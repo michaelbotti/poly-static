@@ -1,6 +1,10 @@
 // See https://tailwindcss.com/docs/configuration
 module.exports = {
-  purge: ["./src/**/*.js"],
+  purge: [
+    "./src/**/*.js",
+    "./src/**/*.ts",
+    "./src/**/*.tsx"
+  ],
   // https://github.com/tailwindlabs/tailwindcss-forms
   plugins: [require("@tailwindcss/forms")],
   theme: {

@@ -5,8 +5,8 @@ const fullConfig = resolveConfig(tailwindConfig);
 
 module.exports = {
   siteMetadata: {
-    title: `ADA Handle`,
-    description: `What's your $ADA handle?`,
+    title: `@handle`,
+    description: `What's your @handle?`,
     author: `@adahandle`,
   },
   plugins: [

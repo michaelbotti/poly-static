@@ -23,7 +23,7 @@ function IndexPage() {
         maxHeight: '700px',
         minHeight: '480px'
       }}>
-        <div className="grid grid-cols-12 content-center">
+        <div className="grid grid-cols-12 content-center" id="beta">
           <div className="col-span-10 relative z-10">
             <h2 className="inline-block mt-8 mb-4 text-5xl font-bold leading-none">
               What's your Cardano<br/> <del className="text-dark-300 font-normal">address</del> <span className="text-primary-200">@</span>handle?
