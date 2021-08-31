@@ -34,7 +34,7 @@ function Layout({ children }) {
             </a>
           </p>
         </nav>
-        <div id="mailchimp" className="max-w-2xl mx-auto mt-2 text-white text-xs text-center">
+        <div id="mailchimp" className="px-8 py-4 max-w-2xl mx-auto mt-2 text-white text-xs text-center">
           <p>* We currently use Mailchimp as our marketing platform. By choosing to subscribe, you acknowledge that your information will be transferred to Mailchimp for processing. <a href="https://mailchimp.com/legal/" className="underline" target="_blank noreferrer">Learn more about Mailchimp's privacy practices here.</a></p>
         </div>
       </footer>
