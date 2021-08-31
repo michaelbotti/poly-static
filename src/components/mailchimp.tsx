@@ -67,7 +67,7 @@ const Form: FC<Form> = ({ subscribe, message, status }): JSX.Element => {
             <fieldset name="interestgroup_field">
                 <div className="flex items-center mt-2 text-sm">
                     <input className="form-checkbox rounded focus:ring-primary-200 text-primary-200" id="gdpr" name="gdpr[24136]" type="checkbox" checked={checked} onChange={() => setChecked(!checked)} value={checked ? 'Y' : 'N'}/>
-                    <label className="ml-2" htmlFor="gdpr">I agree to recieve marketing emails. <a href="#mailchimp">*</a></label>
+                    <label className="ml-2" htmlFor="gdpr">I agree to receive marketing emails. <a href="#mailchimp">*</a></label>
                 </div>
                 <div className="flex items-center mt-2 text-sm">
                     <input className="form-checkbox rounded focus:ring-primary-200 text-primary-200" defaultValue="1" id="betaOptin" name="group[84812][1]" type="checkbox" />
