@@ -1,23 +1,14 @@
-import { graphql, useStaticQuery, Link } from "gatsby";
+import { Link } from "gatsby";
 import React, { useState } from "react";
 
 import logo from '../images/logo.svg';
 
 function Header() {
   const [isExpanded, toggleExpansion] = useState(false);
-  const { site } = useStaticQuery(graphql`
-    query SiteTitleQuery {
-      site {
-        siteMetadata {
-          title
-        }
-      }
-    }
-  `);
 
   return (
     <header>
-      <div className="flex flex-wrap items-center justify-between max-w-4xl p-4 mx-auto md:p-8">
+      <div className="flex flex-wrap items-center justify-between max-w-5xl p-4 mx-auto md:p-8">
         <Link to="/">
           <h1 className="flex items-center text-dark-100 no-underline">
             <img className="w-6 h-6 mr-1" src={logo} alt="ADA" />
@@ -48,27 +39,28 @@ function Header() {
         >
           {[
             {
-              route: `/about`,
-              title: `About`,
+              route: `#simple`,
+              title: `Simple`,
             },
             {
-              route: `/contact`,
-              title: `Contact`,
+              route: `#secure`,
+              title: `Secure`,
             },
             {
-              route: '/api',
-              title: 'API'
+              route: `#non-custodial`,
+              title: `Non-Custodial`
             },
             {
-              route: `/buy`,
-              title: `Pre-Register Your @handle`
+              route: '#roadmap',
+              title: 'Roadmap'
+            },
+            {
+              route: 'https://twitter.com/adahandle',
+              title: 'Follow on Twitter'
             }
           ].map((link) => (
             <Link
-              className={link.route === '/buy'
-                ? `block mt-4 font-bold text-white bg-primary-200 px-4 py-2 rounded-lg hover:text-dark-100 no-underline md:inline-block md:mt-0 md:ml-6`
-                : `block mt-4 font-bold text-dark-300 hover:text-dark-100 no-underline md:inline-block md:mt-0 md:ml-6`
-              }
+              className="block mt-4 font-bold text-dark-300 hover:text-dark-100 no-underline md:inline-block md:mt-0 md:ml-6"
               key={link.title}
               to={link.route}
             >
