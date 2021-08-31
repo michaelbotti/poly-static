@@ -1,0 +1,34 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+#more {
+    margin-left: calc(50% - 50vw);
+    @apply relative w-screen;
+}
+
+#more::before {
+    content: '';
+    transform: skew(0deg, -4deg) translateY(-70px);
+    @apply block absolute top-0 left-0 h-32 w-full bg-dark-200 z-0;
+}
+
+p {
+    @apply mb-4;
+}
+
+ul {
+    @apply pl-4 ml-4 list-disc;
+}
+
+ol {
+    @apply pl-4 ml-4 list-decimal;
+}
+
+li {
+    @apply leading-loose;
+}
+
+code {
+    @apply bg-dark-400 p-1 rounded-sm;
+}
