@@ -60,7 +60,11 @@ function Header() {
             }
           ].map((link) => (
             <Link
-              className="block mt-4 font-bold text-dark-300 hover:text-dark-100 no-underline md:inline-block md:mt-0 md:ml-6"
+              className={
+                link.route === 'https://twitter.com/adahandle'
+                  ? 'block mt-4 font-bold underline text-primary-200 hover:text-dark-100 md:inline-block md:mt-0 md:ml-6'
+                  : 'block mt-4 font-bold text-dark-300 hover:text-dark-100 no-underline md:inline-block md:mt-0 md:ml-6'
+              }
               key={link.title}
               to={link.route}
             >

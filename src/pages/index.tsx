@@ -99,8 +99,8 @@ function IndexPage() {
             <div className="col-span-5" id="roadmap">
               <h2 className="inline-block text-white mb-4 text-4xl font-bold leading-tight"><em>Creating a better crypto experience.</em></h2>
               <div className="text-white">
-                <p><span className="text-primary-200">@</span>handle abstracts the annoyance of complex wallet addresses and replaces it with a <strong>simple and untuitive solution</strong>.</p>
-                <p>We have big plans, including an intuitive dApp interface for sending and receiving native Cardano tokens (deployed on launch day), as well as a full-featured public API for websites, wallets, and exchanges to utilize.</p>
+                <p><span className="text-primary-200">@</span>handle abstracts the annoyance of complex wallet addresses and replaces it with a <strong>simple and intuitive solution</strong>.</p>
+                <p>We have big plans, including an slick dApp interface for sending and receiving native Cardano tokens (deployed on launch day), as well as a full-featured public API for websites, wallets, and exchanges to utilize.</p>
                 <a href="#beta" className="form-input hover:shadow-lg cursor-pointer mt-4 block py-4 px-6 bg-primary-100 hover:bg-dark-100 focus:bg-dark-100 text-white text-center rounded-lg inline-block font-bold h-full">Join the Waitlist</a>
               </div>
             </div>
