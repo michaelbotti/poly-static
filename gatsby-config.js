@@ -19,7 +19,6 @@ module.exports = {
         anonymize: true,
         respectDNT: true,
         exclude: [],
-        defer: true,
         cookieDomain: "adahandle.com",
         enableWebVitalsTracking: true,
       },
