@@ -12,15 +12,20 @@ module.exports = {
   plugins: [
     `gatsby-plugin-react-helmet`,
     {
-      resolve: `gatsby-plugin-google-analytics`,
+      resolve: `gatsby-plugin-google-gtag`,
       options: {
-        trackingId: "G-J6VN2WT0DT",
-        head: true,
-        anonymize: true,
-        respectDNT: true,
-        exclude: [],
-        cookieDomain: "adahandle.com",
-        enableWebVitalsTracking: true,
+        trackingIds: [
+          "G-J6VN2WT0DT"
+        ],
+        gtagConfig: {
+          anonymize_ip: true,
+          cookie_expires: 0,
+        },
+        pluginConfig: {
+          head: false,
+          respectDNT: true,
+          exclude: [],
+        },
       },
     },
     {

@@ -5995,14 +5995,13 @@
     "lodash" "^4.17.21"
     "micromatch" "^4.0.4"
 
-"gatsby-plugin-google-analytics@^3.12.0":
-  "integrity" "sha512-KthqhyFci/nGzzdrlGyZtZne+J79HTPZZ1Q+hVloMJJgIF8GzBHECApRqg/dNzz+MBnbEozww9iSFmvh4GzmJA=="
-  "resolved" "https://registry.npmjs.org/gatsby-plugin-google-analytics/-/gatsby-plugin-google-analytics-3.12.0.tgz"
-  "version" "3.12.0"
+"gatsby-plugin-google-gtag@^3.13.0":
+  "integrity" "sha512-J9O3U53Kc1v3S1YEdIHYm6TpM3KGkHGvPFg7DNkgqOBg2uHTdHYf/bO5hJUpen2k2BcQWSkIBElh2AIgmqSxIA=="
+  "resolved" "https://registry.npmjs.org/gatsby-plugin-google-gtag/-/gatsby-plugin-google-gtag-3.13.0.tgz"
+  "version" "3.13.0"
   dependencies:
     "@babel/runtime" "^7.14.8"
-    "minimatch" "3.0.4"
-    "web-vitals" "^1.1.2"
+    "minimatch" "^3.0.4"
 
 "gatsby-plugin-manifest@^2.12.1":
   "integrity" "sha512-Kiom3IHQ+hsRA/yt+XcBdOn1q+Rqbso5Iw0mXQQg+F+8U23sU66NaJY67ZXUkW8iwU25SOrwZaSw49C8BV0EGw=="
@@ -13160,11 +13159,6 @@
   "version" "1.7.3"
   dependencies:
     "minimalistic-assert" "^1.0.0"
-
-"web-vitals@^1.1.2":
-  "integrity" "sha512-PFMKIY+bRSXlMxVAQ+m2aw9c/ioUYfDgrYot0YUa+/xa0sakubWhSDyxAKwzymvXVdF4CZI71g06W+mqhzu6ig=="
-  "resolved" "https://registry.npmjs.org/web-vitals/-/web-vitals-1.1.2.tgz"
-  "version" "1.1.2"
 
 "webfontloader@^1.6.28":
   "integrity" "sha1-23hhKSU8tujq5UwvsF+HCvZnW64="
