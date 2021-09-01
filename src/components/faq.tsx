@@ -7,7 +7,7 @@ interface FAQProps {
     }[]
 }
 
-export const FAQ: FC<FAQProps> = ({ faqs }): JSX.Element => {
+const FAQ: FC<FAQProps> = ({ faqs }): JSX.Element => {
     const [activeIndex, setActiveIndex] = useState(null);
 
     return faqs && (
@@ -39,3 +39,5 @@ export const FAQ: FC<FAQProps> = ({ faqs }): JSX.Element => {
         </ul>
     )
 }
+
+export default FAQ;

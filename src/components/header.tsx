@@ -39,32 +39,24 @@ function Header() {
         >
           {[
             {
-              route: `#simple`,
-              title: `Simple`,
+              route: '/about',
+              title: 'About'
             },
             {
-              route: `#secure`,
-              title: `Secure`,
+              route: `/faq`,
+              title: `FAQ`,
             },
             {
-              route: `#non-custodial`,
-              title: `Non-Custodial`
+              route: `/features`,
+              title: `Features`,
             },
             {
-              route: '#roadmap',
-              title: 'Roadmap'
-            },
-            {
-              route: 'https://twitter.com/adahandle',
-              title: 'Follow on Twitter'
+              route: `/app`,
+              title: `App`
             }
           ].map((link) => (
             <Link
-              className={
-                link.route === 'https://twitter.com/adahandle'
-                  ? 'block mt-4 font-bold underline text-primary-200 hover:text-dark-100 md:inline-block md:mt-0 md:ml-6'
-                  : 'block mt-4 font-bold text-dark-300 hover:text-dark-100 no-underline md:inline-block md:mt-0 md:ml-6'
-              }
+              className='block mt-4 font-bold text-dark-300 hover:text-dark-100 no-underline md:inline-block md:mt-0 md:ml-6'
               key={link.title}
               to={link.route}
             >
