@@ -33,6 +33,10 @@ function SEO({ description, lang, meta, keywords, title }) {
           content: title,
         },
         {
+          name: `og:image`,
+          content: `https://adahandle.com/twitter-image.jpeg`
+        },
+        {
           property: `og:description`,
           content: metaDescription,
         },
@@ -42,7 +46,11 @@ function SEO({ description, lang, meta, keywords, title }) {
         },
         {
           name: `twitter:card`,
-          content: `summary`,
+          content: `summary_large_image`,
+        },
+        {
+          name: `twitter:image`,
+          content: `https://adahandle.com/twitter-image.jpeg`
         },
         {
           name: `twitter:creator`,

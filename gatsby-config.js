@@ -5,13 +5,29 @@ const fullConfig = resolveConfig(tailwindConfig);
 
 module.exports = {
   siteMetadata: {
-    title: `ADA Handle`,
-    description: `What's your $ADA handle?`,
+    title: `@handle`,
+    description: `Introducing custom wallet addresses for the Cardano blockchain. Secured entirely on-chain.`,
     author: `@adahandle`,
   },
   plugins: [
-    `gatsby-plugin-eslint`,
     `gatsby-plugin-react-helmet`,
+    {
+      resolve: `gatsby-plugin-google-gtag`,
+      options: {
+        trackingIds: [
+          "G-J6VN2WT0DT"
+        ],
+        gtagConfig: {
+          anonymize_ip: true,
+          cookie_expires: 0,
+        },
+        pluginConfig: {
+          head: false,
+          respectDNT: true,
+          exclude: [],
+        },
+      },
+    },
     {
       resolve: `gatsby-plugin-typescript`,
       options: {
