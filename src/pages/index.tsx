@@ -29,7 +29,7 @@ function IndexPage() {
             </h2>
             <div className="md:w-2/3 mt-4">
               <p className="text-xl mb-8 md:pr-8">
-                Introducing <strong>custom wallet addresses</strong> for the Cardano blockchain. <strong>Secured entirely on-chain</strong>.
+                Introducing <strong>custom wallet addresses</strong> for the Cardano blockchain. <strong>Secured on-chain</strong>.
               </p>
               <Form />
               <a href="#more" className="text-dark-300 text-lg mt-8 inline-block inline-flex items-center">
