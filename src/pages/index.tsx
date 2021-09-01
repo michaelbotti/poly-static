@@ -19,11 +19,10 @@ function IndexPage() {
         title="Home"
       />
 
-      <section id="top" className="h-screen z-0 relative" style={{
-        maxHeight: '700px',
-        minHeight: '480px'
+      <section id="top" className="z-0 relative" style={{
+        // minHeight: '75vh'
       }}>
-        <div className="grid grid-cols-12 content-center">
+        <div className="grid grid-cols-12 content-center mb-48">
           <div className="col-span-12 lg:col-span-10 relative z-10">
             <h2 className="inline-block mt-8 mb-4 text-5xl font-bold leading-none">
               What's your Cardano<br/> <del className="text-dark-300 font-normal">address</del> <span className="text-primary-200">@</span>handle?

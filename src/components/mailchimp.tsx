@@ -55,12 +55,12 @@ const Form: FC<Form> = ({ subscribe, message, status }): JSX.Element => {
 
             subscribe(payload);
         }}>
-            <div className="grid grid-cols-2">
-                <div className="grid-span-1">
-                    <input type="email" name="EMAIL" className="mailchimp-email block w-full px-4 py-4 rounded-l-lg border-r-0 outline-primary-200 focus:outline-none" placeholder="hello@example.com" />
+            <div className="sm:grid sm:grid-cols-2">
+                <div className="sm:grid-span-1">
+                    <input type="email" name="EMAIL" className="mailchimp-email block w-full px-4 py-4 rounded-lg sm:rounded-none sm:rounded-l-lg sm:border-r-0 outline-primary-200 focus:outline-none" placeholder="hello@example.com" />
                 </div>
-                <div className="grid-span-1">
-                    <input type="submit" className={`cursor-pointer bg-primary-100 hover:bg-dark-100 focus:bg-dark-100 hover:shadow-lg} form-input m-0 block py-4 px-6 text-white text-center rounded-r-lg inline-block font-bold h-full`} value="Join the Waitlist" />
+                <div className="sm:grid-span-1">
+                    <input type="submit" className={`cursor-pointer bg-primary-100 hover:bg-dark-100 focus:bg-dark-100 hover:shadow-lg sm:rounded-none form-input m-0 block py-4 px-6 text-white text-center rounded-lg w-full sm:w-auto mt-4 sm:mt-0 sm:rounded-r-lg inline-block font-bold h-full`} value="Join the Waitlist" />
                 </div>
             </div>
             <p className="text-sm mt-1"><em>{validateMessage}</em></p>
