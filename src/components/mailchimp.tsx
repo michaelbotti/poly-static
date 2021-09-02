@@ -55,23 +55,23 @@ const Form: FC<Form> = ({ subscribe, message, status }): JSX.Element => {
 
             subscribe(payload);
         }}>
-            <div className="grid grid-cols-2">
-                <div className="grid-span-1">
+            <div className="grid grid-cols-4 max-w-4xl mx-auto">
+                <div className="col-span-3">
                     <input type="email" name="EMAIL" className="mailchimp-email block w-full px-4 py-4 rounded-l-lg border-r-0 outline-primary-200 focus:outline-none" placeholder="hello@example.com" />
                 </div>
-                <div className="grid-span-1">
-                    <input type="submit" className={`cursor-pointer bg-primary-100 hover:bg-dark-100 focus:bg-dark-100 hover:shadow-lg} form-input m-0 block py-4 px-6 text-white text-center rounded-r-lg inline-block font-bold h-full`} value="Join the Waitlist" />
+                <div className="col-span-1">
+                    <input type="submit" className={`cursor-pointer bg-primary-100 hover:bg-dark-100 focus:bg-dark-100 hover:shadow-lg} form-input m-0 block py-4 px-6 text-white text-center rounded-r-lg inline-block font-bold h-full w-full`} value="Join the Waitlist" />
                 </div>
             </div>
-            <p className="text-sm mt-1"><em>{validateMessage}</em></p>
-            <fieldset name="interestgroup_field">
-                <div className="flex items-center mt-2 text-sm">
-                    <input className="form-checkbox rounded focus:ring-primary-200 text-primary-200" id="gdpr" name="gdpr[24136]" type="checkbox" checked={checked} onChange={() => setChecked(!checked)} value={checked ? 'Y' : 'N'}/>
-                    <label className="ml-2" htmlFor="gdpr">I agree to receive marketing emails. <a href="#mailchimp">*</a></label>
+            {validateMessage.length ? <p className="text-sm mt-1"><em>{validateMessage}</em></p> : ''}
+            <fieldset name="interestgroup_field" className="flex items-center justify-center mt-4">
+                <div className="flex items-center m-2 text-sm">
+                    <input className="form-checkbox text-primary-200 rounded focus:ring-primary-200" id="gdpr" name="gdpr[24136]" type="checkbox" checked={checked} onChange={() => setChecked(!checked)} value={checked ? 'Y' : 'N'}/>
+                    <label className="ml-2 text-white" htmlFor="gdpr">I agree to receive marketing emails. <a href="#mailchimp">*</a></label>
                 </div>
-                <div className="flex items-center mt-2 text-sm">
-                    <input className="form-checkbox rounded focus:ring-primary-200 text-primary-200" defaultValue="1" id="betaOptin" name="group[84812][1]" type="checkbox" />
-                    <label className="ml-2" htmlFor="betaOptin">Get notified of beta launch</label>
+                <div className="flex items-center m-2 text-sm">
+                    <input className="form-checkbox text-primary-200 rounded focus:ring-primary-200" defaultValue="1" id="betaOptin" name="group[84812][1]" type="checkbox" />
+                    <label className="ml-2 text-white" htmlFor="betaOptin">Get notified of beta launch</label>
                 </div>
             </fieldset>
             {message}

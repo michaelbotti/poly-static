@@ -3,7 +3,11 @@ import React, { useState } from "react";
 
 import logo from '../images/logo.svg';
 
-function Header() {
+interface HeaderProps {
+  isHome?: boolean;
+}
+
+function Header({ isHome = false }) {
   const [isExpanded, toggleExpansion] = useState(false);
 
   return (
@@ -11,8 +15,9 @@ function Header() {
       <div className="flex flex-wrap items-center justify-between max-w-5xl p-4 mx-auto md:p-8">
         <Link to="/">
           <h1 className="flex items-center text-dark-100 no-underline">
-            <img className="w-6 h-6 mr-1" src={logo} alt="ADA" />
-            <span className="text-xl font-bold tracking-tight">
+            {/* <img className="w-6 h-6 mr-1" src={logo} alt="ADA" /> */}
+            <span className="font-bold text-primary-200 mr-1 text-2xl">$</span>
+            <span className="text-xl font-bold tracking-tight dark:text-white">
               handle
             </span>
           </h1>
@@ -39,30 +44,41 @@ function Header() {
         >
           {[
             {
-              route: '/about',
-              title: 'About'
+              route: `/solutions`,
+              title: `Solutions`,
+            },
+            {
+              route: '/team',
+              title: 'Team'
             },
             {
               route: `/faq`,
               title: `FAQ`,
             },
             {
-              route: `/features`,
-              title: `Features`,
+              route: `/app`,
+              title: `Launch App`
             },
             {
-              route: `/app`,
-              title: `App`
+              route: `/mint`,
+              title: `Mint Custom @handle`
             }
-          ].map((link) => (
-            <Link
-              className='block mt-4 font-bold text-dark-300 hover:text-dark-100 no-underline md:inline-block md:mt-0 md:ml-6'
-              key={link.title}
-              to={link.route}
-            >
-              {link.title}
-            </Link>
-          ))}
+          ].map((link) => {
+            if (!isHome && link.route === '/mint') {
+              return null;
+            }
+
+            return (
+              <Link
+                className={'block border-b-2 border-white mt-4 font-bold text-dark-300 hover:text-primary-100 no-underline md:inline-block md:mt-0 md:ml-6 dark:text-dark-400'}
+                activeClassName="border-primary-200"
+                key={link.title}
+                to={link.route}
+              >
+                {link.title}
+              </Link>
+            )
+          })}
         </nav>
       </div>
     </header>

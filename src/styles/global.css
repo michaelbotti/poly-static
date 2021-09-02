@@ -8,12 +8,6 @@
         @apply relative w-screen;
     }
     
-    #more::before {
-        content: '';
-        transform: skew(0deg, -4deg) translateY(-70px);
-        @apply block absolute top-0 left-0 h-32 w-full bg-dark-100 z-0;
-    }
-    
     html {
         scroll-behavior: smooth;
     }

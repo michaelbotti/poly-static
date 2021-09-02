@@ -7,7 +7,7 @@ import Wallet from '../images/handle-wallet.svg';
 
 function IndexPage() {
   return (
-    <Layout>
+    <Layout isHome={true}>
       <SEO title="Home" />
 
       <section id="top" className="h-screen z-0 relative" style={{
@@ -22,8 +22,7 @@ function IndexPage() {
             <div className="md:w-2/3 mt-4">
               <p className="text-xl mb-8 md:pr-8">
                 Introducing <strong>custom wallet addresses</strong> for the Cardano blockchain. <strong>Secured entirely on-chain</strong>.
-              </p>
-              <Form />
+              </p>              
               <a href="#more" className="text-dark-300 text-lg mt-8 inline-block inline-flex items-center">
                 Learn More
                 <svg className="svg-icon ml-2" viewBox="0 0 20 20">

@@ -1,5 +1,6 @@
 // See https://tailwindcss.com/docs/configuration
 module.exports = {
+  darkMode: 'media',
   purge: [
     "./src/**/*.js",
     "./src/**/*.ts",
