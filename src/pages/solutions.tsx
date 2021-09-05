@@ -10,7 +10,7 @@ import NonCustodial from "../images/non-custodial.svg";
 
 function FeaturesPage() {
   return (
-    <Layout>
+    <>
       <SEO title="Features" />
       <section id="more" className="bg-dark-100 px-16 md:px-0">
         <div className="z-10 relative w-full max-w-4xl px-4 pt-4 pb-8 mx-auto md:px-8 md:pt-16 md:pb-32">
@@ -131,7 +131,7 @@ function FeaturesPage() {
           </div>
         </div>
       </section>
-    </Layout>
+    </>
   );
 }
 

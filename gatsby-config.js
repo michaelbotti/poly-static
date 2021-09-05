@@ -11,6 +11,7 @@ module.exports = {
   },
   plugins: [
     `gatsby-plugin-react-helmet`,
+    `gatsby-plugin-layout`,
     {
       resolve: `gatsby-plugin-google-gtag`,
       options: {
@@ -42,10 +43,10 @@ module.exports = {
         name: `ada-handle-static`,
         short_name: `adahandle`,
         start_url: `/`,
-        background_color: fullConfig.theme.colors.white,
+        background_color: fullConfig.theme.colors.dark['100'],
         theme_color: fullConfig.theme.colors.primary['200'],
         display: `minimal-ui`,
-        icon: `src/images/logo.svg`,
+        icon: `src/images/logo-square.svg`,
       },
     },
     {

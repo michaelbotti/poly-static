@@ -1,12 +1,11 @@
 import React from "react";
 
-import Layout from "../components/layout";
 import SEO from "../components/seo";
 import FAQ from "../components/faq";
 
 function FAQPage() {
   return (
-    <Layout>
+    <>
       <SEO title="FAQ" />
       <section id="faq" className="mt-16 max-w-xl mx-auto">
         <h2 className="inline-block mb-4 text-4xl font-bold leading-none">
@@ -147,7 +146,7 @@ function FAQPage() {
           ]}
         />
       </section>
-    </Layout>
+    </>
   );
 }
 

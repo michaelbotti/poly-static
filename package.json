@@ -4,8 +4,11 @@
   "version": "1.0.0",
   "author": "Calvin Koepke <calvin@adahandle.com",
   "dependencies": {
+    "@emurgo/cardano-serialization-lib-asmjs": "^8.1.0",
+    "buffer": "^6.0.3",
     "gatsby": "^3.12.1",
     "gatsby-plugin-google-gtag": "^3.13.0",
+    "gatsby-plugin-layout": "^2.13.0",
     "gatsby-plugin-manifest": "^2.12.1",
     "gatsby-plugin-offline": "^3.10.2",
     "gatsby-plugin-postcss": "^3.7.0",

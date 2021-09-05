@@ -1,15 +1,12 @@
 import React from 'react';
-import Layout from "../components/layout";
-import SEO from "../components/seo";
-import Form from '../components/mailchimp';
 
+import SEO from "../components/seo";
 import Wallet from '../images/handle-wallet.svg';
 
 function IndexPage() {
   return (
-    <Layout isHome={true}>
+    <>
       <SEO title="Home" />
-
       <section id="top" className="h-screen z-0 relative" style={{
         maxHeight: '700px',
         minHeight: '480px'
@@ -17,7 +14,7 @@ function IndexPage() {
         <div className="grid grid-cols-12 content-center">
           <div className="col-span-12 lg:col-span-10 relative z-10">
             <h2 className="inline-block mt-8 mb-4 text-5xl font-bold leading-none">
-              What's your Cardano<br/> <del className="text-dark-300 font-normal">address</del> <span className="text-primary-200">@</span>handle?
+              What's your Cardano<br/> <del className="text-dark-300 font-normal">address</del> <span className="font-bold text-primary-200 mr-1">$</span>handle?
             </h2>
             <div className="md:w-2/3 mt-4">
               <p className="text-xl mb-8 md:pr-8">
@@ -34,7 +31,7 @@ function IndexPage() {
         </div>
         <img className="absolute hidden md:block top-0 right-0 -mt-8 -mr-32 z-0" src={Wallet} />
       </section>
-    </Layout>
+    </>
   );
 }
 
