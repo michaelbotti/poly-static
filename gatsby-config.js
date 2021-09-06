@@ -34,7 +34,7 @@ module.exports = {
       options: {
         isTSX: true,
         jsxPragma: `jsx`,
-        allExtensions: true,
+        allExtensions: true
       },
     },
     {

@@ -5,6 +5,7 @@ import React, { useState, FC } from "react";
 import Button from './button';
 import Logo from './logo';
 import WalletButton from "./WalletButton";
+import { useEffect } from "react";
 
 interface HeaderProps {
   className?: string;
@@ -12,7 +13,7 @@ interface HeaderProps {
 
 interface NavItem {
   route: string;
-  title: string | (() => JSX.Element);
+  title: string;
 }
 
 const navItems: NavItem[] = [
@@ -35,8 +36,13 @@ const navItems: NavItem[] = [
 ];
 
 const Header: FC<HeaderProps> = ({ className }) => {
-  const [isExpanded, toggleExpansion] = useState(false);
+  const [isExpanded, toggleExpansion] = useState<boolean>(false);
+  const [currentPath, setCurrentPath] = useState<string>('');
   const location = useLocation();
+
+  useEffect(() => {
+    setCurrentPath(location.pathname);
+  }, [location?.pathname]);
 
   return (
     <header className={className}>
@@ -69,24 +75,20 @@ const Header: FC<HeaderProps> = ({ className }) => {
             } md:block md:items-center w-full md:w-auto`}
           >
             {navItems.map((link) => {
-              const title = 'function' === typeof link.title
-                ? link.title()
-                : link.title
-
               return (
                 <Link
                   className={'block mt-4 text-dark-300 hover:text-primary-200 no-underline md:inline-block md:mt-0 md:ml-6 dark:text-dark-400'}
                   activeClassName="border-primary-200"
-                  key={title.toString()}
+                  key={link.title}
                   to={link.route}
                 >
-                  {title}
+                  {link.title}
                 </Link>
               )
             })}
           </nav>
         </div>
-        {('/mint' || '/app') !== location.pathname ? (
+        {('/mint' || '/app') !== currentPath ? (
           <Button className="hover:bg-primary-200" internal={true} href={'/mint'}>Launch App</Button>
         ) : <WalletButton />}
       </div>

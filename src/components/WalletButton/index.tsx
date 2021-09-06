@@ -8,17 +8,18 @@ const WalletButton = (): JSX.Element => {
   const { isConnected, setIsConnected, setErrors } = useContext(AppContext);
   const [loadingWalletAddr, walletAddr] = useWalletAddress();
 
-  const buttonText = useMemo(() => {
+  const [buttonText, buttonClasses] = useMemo(() => {
+      let baseClass = 'w-48 overflow-hidden whitespace-nowrap overflow-ellipsis';
     if (isConnected && loadingWalletAddr) {
-      return "Decoding...";
+      return ["Loading...", `${baseClass} cursor-not-allowed hover:shadow-none dark:bg-dark-100 text-dark-300`];
     }
 
     if (isConnected && !loadingWalletAddr) {
-      return walletAddr;
+      return [walletAddr, `${baseClass} cursor-not-allowed hover:shadow-none dark:bg-dark-100 text-dark-300`];
     }
 
     if (!isConnected && !loadingWalletAddr) {
-      return "Connect";
+      return ["Connect", `${baseClass} bg-primary-100 text-white hover:bg-primary-200`];
     }
   }, [isConnected, walletAddr, loadingWalletAddr]);
 
@@ -40,9 +41,9 @@ const WalletButton = (): JSX.Element => {
 
   return (
     <Button
-      className={`${isConnected && walletAddr ? 'cursor-not-allowed' : ''} w-48 overflow-hidden whitespace-nowrap overflow-ellipsis dark:bg-dark-100 text-dark-300`}
+      className={buttonClasses}
       disabled={isConnected}
-      onClick={isConnected ? handleConnect : () => {}}
+      onClick={!isConnected ? handleConnect : () => {}}
     >
       {buttonText}
     </Button>
