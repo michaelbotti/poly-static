@@ -55,14 +55,14 @@ function Header() {
               title: 'Roadmap'
             },
             {
-              route: 'https://twitter.com/adahandle',
-              title: 'Follow on Twitter'
+              route: '/reserve',
+              title: 'Reserve With Twitter!'
             }
           ].map((link) => (
             <Link
               className={
-                link.route === 'https://twitter.com/adahandle'
-                  ? 'block mt-4 font-bold underline text-primary-200 hover:text-dark-100 md:inline-block md:mt-0 md:ml-6'
+                link.route === '/reserve'
+                  ? 'block mt-4 font-bold no-underline text-white hover:bg-dark-300 bg-dark-200 px-4 rounded py-2 md:inline-block md:mt-0 md:ml-6'
                   : 'block mt-4 font-bold text-dark-300 hover:text-dark-100 no-underline md:inline-block md:mt-0 md:ml-6'
               }
               key={link.title}
