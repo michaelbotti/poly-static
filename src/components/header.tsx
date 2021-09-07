@@ -39,19 +39,19 @@ function Header() {
         >
           {[
             {
-              route: `#simple`,
+              route: `/#simple`,
               title: `Simple`,
             },
             {
-              route: `#secure`,
+              route: `/#secure`,
               title: `Secure`,
             },
             {
-              route: `#non-custodial`,
+              route: `/#non-custodial`,
               title: `Non-Custodial`
             },
             {
-              route: '#roadmap',
+              route: '/#roadmap',
               title: 'Roadmap'
             },
             {
