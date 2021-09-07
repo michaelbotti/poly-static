@@ -4,6 +4,7 @@ import { initializeApp } from "@firebase/app";
 
 import Layout from "../components/layout";
 import SEO from "../components/seo";
+import { AdditionalUserInfo } from "@firebase/auth";
 
 const firebaseConfig = {
   apiKey: "AIzaSyAjLfhecwnZJyl-lv8FdXasQZGmYEEJ-wc",
@@ -58,7 +59,7 @@ function IndexPage() {
                       for you.
                       <br />{" "}
                       <a
-                        className="font-bold text-primary-100"
+                        className="font-bold mt-4 text-primary-100"
                         href="https://twitter.com/intent/tweet?text=I%20just%20reserved%20my%20custom%20%23Cardano%20address%20at%20%40adahandle!%20Check%20it%20out%3A%20https%3A//adahandle.com"
                       >
                         Share on Twitter
@@ -83,9 +84,9 @@ function IndexPage() {
                           const auth = getAuth();
                           signInWithPopup(auth, provider)
                             .then((result) => {
-                              const { username } =
+                              const { username, isNewUser }: AdditionalUserInfo =
                                 getAdditionalUserInfo(result);
-                              if (result.user.metadata.lastSignInTime !== "0") {
+                              if (!isNewUser) {
                                 setUser(username);
                                 setAlreadyReserved(true);
                               } else {
