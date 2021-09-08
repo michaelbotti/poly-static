@@ -108,8 +108,7 @@ function IndexPage() {
                         <small>
                           <strong>Note:</strong> reserving your handle via
                           Twitter will require you to authenticate again on
-                          launch day to unlock your handle.
-                        </small>
+                          launch day to unlock your handle. Furthermore, the Twitter API limits our privacy requests to Read-Only. There is no way to decrease this request to purely the username. <a className="text-primary-100" href="https://help.twitter.com/en/managing-your-account/connect-or-revoke-access-to-third-party-apps">See Twitter API docs</a>. If privacy matters concern you, consider waiting for launch day.</small>
                       </p>
                     </>
                   )}
