@@ -8,33 +8,34 @@ import SEO from "../components/seo";
  * _
  * -
  */
-const ALLOWED_CHAR = new RegExp(/[a-zA-Z|0-9|\-|\_]/g)
+const ALLOWED_CHAR = new RegExp(/[a-zA-Z|0-9|\-|\_]/g);
 
 function MintPage() {
   const [handle, setHandle] = useState<string>("");
-  const [message, setMessage] = useState<string>("message");
+  const [message, setMessage] = useState<string>("");
   const [isTaken, setIsTaken] = useState<boolean>(false);
 
   const onUpdateHandle = (handle: string): void => {
-      if ('string' !== typeof handle) {
-          return;
-      }
-      
-      if (message.length > 0) {
-          setMessage('');
-      }
-      
+    if ("string" !== typeof handle) {
+      return;
+    }
+
+    if (message.length > 0) {
+      setMessage("");
+    }
+
     const isAllowed = handle.match(ALLOWED_CHAR);
-    const handleChars = handle.split('');
-      const includesInvalidChars = handleChars.filter(char => !isAllowed.includes(char)).length > 0
-    
+    const handleChars = handle.split("");
+    const includesInvalidChars =
+      handleChars.filter((char) => !isAllowed.includes(char)).length > 0;
+
     if (handle.length > 0 && includesInvalidChars) {
-        setMessage('That\'s not allowed.');
-        return;
+      setMessage("That's not allowed.");
+      return;
     }
 
     setHandle(handle);
-  }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
