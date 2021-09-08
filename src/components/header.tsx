@@ -72,6 +72,12 @@ function Header() {
             </Link>
           ))}
         </nav>
+        <Link
+          className="block mt-4 font-bold no-underline text-white hover:bg-dark-300 bg-dark-200 px-4 rounded py-2 md:inline-block md:mt-0 md:ml-6 md:hidden"
+          to={`/reserve`}
+        >
+          Reserve Handle
+        </Link>
       </div>
     </header>
   );
