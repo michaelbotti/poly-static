@@ -18,7 +18,7 @@ function Header() {
           </h1>
         </Link>
 
-        <button
+        {/* <button
           className="items-center block px-3 py-2 text-white border border-white rounded md:hidden"
           onClick={() => toggleExpansion(!isExpanded)}
         >
@@ -30,7 +30,7 @@ function Header() {
             <title>Menu</title>
             <path d="M0 3h20v2H0V3zm0 6h20v2H0V9zm0 6h20v2H0v-2z" />
           </svg>
-        </button>
+        </button> */}
 
         <nav
           className={`${
