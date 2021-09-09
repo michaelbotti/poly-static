@@ -4,6 +4,7 @@ import { Link } from 'gatsby';
 import Layout from "../components/layout";
 import SEO from "../components/seo";
 import Form from '../components/mailchimp';
+import { Logo } from '../components/logo';
 
 import Wallet from '../images/handle-wallet.svg';
 import Cardano from '../images/cardano.svg';
@@ -15,7 +16,6 @@ function IndexPage() {
   return (
     <Layout>
       <SEO
-        keywords={[`gatsby`, `tailwind`, `react`, `tailwindcss`]}
         title="Home"
       />
 
@@ -25,7 +25,7 @@ function IndexPage() {
         <div className="grid grid-cols-12 content-center mb-48">
           <div className="col-span-12 lg:col-span-10 relative z-10">
             <h2 className="inline-block mt-8 mb-4 text-5xl font-bold leading-none">
-              What's your Cardano<br/> <del className="text-dark-300 font-normal">address</del> <span className="text-primary-200">@</span>handle?
+              What's your Cardano<br/> <del className="text-dark-300 font-normal">address</del> <Logo className="w-48 mb-2 inline" labeledBy="header-logo" />?
             </h2>
             <div className="md:w-2/3 mt-4">
               <p className="text-xl mb-8 md:pr-8">

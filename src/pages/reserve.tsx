@@ -31,7 +31,7 @@ function IndexPage() {
             {alreadyReserverd ? (
               <>
                 <h2 className="inline-block mt-8 mb-4 text-5xl font-bold leading-none">
-                  ✅ @{user}
+                  ✅ ${user}
                 </h2>
                 <p className="text-xl mb-8">
                   Your handle is already reserved! Nice.
@@ -44,7 +44,7 @@ function IndexPage() {
               <>
                 <h2 className="inline-block mt-8 mb-4 text-5xl font-bold leading-none">
                   {user ? (
-                    `@${user}`
+                    `$${user}`
                   ) : (
                     <>
                       Reserve Your
