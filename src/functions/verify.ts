@@ -28,8 +28,6 @@ const handler: Handler = async (event, context) => {
       body: JSON.stringify({ message: 'Hmm, we think you might be a bot but we hope we\'re wrong. Please try again.' }),
     };
   }
-
-  // Mint token
 };
 
 export { handler };

@@ -9,17 +9,17 @@ const WalletButton = (): JSX.Element => {
   const [loadingWalletAddr, walletAddr] = useWalletAddress();
 
   const [buttonText, buttonClasses] = useMemo(() => {
-      let baseClass = 'w-48 overflow-hidden whitespace-nowrap overflow-ellipsis';
+      let baseClass = 'overflow-hidden whitespace-nowrap overflow-ellipsis';
     if (isConnected && loadingWalletAddr) {
       return ["Loading...", `${baseClass} cursor-not-allowed hover:shadow-none dark:bg-dark-100 text-dark-300`];
     }
 
     if (isConnected && !loadingWalletAddr) {
-      return [walletAddr, `${baseClass} cursor-not-allowed hover:shadow-none dark:bg-dark-100 text-dark-300`];
+      return [walletAddr, `${baseClass} w-48 cursor-not-allowed hover:shadow-none dark:bg-dark-100 text-dark-300`];
     }
 
     if (!isConnected && !loadingWalletAddr) {
-      return ["Connect", `${baseClass} bg-primary-100 text-white hover:bg-primary-200`];
+      return ["Connect to Nami Wallet", `${baseClass} bg-primary-100 text-white hover:bg-primary-200`];
     }
   }, [isConnected, walletAddr, loadingWalletAddr]);
 

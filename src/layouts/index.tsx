@@ -28,19 +28,21 @@ const Layout: FC = ({ children }): JSX.Element => {
           {errors.map((error, index) => <p key={index} className="m-0">{error}</p>)}
         </div>
       ) : ''}
-      <Header className="dark:bg-dark-200 dark:text-dark-400 text-gray-900" />
-      <div className="flex flex-col min-h-screen font-sans dark:bg-dark-200 dark:text-dark-400 text-gray-900 overflow-hidden">
+      <Header className="dark:bg-dark-100 dark:text-dark-400 text-gray-900" />
+      <div className="flex flex-col min-h-screen font-sans dark:bg-dark-100 dark:text-dark-400 text-gray-900 overflow-hidden">
 
         <main className="w-full max-w-5xl px-4 pt-8 mx-auto md:px-8 md:pt-16">
           {children}
         </main>
 
-        <div className="bg-dark-200 py-16">
-          <div className="max-w-5xl mx-auto text-center">
-            <h4 className="mb-8 text-white font-bold text-3xl">Never Miss an Update</h4>
-            <Form />
+        {'undefined' !== typeof window && window.location.pathname !== '/mint' && (
+          <div className="bg-dark-200 py-16">
+            <div className="max-w-5xl mx-auto text-center">
+              <h4 className="mb-8 text-white font-bold text-3xl">Never Miss an Update</h4>
+              <Form />
+            </div>
           </div>
-        </div>
+        )}
 
         <footer className="bg-dark-100 pt-16">
           <nav className="flex justify-center max-w-4xl p-4 mx-auto text-sm md:p-8">
@@ -69,6 +71,10 @@ const Layout: FC = ({ children }): JSX.Element => {
           </div>
         </footer>
       </div>
+      <script
+        async
+        src="https://www.google.com/recaptcha/api.js?render=6Ld0QUkcAAAAAN-_KvCv8R_qke8OYxotNJzIg2RP"
+      />
     </AppContext.Provider>
   );
 }
