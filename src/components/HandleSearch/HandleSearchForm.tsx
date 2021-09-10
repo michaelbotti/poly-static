@@ -17,7 +17,7 @@ export const HandleSearchForm = ({ className = "", ...rest }) => {
   useCheckIfAvailable(debouncedHandle);
 
   const onUpdateHandle = (newHandle: string) => {
-    const valid = !!newHandle.match(ALLOWED_CHAR);
+    const valid = !!newHandle.match(ALLOWED_CHAR) && newHandle.length < 45;
     if (!valid && 0 === handle.length) {
       return;
     }
