@@ -1,19 +1,22 @@
 import React, { useState, useContext } from "react";
+import { Link } from "gatsby";
+import { AdditionalUserInfo } from "firebase/auth";
 
 import { AppContext } from '../context/app';
-import { HandleSearchForm } from "../components/HandleSearch";
-import WalletButton from '../components/WalletButton';
-import { HandleMintContext, defaultState } from "../context/handleSearch";
+import { HandleMintContext, defaultState, TwitterProfileType } from "../context/handleSearch";
 import { HandleAvailableResponseGETBody } from "../functions/handle";
+
+import { HandleSearchForm, HandleSearchConnectTwitter } from "../components/HandleSearch";
+import WalletButton from '../components/WalletButton';
 import NFTPreview from "../components/NFTPreview";
 import SEO from "../components/seo";
-import { Link } from "gatsby";
 
 function MintPage() {
   const { isConnected } = useContext(AppContext);
   const [handle, setHandle] = useState<string>("");
   const [fetching, setFetching] = useState<boolean>(false);
   const [handleResponse, setHandleResponse] = useState<HandleAvailableResponseGETBody|null>(null);
+  const [twitter, setTwitter] = useState<TwitterProfileType>(null);
 
   return (
     <HandleMintContext.Provider value={{
@@ -23,10 +26,13 @@ function MintPage() {
       handle,
       setHandle,
       handleResponse,
-      setHandleResponse
+      setHandleResponse,
+      twitter,
+      setTwitter
     }}>
       <SEO title="Home" />
       <section id="top">
+        <HandleSearchConnectTwitter />
         <div className="grid grid-cols-12 bg-dark-200 rounded-lg place-content-center">
           <div className="col-span-12 lg:col-span-6 relative z-10">
             <div className="p-8">

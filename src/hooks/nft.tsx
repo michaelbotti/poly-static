@@ -57,28 +57,35 @@ export const useRarityCost = (handle: string): RarityCostTypes => {
   }
 };
 
-export const useCheckIfAvailable = async (debouncedHandle: string) => {
-  const { setFetching, setHandleResponse } = useContext(HandleMintContext);
+export const useCheckIfAvailable = async (handle: string) => {
+  const { setFetching, setHandleResponse, twitter } = useContext(HandleMintContext);
 
   useEffect(() => {
-    if (debouncedHandle.length === 0) {
+    if (handle.length === 0) {
       setHandleResponse(null);
       return;
     }
 
     (async () => {
       setFetching(true);
+
+      const headers: HeadersInit = {
+        "x-handle": handle,
+      }
+
+      if (twitter) {
+        headers['x-twitter-data'] = JSON.stringify({
+          twitter: twitter.user.profile,
+          credentials: twitter.credentials
+        })
+      }
       
       const res: HandleAvailableResponseGETBody = await (
-        await fetch(`/.netlify/functions/handle`, {
-          headers: {
-            "x-handle": debouncedHandle,
-          },
-        })
+        await fetch(`/.netlify/functions/handle`, { headers })
       ).json();
 
       setFetching(false);
       setHandleResponse(res);
     })();
-  }, [debouncedHandle]);
+  }, [handle]);
 };
