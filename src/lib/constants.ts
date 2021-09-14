@@ -1,12 +1,4 @@
-export const RESERVED_HANDLES = [
-    'cardanodan',
-    'dan',
-    'ape',
-    'calvin',
-    'conrad',
-    'mrgoose',
-    'goose'
-];
+export const RESERVE_EXPIRE_DATE = new Date('10/23/2021');
 
 /**
  * a-z

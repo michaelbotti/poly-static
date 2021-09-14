@@ -1,7 +1,7 @@
 import React, { createContext, Dispatch, SetStateAction } from 'react';
 import { AdditionalUserInfo, OAuthCredential } from 'firebase/auth';
 
-import { HandleAvailableResponseGETBody } from '../functions/handle';
+import { HandleResponseBody } from '../functions/handle';
 
 export interface TwitterProfileType {
     credentials: OAuthCredential;
@@ -10,13 +10,18 @@ export interface TwitterProfileType {
 
 export interface HandleMintContextType {
     handle: string;
-    setHandle: Dispatch<SetStateAction<string>>;
-    handleResponse: HandleAvailableResponseGETBody | null;
-    setHandleResponse: Dispatch<SetStateAction<HandleAvailableResponseGETBody>>;
+    handleResponse: HandleResponseBody | null;
     fetching: boolean;
     setFetching: Dispatch<SetStateAction<boolean>>;
     twitter: null | TwitterProfileType,
+    reservedTwitterUsernames: string[];
+    currentSessions: string[];
+    setHandle: Dispatch<SetStateAction<string>>;
+    isPurchasing: boolean;
+    setHandleResponse: Dispatch<SetStateAction<HandleResponseBody>>;
     setTwitter: Dispatch<SetStateAction<TwitterProfileType>>;
+    setIsPurchasing: Dispatch<SetStateAction<boolean>>;
+    setCurrentSessions: Dispatch<SetStateAction<string[]>>;
 }
 
 export const defaultState: HandleMintContextType = {
@@ -24,10 +29,15 @@ export const defaultState: HandleMintContextType = {
     handle: '',
     fetching: false,
     handleResponse: null,
+    isPurchasing: false,
+    reservedTwitterUsernames: [],
+    currentSessions: [],
     setHandleResponse: () => {},
     setFetching: () => {},
     setTwitter: () => {},
-    setHandle: () => {}
+    setHandle: () => {},
+    setIsPurchasing: () => {},
+    setCurrentSessions: () => {}
 };
 
 export const HandleMintContext = createContext<HandleMintContextType>(defaultState)

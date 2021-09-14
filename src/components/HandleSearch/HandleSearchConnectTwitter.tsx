@@ -1,31 +1,41 @@
 import React, { useContext, useState } from "react";
-
-import { useTwitter } from "../../hooks/twitter";
 import { HandleMintContext } from "../../context/handleSearch";
 
+import { useTwitter } from "../../hooks/twitter";
+
 export const HandleSearchConnectTwitter = () => {
-    const [isConnecting, setIsConnecting] = useState<boolean>(false);
-    const { twitter } = useContext(HandleMintContext);
-    const [handleConnectTwitter] = useTwitter();
+  const [isConnecting, setIsConnecting] = useState<boolean>(false);
+  const { setHandleResponse } = useContext(HandleMintContext);
+  const [checkHandleAgainstUser] = useTwitter();
 
-    if (twitter) {
-        return null;
-    }
-
-    return (
-        <div className="text-center">
-            {isConnecting
-                ? <p className="text-lg">Authenticating your reserved handle...</p>
-                : (
-                    <p className="text-lg">
-                        If you reserved a handle with Twitter, <button className="text-primary-100" onClick={async () => {
-                            setIsConnecting(true);
-                            await handleConnectTwitter();
-                            setIsConnecting(false);
-                        }}>unlock it here</button>.
-                    </p>
-                )
+  return (
+    <button
+      className={`cursor-pointer bg-primary-100 text-white form-input rounded-lg p-6 w-full mt-12 font-bold text-dark-100`}
+      onClick={async (e) => {
+        e.preventDefault();
+        setIsConnecting(true);
+        const matches = await checkHandleAgainstUser();
+        const res = matches
+          ? {
+              available: true,
+              message: "Successfully unlocked!",
+              twitter: true,
             }
-        </div>
-    );
-}
+          : {
+              available: false,
+              message: "Whoops! That Twitter account doesn't match.",
+              twitter: true,
+            };
+
+        setIsConnecting(false);
+        setHandleResponse(res);
+      }}
+    >
+      {!isConnecting ? (
+        <>Unlock with Twitter</>
+      ) : (
+        <>Authenticating your reserved handle...</>
+      )}
+    </button>
+  );
+};

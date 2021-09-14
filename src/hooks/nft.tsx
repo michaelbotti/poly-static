@@ -1,13 +1,13 @@
-import { useState } from "react";
-import { useEffect } from "react";
-import { useContext } from "react";
+import React, { useEffect, useContext } from "react";
+
+import { RESERVE_EXPIRE_DATE } from "../lib/constants";
 import { HandleMintContext } from "../context/handleSearch";
-import { HandleAvailableResponseGETBody } from "../functions/handle";
+import { HandleResponseBody } from "../functions/handle";
 import { getRarityFromLength } from "../lib/helpers/nfts";
 
 export type RarityType = "Legendary" | "Ultra Rare" | "Rare" | "Common";
 export type RarityColorTypes = "white" | "blue" | "green" | "red";
-export type RarityCostTypes = 500 | 250 | 100 | 10;
+export type RarityCostTypes = 750 | 450 | 100 | 10;
 export type RarityHexTypes = "#ffffff" | "#48ACF0" | "#0CD15B" | "#DF3737";
 
 export const useRaritySlug = (handle: string): RarityType =>
@@ -47,9 +47,9 @@ export const useRarityCost = (handle: string): RarityCostTypes => {
   const rarity = getRarityFromLength(handle.length);
   switch (rarity) {
     case "Legendary":
-      return 500;
+      return 750;
     case "Ultra Rare":
-      return 250;
+      return 450;
     case "Rare":
       return 100;
     case "Common":
@@ -58,7 +58,7 @@ export const useRarityCost = (handle: string): RarityCostTypes => {
 };
 
 export const useCheckIfAvailable = async (handle: string) => {
-  const { setFetching, setHandleResponse, twitter } = useContext(HandleMintContext);
+  const { setFetching, setHandleResponse, twitter, reservedTwitterUsernames } = useContext(HandleMintContext);  
 
   useEffect(() => {
     if (handle.length === 0) {
@@ -72,17 +72,26 @@ export const useCheckIfAvailable = async (handle: string) => {
       const headers: HeadersInit = {
         "x-handle": handle,
       }
-
-      if (twitter) {
-        headers['x-twitter-data'] = JSON.stringify({
-          twitter: twitter.user.profile,
-          credentials: twitter.credentials
-        })
-      }
       
-      const res: HandleAvailableResponseGETBody = await (
+      const res: HandleResponseBody = await (
         await fetch(`/.netlify/functions/handle`, { headers })
       ).json();
+
+      // Circumvent if reserved but not yet minted.
+      const today = new Date();
+      if (res.available && reservedTwitterUsernames.includes(handle.toLocaleLowerCase()) && today < RESERVE_EXPIRE_DATE) {
+        const day = await import('dayjs').then(module => module.default)
+        const relativeTime = await import('dayjs/plugin/relativeTime').then(module => module.default);
+        day.extend(relativeTime);
+
+        setFetching(false);
+        setHandleResponse({
+          available: false,
+          message: `Reserve status for this handle will expire ${day().to(RESERVE_EXPIRE_DATE)}.`,
+          twitter: true
+        });
+        return;
+      }
 
       setFetching(false);
       setHandleResponse(res);

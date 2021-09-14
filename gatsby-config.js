@@ -13,6 +13,12 @@ module.exports = {
     `gatsby-plugin-react-helmet`,
     `gatsby-plugin-layout`,
     {
+      resolve: `gatsby-plugin-loadable-components-ssr`,
+      options: {
+        useHydrate: true,
+      },
+    },
+    {
       resolve: `gatsby-plugin-google-gtag`,
       options: {
         trackingIds: [
@@ -38,18 +44,6 @@ module.exports = {
       },
     },
     {
-      resolve: `gatsby-plugin-manifest`,
-      options: {
-        name: `ada-handle-static`,
-        short_name: `adahandle`,
-        start_url: `/`,
-        background_color: fullConfig.theme.colors.dark['100'],
-        theme_color: fullConfig.theme.colors.primary['200'],
-        display: `minimal-ui`,
-        icon: `src/images/logo-square.svg`,
-      },
-    },
-    {
       resolve: `gatsby-plugin-postcss`,
       options: {
         postCssPlugins: [
@@ -68,7 +62,6 @@ module.exports = {
           families: ['Noto Sans:400,400italic,700,700italic']
         }
       }
-    },
-    `gatsby-plugin-offline`,
+    }
   ],
 };

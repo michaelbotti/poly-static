@@ -71,10 +71,6 @@ const Layout: FC = ({ children }): JSX.Element => {
           </div>
         </footer>
       </div>
-      <script
-        async
-        src="https://www.google.com/recaptcha/api.js?render=6Ld0QUkcAAAAAN-_KvCv8R_qke8OYxotNJzIg2RP"
-      />
     </AppContext.Provider>
   );
 }

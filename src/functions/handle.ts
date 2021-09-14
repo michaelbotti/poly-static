@@ -1,13 +1,15 @@
-import { Handler, HandlerEvent, HandlerContext, HandlerCallback } from "@netlify/functions";
-
+import { Handler, HandlerEvent, HandlerContext, HandlerCallback, HandlerResponse } from "@netlify/functions";
 import * as admin from 'firebase-admin';
+import fs from 'fs';
 import { getAdditionalUserInfo, TwitterAuthProvider } from 'firebase/auth';
 import { normalizeNFTHandle } from "../lib/helpers/nfts";
 import { BETA_PHASE_MATCH } from '../lib/constants';
+import fetch from 'node-fetch';
 
-export interface HandleAvailableResponseGETBody {
+export interface HandleResponseBody {
     available: boolean;
     message: string;
+    twitter: boolean;
     link?: string;
 }
 
@@ -16,44 +18,83 @@ const firebaseAdmin =
     .initializeApp({
         credential: admin.credential.cert(JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT_KEY_JSON))
     })
-
 const adminAuth = firebaseAdmin.auth();
-// const adminDB = firebaseAdmin.database().ref('https://console.firebase.google.com/u/0/project/ada-handle-reserve/database/ada-handle-reserve-default-rtdb/data/');
 
-const handleIsTwitterUsername = async (handle: string): Promise<boolean> => {
-    // const twitterUsernames = [];
-    // let isTwitterUsername = false;
-    // const getUsers = async (nextPageToken?: string) =>
-    //     await adminAuth
-    //         .listUsers(1000, nextPageToken)
-    //         .then(async (listUsersResult) => {
-    //             listUsersResult.users.forEach(async (userRecord) => {
-    //                 twitterUsernames.push(userRecord.providerData[0].uid);
-    //             });
-                
-    //             // List next batch of users.
-    //             if (listUsersResult.pageToken) {
-    //                 return await getUsers(listUsersResult.pageToken);
-    //             }
-    //         })
-    //         .catch((error) => {
-    //             console.log('Error listing users:', error);
-    //         });
+
+const getTwitterUsernames = async (ids: number[]): Promise<string[]> => {
+    const usernames = [];
     
-    // await getUsers();
-    // fs.writeFileSync('/Users/cjkoepke/Desktop/ids.txt', JSON.stringify(twitterUsernames));
-    // return isTwitterUsername;
-    return false;
+    const fetchUsernames = async (startIndex: number = 0) => {
+        const endIndex = startIndex < 900 ? startIndex + 100 : startIndex + 16;
+        console.log(startIndex, endIndex);
+        if (startIndex === endIndex) {
+            return;
+        }
+
+        const url = new URL('/2/users', 'https://api.twitter.com');
+        url.searchParams.set('ids', ids.slice(startIndex, endIndex).join(','));
+
+        return await fetch(url.toString(), {
+            method: 'GET',
+            headers: {
+                'Authorization': 'Bearer AAAAAAAAAAAAAAAAAAAAAJTlTQEAAAAA7KHn69cHQWCz9WH8mOBQ0Xjb2uw%3DzMpHdJz70iRKW2eAp19ZwnhT1fIHj6votkHfdCHhHu9bz9yuBG'
+            },
+            redirect: 'follow'
+        })
+            .then(res => res.json())
+            // @ts-ignore
+            .then(async ({ data, errors }) => {
+                data.forEach(user => {
+                    usernames.push(user.username.toLowerCase());
+                });
+    
+                if (endIndex !== ids.length) {
+                    return await fetchUsernames(endIndex)
+                }
+            })
+    }
+    
+    await fetchUsernames();
+    return usernames;
 }
 
-const _handle_GET: Handler = async (event: HandlerEvent, context: HandlerContext) => {
-    const { headers } = event;
+const getTwitterIds = async (): Promise<number[]> => {
+    const ids = [];
+    const getUsers = async (nextPageToken?: string) =>
+        await adminAuth
+            .listUsers(1000, nextPageToken)
+            .then(async (listUsersResult) => {
+                listUsersResult.users.forEach(async (userRecord) => {
+                    if (userRecord.providerData[0].uid) {
+                        ids.push(userRecord.providerData[0].uid);
+                    }
+                });
+                
+                // List next batch of users.
+                if (listUsersResult.pageToken) {
+                    return await getUsers(listUsersResult.pageToken);
+                }
+            })
+            .catch((error) => {
+                console.log('Error listing users:', error);
+            });
+    
+    await getUsers();
+    return ids;
+}
+
+const handler: Handler = async (event: HandlerEvent, context: HandlerContext, callback: HandlerCallback) => {
+    const { headers, httpMethod } = event;
+
+    if ('GET' !== httpMethod) {
+        return { statusCode: 400 }
+    }
 
     if (!headers['x-handle']) {
-        const response: HandleAvailableResponseGETBody = {
+        const response: HandleResponseBody = {
             message: 'No handle was provided',
             available: false,
-            link: null
+            twitter: false
         };
 
         return {
@@ -65,9 +106,10 @@ const _handle_GET: Handler = async (event: HandlerEvent, context: HandlerContext
     const handle = normalizeNFTHandle(headers['x-handle']);
 
     if (!handle.match(BETA_PHASE_MATCH)) {
-        const response: HandleAvailableResponseGETBody = {
+        const response: HandleResponseBody = {
             message: 'Beta launch handles must be 3+ characters.',
-            available: false
+            available: false,
+            twitter: false
         };
 
         return {
@@ -76,8 +118,17 @@ const _handle_GET: Handler = async (event: HandlerEvent, context: HandlerContext
         }
     }
 
-    // Check Twitter reserved.
-    const isTwitterUsername = await handleIsTwitterUsername(handle);
+    // const twitterIds = await getTwitterIds();
+    // const twitterUsernames = await getTwitterUsernames(twitterIds);
+    // if (twitterUsernames.includes(handle)) {
+    //     return {
+    //         statusCode: 200,
+    //         body: JSON.stringify({
+    //             available: false,
+    //             message: 'This handle is reserved for the Twitter user.'
+    //         })
+    //     }
+    // }
     
     // const twitterData = headers['x-twitter-data'] && JSON.parse(headers['x-twitter-data']);
     // if (twitterData) {
@@ -86,19 +137,20 @@ const _handle_GET: Handler = async (event: HandlerEvent, context: HandlerContext
     
 
     // Simulate taken handle.
-    const response: HandleAvailableResponseGETBody = await new Promise((res, rej) => {
+    const response: HandleResponseBody = await new Promise((res, rej) => {
         setTimeout(() => {
             if ('onchain' === handle) {
                 res({
                     available: false,
                     link: 'https://cardanoscan.com',
-                    message: 'Handle already owned!'
+                    message: 'Handle already owned!',
+                    twitter: false
                 });
             } else {
                 res({
                     available: true,
                     message: 'Available!',
-                    link: null
+                    twitter: false
                 });
             }
         }, 400)
@@ -107,20 +159,6 @@ const _handle_GET: Handler = async (event: HandlerEvent, context: HandlerContext
     return {
         statusCode: 200,
         body: JSON.stringify(response)
-    }
-}
-
-const handler: Handler = async (event: HandlerEvent, context: HandlerContext, callback: HandlerCallback) => {
-    switch(event.httpMethod) {
-        case 'GET':
-            return await _handle_GET(event, context, callback);
-    }
-
-    return {
-        statusCode: 400,
-        body: JSON.stringify({
-            message: 'Not support method.'
-        })
     }
 };
 

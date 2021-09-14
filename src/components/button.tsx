@@ -5,7 +5,7 @@ interface ButtonProps {
     style?: 'primary' | 'secondary' | 'link',
     internal: boolean;
     href?: string;
-    className: string;
+    className?: string;
 }
 
 const classes = 'cursor-pointer bg-primary-100 hover:bg-dark-100 focus:bg-dark-100 hover:shadow-lg m-0 py-4 px-6 text-white text-center rounded-lg inline-block font-bold';
