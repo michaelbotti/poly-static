@@ -1,6 +1,8 @@
 import React, { useContext } from "react";
 import { HandleMintContext } from "../../context/handleSearch";
 import ReactCountdown from "react-countdown";
+
+import { RESERVE_SESSION_LENGTH } from "../../lib/constants";
 import Button from "../button";
 import { useRarityCost, useRarityHex, useRaritySlug } from "../../hooks/nft";
 
@@ -38,7 +40,7 @@ export const HandleSearchPurchaseFlow = () => {
       <h2 className="font-bold text-4xl mb-2">
         Session expires in{" "}
         <ReactCountdown
-          date={Date.now() + 600000}
+          date={Date.now() + RESERVE_SESSION_LENGTH}
           renderer={({ minutes, seconds }) => (
             <strong>
               {minutes}:{seconds}

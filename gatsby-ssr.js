@@ -1,11 +1,12 @@
 import React from 'react';
+import { RECAPTCHA_SITE_KEY } from './src/lib/constants';
 
 export const onRenderBody = ({ setHeadComponents }) => {
     setHeadComponents([
         <script
             async
             key="recaptcha-script"
-            src="https://www.google.com/recaptcha/api.js?render=6Ld0QUkcAAAAAN-_KvCv8R_qke8OYxotNJzIg2RP"
+            src={`https://www.google.com/recaptcha/api.js?render=${RECAPTCHA_SITE_KEY}`}
         />
     ])
 }

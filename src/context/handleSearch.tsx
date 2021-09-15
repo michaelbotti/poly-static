@@ -8,20 +8,22 @@ export interface TwitterProfileType {
     user: AdditionalUserInfo;
 }
 
+export interface CurrentSessionType {
+    handle: string;
+    timestamp: number;
+}
+
 export interface HandleMintContextType {
     handle: string;
     handleResponse: HandleResponseBody | null;
     fetching: boolean;
     setFetching: Dispatch<SetStateAction<boolean>>;
     twitter: null | TwitterProfileType,
-    reservedTwitterUsernames: string[];
-    currentSessions: string[];
     setHandle: Dispatch<SetStateAction<string>>;
     isPurchasing: boolean;
     setHandleResponse: Dispatch<SetStateAction<HandleResponseBody>>;
     setTwitter: Dispatch<SetStateAction<TwitterProfileType>>;
     setIsPurchasing: Dispatch<SetStateAction<boolean>>;
-    setCurrentSessions: Dispatch<SetStateAction<string[]>>;
 }
 
 export const defaultState: HandleMintContextType = {
@@ -30,14 +32,11 @@ export const defaultState: HandleMintContextType = {
     fetching: false,
     handleResponse: null,
     isPurchasing: false,
-    reservedTwitterUsernames: [],
-    currentSessions: [],
     setHandleResponse: () => {},
     setFetching: () => {},
     setTwitter: () => {},
     setHandle: () => {},
-    setIsPurchasing: () => {},
-    setCurrentSessions: () => {}
+    setIsPurchasing: () => {}
 };
 
 export const HandleMintContext = createContext<HandleMintContextType>(defaultState)

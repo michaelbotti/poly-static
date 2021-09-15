@@ -58,7 +58,7 @@ export const useRarityCost = (handle: string): RarityCostTypes => {
 };
 
 export const useCheckIfAvailable = async (handle: string) => {
-  const { setFetching, setHandleResponse, twitter, reservedTwitterUsernames } = useContext(HandleMintContext);  
+  const { setFetching, setHandleResponse, currentSessions, reservedTwitterUsernames } = useContext(HandleMintContext);  
 
   useEffect(() => {
     if (handle.length === 0) {
@@ -78,20 +78,20 @@ export const useCheckIfAvailable = async (handle: string) => {
       ).json();
 
       // Circumvent if reserved but not yet minted.
-      const today = new Date();
-      if (res.available && reservedTwitterUsernames.includes(handle.toLocaleLowerCase()) && today < RESERVE_EXPIRE_DATE) {
-        const day = await import('dayjs').then(module => module.default)
-        const relativeTime = await import('dayjs/plugin/relativeTime').then(module => module.default);
-        day.extend(relativeTime);
+      // const today = new Date();
+      // if (res.available && reservedTwitterUsernames.includes(handle.toLocaleLowerCase()) && today < RESERVE_EXPIRE_DATE) {
+      //   const day = await import('dayjs').then(module => module.default)
+      //   const relativeTime = await import('dayjs/plugin/relativeTime').then(module => module.default);
+      //   day.extend(relativeTime);
 
-        setFetching(false);
-        setHandleResponse({
-          available: false,
-          message: `Reserve status for this handle will expire ${day().to(RESERVE_EXPIRE_DATE)}.`,
-          twitter: true
-        });
-        return;
-      }
+      //   setFetching(false);
+      //   setHandleResponse({
+      //     available: false,
+      //     message: `Reserve status for this handle will expire ${day().to(RESERVE_EXPIRE_DATE)}.`,
+      //     twitter: true
+      //   });
+      //   return;
+      // }
 
       setFetching(false);
       setHandleResponse(res);

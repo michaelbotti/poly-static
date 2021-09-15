@@ -7,8 +7,7 @@ import { ref, child, get } from 'firebase/database';
 import { HandleMintContext } from "../context/handleSearch";
 
 export const useTwitter = (): [
-  () => Promise<boolean>,
-  () => Promise<string[]>
+  () => Promise<boolean>
 ] => {
   const { setTwitter, handle } = useContext(HandleMintContext);
   
@@ -46,12 +45,5 @@ export const useTwitter = (): [
       });
   };
 
-  const getTwitterUsernames = async () => {
-    const db = getDatabase(getFirebase());
-    const dbRef = ref(db);
-    const snapshot = await get(child(dbRef, '/reservedTwitterUsernames'));
-    return snapshot.val().map(username => username.toLowerCase()) || [];
-  }
-
-  return [checkHandleAgainstUser, getTwitterUsernames];
+  return [checkHandleAgainstUser];
 };

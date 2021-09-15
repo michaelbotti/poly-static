@@ -1,13 +1,9 @@
-import React, { useState, useContext, useEffect } from "react";
-import { getDatabase, ref, onValue } from "firebase/database";
-import { initializeAppCheck, ReCaptchaV3Provider } from 'firebase/app-check';
+import React, { useState, useContext } from "react";
 import loadable from '@loadable/component';
 
-import { getFirebase } from "../lib/firebase";
 import { AppContext } from '../context/app';
 import { HandleMintContext, defaultState, TwitterProfileType } from "../context/handleSearch";
 import { HandleResponseBody } from "../functions/handle";
-import { useTwitter } from '../hooks/twitter';
 
 import WalletButton from '../components/WalletButton';
 import NFTPreview from "../components/NFTPreview";
@@ -27,32 +23,7 @@ function MintPage() {
   const [fetching, setFetching] = useState<boolean>(false);
   const [handleResponse, setHandleResponse] = useState<HandleResponseBody|null>(null);
   const [twitter, setTwitter] = useState<TwitterProfileType>(null);
-  const [currentSessions, setCurrentSessions] = useState<string[]>([]);
-  const [reservedTwitterUsernames, setReservedTwitterUsernames] = useState<string[]>([]);
   const [isPurchasing, setIsPurchasing] = useState<boolean>(false);
-  const [handleTwitterConnect, getTwitterUsernames] = useTwitter();
-
-  useEffect(() => {
-    (async () => {
-      const app = getFirebase();
-      initializeAppCheck(app, {
-          provider: new ReCaptchaV3Provider('6Ld0QUkcAAAAAN-_KvCv8R_qke8OYxotNJzIg2RP'),
-          isTokenAutoRefreshEnabled: true
-      });
-
-      // Get reserved Twitter names.
-      const names = await getTwitterUsernames();
-      setReservedTwitterUsernames(names);
-      
-      // Setup a session watcher.
-      const db = getDatabase(getFirebase());
-      const sessionRef = ref(db, '/currentSessions');
-      onValue(sessionRef, (snapshot) => {
-        const sessions = snapshot.val();
-        setCurrentSessions(sessions);
-      });
-    })();
-  }, []);
 
   return (
     <HandleMintContext.Provider value={{
@@ -61,15 +32,12 @@ function MintPage() {
       handle,
       handleResponse,
       twitter,
-      reservedTwitterUsernames,
       isPurchasing,
-      currentSessions,
       setFetching,
       setHandle,
       setHandleResponse,
       setTwitter,
-      setIsPurchasing,
-      setCurrentSessions
+      setIsPurchasing
     }}>
       <SEO title="Home" />
       <section id="top">
