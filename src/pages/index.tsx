@@ -53,7 +53,7 @@ function IndexPage() {
               <h2 className="inline-block text-white mb-4 text-4xl font-bold leading-tight"><em>Cardano addresses made simple.</em></h2>
               <div className="text-white">
                 <p>Sending and receiving cryptocurrency is a pretty lame experience. You get the most security by sending directly to a cryptographic hash, but you give up <strong>readability, predictability, and memorization.</strong></p>
-                <p><span className="text-primary-200">@</span>handle ensures that your custom address will always <strong>resolve to your current wallet address</strong>, every time.</p>
+                <p>$handle ensures that your custom address will always <strong>resolve to your current wallet address</strong>, every time.</p>
                 <a href="#top" className="form-input hover:shadow-lg cursor-pointer mt-4 block py-4 px-6 bg-primary-100 hover:bg-dark-100 focus:bg-dark-100 text-white text-center rounded-lg inline-block font-bold h-full">Join the Waitlist</a>
               </div>
             </div>
@@ -66,7 +66,7 @@ function IndexPage() {
               <h2 className="inline-block text-white mb-4 text-4xl font-bold leading-tight"><em>Secured by the blockchain.</em></h2>
               <div className="text-white">
                 <p>It wouldn't be very interesting to own a custom wallet address, but be forced into relying on a central entity to resolve it.</p>
-                <p>Thankfully, <span className="text-primary-200">@</span>handle doesn't own the data associated with your address. <strong>You do, and it's secured on the Cardano blockchain.</strong></p>
+                <p>Thankfully, $handle doesn't own the data associated with your address. <strong>You do, and it's secured on the Cardano blockchain.</strong></p>
                 <p>You can think of it like a domain service, but where you own the address perpetually, and the chain (instead of a DNS) takes care of the routing details.</p>
                 <a href="#top" className="form-input hover:shadow-lg cursor-pointer mt-4 block py-4 px-6 bg-primary-100 hover:bg-dark-100 focus:bg-dark-100 text-white text-center rounded-lg inline-block font-bold h-full">Join the Waitlist</a>
               </div>
@@ -85,8 +85,8 @@ function IndexPage() {
             <div className="col-span-12 md:col-span-5" id="non-custodial">
               <h2 className="inline-block text-white mb-4 text-4xl font-bold leading-tight"><em>Non-custodial address resolver.</em></h2>
               <div className="text-white">
-                <p><span className="text-primary-200">@</span>handle works completely as an address routing service that lives on the Cardano blockchain. We <strong>never request, see, or interface with your private wallet keys</strong>.</p>
-                <p>Instead, we utilize revolutionary new technology to ensure that we simply return a valid Cardano crypto address whenever a @handle is submitted, either to our web app or our upcoming API.</p>
+                <p>$handle works completely as an address routing service that lives on the Cardano blockchain. We <strong>never request, see, or interface with your private wallet keys</strong>.</p>
+                <p>Instead, we utilize revolutionary new technology to ensure that we simply return a valid Cardano crypto address whenever a $handle is submitted, either to our web app or our upcoming API.</p>
                 <a href="#top" className="form-input hover:shadow-lg cursor-pointer mt-4 block py-4 px-6 bg-primary-100 hover:bg-dark-100 focus:bg-dark-100 text-white text-center rounded-lg inline-block font-bold h-full">Join the Waitlist</a>
               </div>
             </div>
@@ -98,7 +98,7 @@ function IndexPage() {
             <div className="col-span-12 md:col-span-5" id="roadmap">
               <h2 className="inline-block text-white mb-4 text-4xl font-bold leading-tight"><em>Creating a better crypto experience.</em></h2>
               <div className="text-white">
-                <p><span className="text-primary-200">@</span>handle abstracts the annoyance of complex wallet addresses and replaces it with a <strong>simple and intuitive solution</strong>.</p>
+                <p>$handle abstracts the annoyance of complex wallet addresses and replaces it with a <strong>simple and intuitive solution</strong>.</p>
                 <p>We have big plans, including an slick dApp interface for sending and receiving native Cardano tokens (deployed on launch day), as well as a full-featured public API for websites, wallets, and exchanges to utilize.</p>
                 <a href="#top" className="form-input hover:shadow-lg cursor-pointer mt-4 block py-4 px-6 bg-primary-100 hover:bg-dark-100 focus:bg-dark-100 text-white text-center rounded-lg inline-block font-bold h-full">Join the Waitlist</a>
               </div>
