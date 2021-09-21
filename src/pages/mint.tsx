@@ -32,14 +32,15 @@ function MintPage() {
         [HEADER_APPCHECK]: token
       }
 
+      // Refresh session list.
       await (await fetch('/.netlify/functions/clean', { headers })).json();
+
+      // Retrieve reserved handle data store.
       const reservedData = await (await fetch('/.netlify/functions/reservedHandles', { headers })).json();
       if (!localStorage.getItem('ADAHANDLE_IP')) {
         const { ip } = await (await fetch('/.netlify/functions/ip', { headers })).json();
         localStorage.setItem('ADAHANDLE_IP', ip);
       }
-
-      console.log('test');
 
       setReservedHandles(reservedData);
       setLoaded(true);
