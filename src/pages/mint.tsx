@@ -39,6 +39,8 @@ function MintPage() {
         localStorage.setItem('ADAHANDLE_IP', ip);
       }
 
+      console.log('test');
+
       setReservedHandles(reservedData);
       setLoaded(true);
     })();
