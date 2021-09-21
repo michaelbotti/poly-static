@@ -1,42 +1,48 @@
-import React, { createContext, Dispatch, SetStateAction } from 'react';
-import { AdditionalUserInfo, OAuthCredential } from 'firebase/auth';
+import { createContext, Dispatch, SetStateAction } from "react";
 
-import { HandleResponseBody } from '../functions/handle';
+import { HandleResponseBody } from "../lib/helpers/search";
 
-export interface TwitterProfileType {
-    credentials: OAuthCredential;
-    user: AdditionalUserInfo;
+export interface ReservedHandlesType {
+  twitter: string[];
+  manual: string[];
+  spos: string[];
 }
 
-export interface CurrentSessionType {
-    handle: string;
-    timestamp: number;
+export interface ActiveSessionType {
+  ip: string;
+  handle: string;
+  timestamp: number;
 }
 
 export interface HandleMintContextType {
-    handle: string;
-    handleResponse: HandleResponseBody | null;
-    fetching: boolean;
-    setFetching: Dispatch<SetStateAction<boolean>>;
-    twitter: null | TwitterProfileType,
-    setHandle: Dispatch<SetStateAction<string>>;
-    isPurchasing: boolean;
-    setHandleResponse: Dispatch<SetStateAction<HandleResponseBody>>;
-    setTwitter: Dispatch<SetStateAction<TwitterProfileType>>;
-    setIsPurchasing: Dispatch<SetStateAction<boolean>>;
+  handle: string;
+  handleResponse: HandleResponseBody | null;
+  fetching: boolean;
+  setFetching: Dispatch<SetStateAction<boolean>>;
+  twitterToken: string | null;
+  setHandle: Dispatch<SetStateAction<string>>;
+  reservedHandles: ReservedHandlesType | null;
+  isPurchasing: boolean;
+  setReservedHandles: Dispatch<SetStateAction<ReservedHandlesType | null>>;
+  setHandleResponse: Dispatch<SetStateAction<HandleResponseBody | null>>;
+  setTwitterToken: Dispatch<SetStateAction<string | null>>;
+  setIsPurchasing: Dispatch<SetStateAction<boolean>>;
 }
 
 export const defaultState: HandleMintContextType = {
-    twitter: null,
-    handle: '',
-    fetching: false,
-    handleResponse: null,
-    isPurchasing: false,
-    setHandleResponse: () => {},
-    setFetching: () => {},
-    setTwitter: () => {},
-    setHandle: () => {},
-    setIsPurchasing: () => {}
+  handle: "",
+  fetching: false,
+  handleResponse: null,
+  isPurchasing: false,
+  reservedHandles: null,
+  twitterToken: null,
+  setHandleResponse: () => {},
+  setFetching: () => {},
+  setHandle: () => {},
+  setIsPurchasing: () => {},
+  setReservedHandles: () => {},
+  setTwitterToken: () => {}
 };
 
-export const HandleMintContext = createContext<HandleMintContextType>(defaultState)
+export const HandleMintContext =
+  createContext<HandleMintContextType>(defaultState);

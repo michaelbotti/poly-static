@@ -7,6 +7,7 @@ import { AppContext, defaultState } from '../context/app';
 const Layout: FC = ({ children }): JSX.Element => {
   const [errors, setErrors] = useState<string[]>([]);
   const [isConnected, setIsConnected] = useState<boolean>(false);
+  const [sessionToken, setSessionToken] = useState<string | null>(null);
 
   useEffect(() => {
       (async () => {
@@ -19,9 +20,11 @@ const Layout: FC = ({ children }): JSX.Element => {
     <AppContext.Provider value={{
       ...defaultState,
       isConnected,
-      setIsConnected,
       errors,
-      setErrors
+      sessionToken,
+      setIsConnected,
+      setErrors,
+      setSessionToken
     }}>
       {errors.length ? (
         <div className="shadow-lg absolute top-0 left-0 w-full p-4 bg-dark-100 text-white dark:bg-white dark:text-dark-100 text-center">

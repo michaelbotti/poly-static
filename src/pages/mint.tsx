@@ -1,29 +1,48 @@
-import React, { useState, useContext } from "react";
-import loadable from '@loadable/component';
+import React, { useState, useContext, useEffect } from "react";
 
 import { AppContext } from '../context/app';
-import { HandleMintContext, defaultState, TwitterProfileType } from "../context/handleSearch";
-import { HandleResponseBody } from "../functions/handle";
+import { HandleMintContext, defaultState, TwitterProfileType, ReservedHandlesType, ActiveSessionType } from "../context/handleSearch";
+import { HandleResponseBody } from '../lib/helpers/search';
 
+import { Loader } from '../components/Loader';
 import WalletButton from '../components/WalletButton';
 import NFTPreview from "../components/NFTPreview";
 import SEO from "../components/seo";
-import { HandleSearchReserveFlow } from "../components/HandleSearch";
-
-const LazyHandleSearchPurchaseFlow = loadable(
-  () => import('../components/HandleSearch/HandleSearchPurchaseFlow'),
-  {
-      fallback: <h4>Intializing...</h4>
-  }
-);
+import { HandleSearchReserveFlow, HandleSearchPurchaseFlow } from "../components/HandleSearch";
+import { requestToken } from "../lib/firebase";
+import { HEADER_APPCHECK } from "../lib/constants";
 
 function MintPage() {
-  const { isConnected } = useContext(AppContext);
+  const { isConnected, setErrors } = useContext(AppContext);
+  const [loaded, setLoaded] = useState<boolean>(false);
+
+  // State handlers for context.
   const [handle, setHandle] = useState<string>("");
   const [fetching, setFetching] = useState<boolean>(false);
   const [handleResponse, setHandleResponse] = useState<HandleResponseBody|null>(null);
-  const [twitter, setTwitter] = useState<TwitterProfileType>(null);
+  const [twitterToken, setTwitterToken] = useState<TwitterProfileType|null>(null);
   const [isPurchasing, setIsPurchasing] = useState<boolean>(false);
+  const [reservedHandles, setReservedHandles] = useState<ReservedHandlesType|null>(null);
+
+  // Pre-fetch reserved handles to ensure warm function.
+  useEffect(() => {
+    (async () => {
+      const token = await requestToken();
+      const headers = {
+        [HEADER_APPCHECK]: token
+      }
+
+      await (await fetch('/.netlify/functions/clean', { headers })).json();
+      const reservedData = await (await fetch('/.netlify/functions/reservedHandles', { headers })).json();
+      if (!localStorage.getItem('ADAHANDLE_IP')) {
+        const { ip } = await (await fetch('/.netlify/functions/ip', { headers })).json();
+        localStorage.setItem('ADAHANDLE_IP', ip);
+      }
+
+      setReservedHandles(reservedData);
+      setLoaded(true);
+    })();
+  }, []);
 
   return (
     <HandleMintContext.Provider value={{
@@ -31,28 +50,39 @@ function MintPage() {
       fetching,
       handle,
       handleResponse,
-      twitter,
+      twitterToken,
       isPurchasing,
+      reservedHandles,
       setFetching,
       setHandle,
       setHandleResponse,
-      setTwitter,
-      setIsPurchasing
+      setTwitterToken,
+      setIsPurchasing,
+      setReservedHandles
     }}>
       <SEO title="Home" />
       <section id="top">
         <div className="grid grid-cols-12 bg-dark-200 rounded-lg place-content-center">
           <div className="col-span-12 lg:col-span-6 relative z-10">
-            <div className="p-8">
-              {isConnected && !isPurchasing && <HandleSearchReserveFlow />}
-              {isConnected && isPurchasing && <LazyHandleSearchPurchaseFlow />}
-              {!isConnected && (
-                <>
-                  <p className="mt-2 text-lg">In order to mint a new handle, you'll need to connect your Nami wallet.</p>
-                  <WalletButton />
-                </>
-              )}
-            </div>
+            {loaded
+              ? (
+                <div className="p-8">
+                  {isConnected && !isPurchasing && <HandleSearchReserveFlow />}
+                  {isConnected && isPurchasing && <HandleSearchPurchaseFlow />}
+                  {!isConnected && loaded && (
+                    <>
+                      <p className="mt-2 text-lg">In order to mint a new handle, you'll need to connect your Nami wallet.</p>
+                      <WalletButton />
+                    </>
+                  )}
+                </div>
+              ) : (
+                <div className="grid justify-center content-center h-full w-full p-8 flex-wrap">
+                  <p className="w-full text-center">Fetching bytes...</p>
+                  <Loader />
+                </div>
+              )
+            }
           </div>
           <div className="col-span-12 lg:col-span-6 py-8">
             <NFTPreview handle={handle} />

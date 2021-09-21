@@ -4,13 +4,13 @@ import ReactCountdown from "react-countdown";
 
 import { RESERVE_SESSION_LENGTH } from "../../lib/constants";
 import Button from "../button";
-import { useRarityCost, useRarityHex, useRaritySlug } from "../../hooks/nft";
+import { getRarityCost, getRarityHex, getRaritySlug } from '../../lib/helpers/nfts';
 
 export const HandleSearchPurchaseFlow = () => {
   const { isPurchasing, twitter, handle } = useContext(HandleMintContext);
-  const cost = useRarityCost(handle);
-  const rarity = useRaritySlug(handle);
-  const color = useRarityHex(handle);
+  const cost = getRarityCost(handle);
+  const rarity = getRaritySlug(handle);
+  const color = getRarityHex(handle);
 
   if (!isPurchasing) {
     return null;

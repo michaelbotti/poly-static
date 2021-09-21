@@ -1,13 +1,13 @@
 import React from "react";
 import { useContext } from "react";
 import { HandleMintContext } from "../../context/handleSearch";
-import { useRarityCost, useRarityHex, useRaritySlug } from "../../hooks/nft";
+import { getRarityCost, getRarityHex, getRaritySlug } from '../../lib/helpers/nfts';
 
 export const HandleDetails = (): JSX.Element => {
   const { handle } = useContext(HandleMintContext);
-  const hex = useRarityHex(handle);
-  const slug = useRaritySlug(handle);
-  const cost = useRarityCost(handle);
+  const hex = getRarityHex(handle);
+  const slug = getRaritySlug(handle);
+  const cost = getRarityCost(handle);
 
   return (
     <h4 className="text-xl">

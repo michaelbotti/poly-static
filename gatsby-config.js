@@ -13,12 +13,6 @@ module.exports = {
     `gatsby-plugin-react-helmet`,
     `gatsby-plugin-layout`,
     {
-      resolve: `gatsby-plugin-loadable-components-ssr`,
-      options: {
-        useHydrate: true,
-      },
-    },
-    {
       resolve: `gatsby-plugin-google-gtag`,
       options: {
         trackingIds: [
@@ -40,7 +34,10 @@ module.exports = {
       options: {
         isTSX: true,
         jsxPragma: `jsx`,
-        allExtensions: true
+        allExtensions: true,
+        typeRoots: [
+          './@types'
+        ]
       },
     },
     {

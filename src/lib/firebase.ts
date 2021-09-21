@@ -1,5 +1,6 @@
 import { initializeAppCheck, ReCaptchaV3Provider, getToken } from '@firebase/app-check';
 import { initializeApp, FirebaseOptions } from 'firebase/app';
+import { RECAPTCHA_SITE_KEY } from './constants';
 
 export const config: FirebaseOptions = {
     apiKey: "AIzaSyAjLfhecwnZJyl-lv8FdXasQZGmYEEJ-wc",
@@ -15,10 +16,10 @@ const app = initializeApp(config);
 
 export const requestToken = async (): Promise<string> => {
     const appCheck = initializeAppCheck(app, {
-        provider: new ReCaptchaV3Provider('6Ld0QUkcAAAAAN-_KvCv8R_qke8OYxotNJzIg2RP'),
+        provider: new ReCaptchaV3Provider(RECAPTCHA_SITE_KEY),
         isTokenAutoRefreshEnabled: true
     });
-    
+
     const { token } = await getToken(appCheck, false);
     return token;
 }

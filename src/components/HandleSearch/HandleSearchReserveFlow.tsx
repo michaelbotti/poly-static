@@ -1,33 +1,27 @@
-import React, { FormEvent, useContext, useRef } from "react";
-import { useEffect } from "react";
+import React, { FormEvent, useContext, useRef, useEffect, useState } from "react";
 import { useDebounce } from "use-debounce";
-import { Link } from "gatsby";
+import { Link, navigate } from "gatsby";
 
 import { requestToken } from '../../lib/firebase';
-import { ALLOWED_CHAR, RECAPTCHA_SITE_KEY } from "../../lib/constants";
+import { ALLOWED_CHAR, HEADER_APPCHECK, HEADER_HANDLE, HEADER_IP_ADDRESS, HEADER_RECAPTCHA, HEADER_TWITTER_ACCESS_TOKEN, RECAPTCHA_SITE_KEY } from "../../lib/constants";
 import { HandleMintContext } from "../../context/handleSearch";
-import { useCheckIfAvailable } from "../../hooks/nft";
+import { useSyncAvailableStatus } from '../../hooks/handle';
 import LogoMark from "../../images/logo-single.svg";
 import { HandleSearchConnectTwitter } from "./";
 import { AppContext } from "../../context/app";
+import { Loader } from "../Loader";
 
-const isValid = (handle: string) => !!handle.match(ALLOWED_CHAR) && handle.length < 45;
+export const isValid = (handle: string) => !!handle.match(ALLOWED_CHAR) && handle.length < 15;
 
 export const HandleSearchReserveFlow = ({ className = "", ...rest }) => {
-  const { setErrors } = useContext(AppContext);
-  const { fetching, handleResponse, handle, setHandle, twitter, setIsPurchasing } = useContext(HandleMintContext);
-  const [debouncedHandle] = useDebounce(handle, 750);
+  const { fetching, handleResponse, setHandleResponse, handle, setHandle, twitterToken } = useContext(HandleMintContext);
+  const [fetchingSession, setFetchingSession] = useState<boolean>(false);
+  const [debouncedHandle] = useDebounce(handle, 600);
   const handleInputRef = useRef(null);
 
-  // Check if availabe, debounced.
-  useCheckIfAvailable(debouncedHandle);
+  useSyncAvailableStatus(debouncedHandle);
 
-  /**
-   * Handles the input validation and updates.
-   *
-   * @param {string} newHandle
-   * @returns {void}
-   */
+  // Handles the input validation and updates.
   const onUpdateHandle = async (newHandle: string) => {
     const valid = isValid(newHandle);
     if (!valid && 0 === handle.length) {
@@ -42,15 +36,11 @@ export const HandleSearchReserveFlow = ({ className = "", ...rest }) => {
   /**
    * Handles the form submission to start a session.
    *
-   * @param {FormEvent} e 
-   * @returns 
+   * @param {FormEvent} e
+   * @returns
    */
   const handleOnSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    if (!handleResponse.available || !isValid(handle) || 'undefined' === typeof window?.grecaptcha) {
-      setErrors(['Hmm, something isn\'t right. Try reloading and try again.']);
-      return false;
-    }
 
     const appCheckToken = await requestToken();
     const recaptchaToken: string = await window.grecaptcha.ready(() => window.grecaptcha.execute(
@@ -59,23 +49,49 @@ export const HandleSearchReserveFlow = ({ className = "", ...rest }) => {
       (token: string) => token
     ));
 
-    console.log(appCheckToken, recaptchaToken);
-    // const session = await fetch('/.netlify/functions/session', {
-    //   headers: {
-    //     'x-handle': handle,
-    //     'x-recaptcha': recaptchaToken,
-    //     'x-appcheck-token': appCheckToken,
-    //     'x-twitter-accessToken': twitter?.credentials?.accessToken
-    //   }
-    // });
+    const headers = new Headers();
+    headers.append(HEADER_HANDLE, handle);
+    headers.append(HEADER_RECAPTCHA, recaptchaToken);
+    headers.append(HEADER_APPCHECK, appCheckToken);
+    if (twitterToken) {
+      headers.append(HEADER_TWITTER_ACCESS_TOKEN, twitterToken);
+    }
 
-    // console.log(session);
+    const ip = localStorage.getItem('ADAHANDLE_IP');
+    if (ip) {
+      headers.append(HEADER_IP_ADDRESS, ip);
+    }
+
+    setFetchingSession(true);
+    const session = await fetch('/.netlify/functions/session', { headers });
+    const sessionJSON = await session.json();
+    if (sessionJSON.token) {
+      navigate(
+        '/session',
+        {
+          state: sessionJSON
+        }
+      )
+    } else {
+      console.log(sessionJSON);
+      setHandleResponse(sessionJSON);
+      setFetchingSession(false);
+    }
   }
 
   // Autofocus the input field on load.
   useEffect(() => {
-    handleInputRef.current.focus();
+    (handleInputRef?.current as HTMLInputElement | null)?.focus();
   }, []);
+
+  if (fetchingSession) {
+    return (
+      <div className="text-center">
+        <p className="text-3xl">Fetching session...</p>
+        <Loader />
+      </div>
+    )
+  }
 
   return (
     <>
@@ -112,7 +128,9 @@ export const HandleSearchReserveFlow = ({ className = "", ...rest }) => {
               {fetching && <span className="block">Checking the Cardano blockchain...</span>}
               {!fetching && handleResponse?.message && (
                 <span className="block text-right">
-                  {handleResponse?.message}
+                  {handleResponse?.message && (
+                    <span dangerouslySetInnerHTML={{ __html: handleResponse.message }}></span>
+                  )}
                   {!handleResponse?.available && handleResponse?.link && (
                     <a
                       href={handleResponse?.link}
@@ -127,12 +145,12 @@ export const HandleSearchReserveFlow = ({ className = "", ...rest }) => {
             </small>
           </p>
         </div>
-        {!twitter && handleResponse?.twitter && !handleResponse.available ? (
+        {!twitterToken && handleResponse?.twitter && !handleResponse.available ? (
           <HandleSearchConnectTwitter />
         ) : (
           <input
             type="submit"
-            value={"Checkout"}
+            value={"Reserve a Session"}
             disabled={!handleResponse?.available}
             className={`${
               !fetching && true === handleResponse?.available

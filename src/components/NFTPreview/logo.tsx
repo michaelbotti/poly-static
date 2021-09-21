@@ -1,13 +1,13 @@
-import React, { FC, SVGAttributes, useMemo } from "react";
+import React, { FC, SVGAttributes } from "react";
 
-import { useRarityHex } from '../../hooks/nft';
+import { getRarityHex } from '../../lib/helpers/nfts';
 
 interface LogoProps extends SVGAttributes<any> {
   handle: string;
 }
 
 const Logo: FC<LogoProps> = ({ handle, ...rest }) => {
-    const fillColor = useRarityHex(handle);
+    const fillColor = getRarityHex(handle);
 
   return (
     <svg
