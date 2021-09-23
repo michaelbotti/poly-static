@@ -19,8 +19,7 @@ import {
   BETA_PHASE_MATCH,
   HEADER_APPCHECK,
   HEADER_HANDLE,
-  HEADER_IP_ADDRESS,
-  REDIS_RESERVED_HANDLES_KEY,
+  HEADER_IP_ADDRESS
 } from "../../src/lib/constants";
 import {
   ActiveSessionType,
