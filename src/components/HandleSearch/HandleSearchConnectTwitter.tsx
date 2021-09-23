@@ -1,5 +1,5 @@
 import React, { useContext, useState } from "react";
-import { HandleMintContext } from "../../context/handleSearch";
+import { HandleMintContext } from "../../../src/context/handleSearch";
 
 import { useTwitter } from "../../hooks/twitter";
 

@@ -5,8 +5,8 @@ import {
   HandlerResponse,
 } from "@netlify/functions";
 import "cross-fetch/polyfill";
-import { HEADER_APPCHECK } from "../lib/constants";
-import { verifyAppCheck } from "../lib/functions";
+import { HEADER_APPCHECK } from "../../src/lib/constants";
+import { verifyAppCheck } from "../helpers";
 
 const handler: Handler = async (
   event: HandlerEvent,

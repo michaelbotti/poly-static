@@ -3,12 +3,11 @@ import { useDebounce } from "use-debounce";
 import { Link, navigate } from "gatsby";
 
 import { requestToken } from '../../lib/firebase';
-import { ALLOWED_CHAR, HEADER_APPCHECK, HEADER_HANDLE, HEADER_IP_ADDRESS, HEADER_RECAPTCHA, HEADER_TWITTER_ACCESS_TOKEN, RECAPTCHA_SITE_KEY } from "../../lib/constants";
-import { HandleMintContext } from "../../context/handleSearch";
+import { ALLOWED_CHAR, HEADER_APPCHECK, HEADER_HANDLE, HEADER_IP_ADDRESS, HEADER_RECAPTCHA, HEADER_TWITTER_ACCESS_TOKEN, RECAPTCHA_SITE_KEY } from "../../../src/lib/constants";
+import { HandleMintContext } from "../../../src/context/handleSearch";
 import { useSyncAvailableStatus } from '../../hooks/handle';
 import LogoMark from "../../images/logo-single.svg";
 import { HandleSearchConnectTwitter } from "./";
-import { AppContext } from "../../context/app";
 import { Loader } from "../Loader";
 
 export const isValid = (handle: string) => !!handle.match(ALLOWED_CHAR) && handle.length < 15;

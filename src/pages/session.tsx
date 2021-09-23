@@ -2,7 +2,7 @@ import React, { useState, useContext, useEffect } from "react";
 import { PageProps } from 'gatsby';
 
 import { AppContext } from '../context/app';
-import { HandleMintContext } from '../context/handleSearch';
+import { HandleMintContext } from '../../src/context/handleSearch';
 
 import { Loader } from '../components/Loader';
 import WalletButton from '../components/WalletButton';

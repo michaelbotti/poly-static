@@ -1,18 +1,17 @@
 import { useEffect, useContext } from 'react';
 
 // Types
-import { HandleResponseBody } from '../lib/helpers/search';
+import { HandleResponseBody } from '../../src/lib/helpers/search';
 
 // Helpers
 import { requestToken } from '../lib/firebase';
-import { BETA_PHASE_MATCH, HEADER_APPCHECK, HEADER_HANDLE, HEADER_IP_ADDRESS } from '../lib/constants';
-import { HandleMintContext } from '../context/handleSearch';
+import { BETA_PHASE_MATCH, HEADER_APPCHECK, HEADER_HANDLE, HEADER_IP_ADDRESS } from '../../src/lib/constants';
+import { HandleMintContext } from '../../src/context/handleSearch';
 import {
   getTwitterResponseUnvailable,
-  getDefaultResponseAvailable,
   getDefaultResponseUnvailable,
   getBetaPhaseResponseUnavailable
-} from '../lib/helpers/search';
+} from '../../src/lib/helpers/search';
 
 export const useSyncAvailableStatus = async (handle: string) => {
     const { setFetching, setHandleResponse, reservedHandles } = useContext(HandleMintContext);

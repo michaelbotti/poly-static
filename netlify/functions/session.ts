@@ -12,20 +12,17 @@ import {
   HEADER_HANDLE,
   HEADER_RECAPTCHA,
   HEADER_TWITTER_ACCESS_TOKEN,
-  HEADER_IP_ADDRESS,
-  REDIS_ACTIVE_SESSIONS_HANDLE_KEY,
-  REDIS_ACTIVE_SESSIONS_IP_PREFIX,
-  REDIS_RESERVED_HANDLES_KEY,
-} from "../lib/constants";
-import { normalizeNFTHandle } from "../lib/helpers/nfts";
-import { getRedis, getS3, getFirebase, verifyAppCheck } from "../lib/functions";
-import { verifyTwitterUser } from "../lib/functions/firebase";
-import { ActiveSessionType, ReservedHandlesType } from "../context/handleSearch";
+  HEADER_IP_ADDRESS
+} from "../../src/lib/constants";
+import { normalizeNFTHandle } from "../../src/lib/helpers/nfts";
+import { getS3, getFirebase, verifyAppCheck } from "../helpers";
+import { verifyTwitterUser } from "../helpers";
+import { ActiveSessionType, ReservedHandlesType } from "../../src/context/handleSearch";
 import {
   getActiveSessionUnavailable,
   getSessionCountUnavailable,
   HandleResponseBody,
-} from "../lib/helpers/search";
+} from "../../src/lib/helpers/search";
 
 const unauthorizedResponse: HandlerResponse = {
   statusCode: 403,

@@ -1,5 +1,5 @@
 import React, { FC, useContext } from 'react';
-import { HandleMintContext } from '../../context/handleSearch';
+import { HandleMintContext } from '../../../src/context/handleSearch';
 
 import Background from '../../images/code.svg';
 import FullLogo from '../../images/logo-dark.svg';

@@ -1,8 +1,8 @@
 import React, { useState, useContext, useEffect } from "react";
 
 import { AppContext } from '../context/app';
-import { HandleMintContext, defaultState, TwitterProfileType, ReservedHandlesType, ActiveSessionType } from "../context/handleSearch";
-import { HandleResponseBody } from '../lib/helpers/search';
+import { HandleMintContext, defaultState, ReservedHandlesType } from "../../src/context/handleSearch";
+import { HandleResponseBody } from '../../src/lib/helpers/search';
 
 import { Loader } from '../components/Loader';
 import WalletButton from '../components/WalletButton';
@@ -10,7 +10,7 @@ import NFTPreview from "../components/NFTPreview";
 import SEO from "../components/seo";
 import { HandleSearchReserveFlow, HandleSearchPurchaseFlow } from "../components/HandleSearch";
 import { requestToken } from "../lib/firebase";
-import { HEADER_APPCHECK } from "../lib/constants";
+import { HEADER_APPCHECK } from "../../src/lib/constants";
 
 function MintPage() {
   const { isConnected, setErrors } = useContext(AppContext);
@@ -20,30 +20,37 @@ function MintPage() {
   const [handle, setHandle] = useState<string>("");
   const [fetching, setFetching] = useState<boolean>(false);
   const [handleResponse, setHandleResponse] = useState<HandleResponseBody|null>(null);
-  const [twitterToken, setTwitterToken] = useState<TwitterProfileType|null>(null);
+  const [twitterToken, setTwitterToken] = useState<string|null>(null);
   const [isPurchasing, setIsPurchasing] = useState<boolean>(false);
   const [reservedHandles, setReservedHandles] = useState<ReservedHandlesType|null>(null);
 
   // Pre-fetch reserved handles to ensure warm function.
   useEffect(() => {
     (async () => {
-      const token = await requestToken();
-      const headers = {
-        [HEADER_APPCHECK]: token
+
+      try {
+        const token = await requestToken();
+        const headers = {
+          [HEADER_APPCHECK]: token
+        }
+
+        // Refresh session list.
+        await (await fetch('/.netlify/functions/clean', { headers })).json();
+
+        // Retrieve reserved handle data store.
+        const reservedData = await (await fetch('/.netlify/functions/reservedHandles', { headers })).json();
+        if (!localStorage.getItem('ADAHANDLE_IP')) {
+          const { ip } = await (await fetch('/.netlify/functions/ip', { headers })).json();
+          localStorage.setItem('ADAHANDLE_IP', ip);
+        }
+
+        setReservedHandles(reservedData);
+        setLoaded(true);
+      } catch(e) {
+        setErrors([
+          'Something went wrong. Please refresh and try again.'
+        ]);
       }
-
-      // Refresh session list.
-      await (await fetch('/.netlify/functions/clean', { headers })).json();
-
-      // Retrieve reserved handle data store.
-      const reservedData = await (await fetch('/.netlify/functions/reservedHandles', { headers })).json();
-      if (!localStorage.getItem('ADAHANDLE_IP')) {
-        const { ip } = await (await fetch('/.netlify/functions/ip', { headers })).json();
-        localStorage.setItem('ADAHANDLE_IP', ip);
-      }
-
-      setReservedHandles(reservedData);
-      setLoaded(true);
     })();
   }, []);
 

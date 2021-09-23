@@ -1,8 +1,8 @@
 import { Handler, HandlerEvent, HandlerResponse } from '@netlify/functions';
 
-import { ActiveSessionType, ReservedHandlesType } from '../context/handleSearch';
-import { HEADER_APPCHECK } from '../lib/constants';
-import { getFirebase, verifyAppCheck } from '../lib/functions';
+import { ActiveSessionType, ReservedHandlesType } from '../../src/context/handleSearch';
+import { HEADER_APPCHECK } from '../../src/lib/constants';
+import { getFirebase, verifyAppCheck } from '../helpers';
 
 const handler: Handler = async (event: HandlerEvent): Promise<HandlerResponse> => {
   const { headers } = event;

@@ -1,10 +1,10 @@
 import React, { useContext } from "react";
-import { HandleMintContext } from "../../context/handleSearch";
+import { HandleMintContext } from "../../../src/context/handleSearch";
 import ReactCountdown from "react-countdown";
 
-import { RESERVE_SESSION_LENGTH } from "../../lib/constants";
+import { RESERVE_SESSION_LENGTH } from "../../../src/lib/constants";
 import Button from "../button";
-import { getRarityCost, getRarityHex, getRaritySlug } from '../../lib/helpers/nfts';
+import { getRarityCost, getRarityHex, getRaritySlug } from '../../../src/lib/helpers/nfts';
 
 export const HandleSearchPurchaseFlow = () => {
   const { isPurchasing, twitter, handle } = useContext(HandleMintContext);

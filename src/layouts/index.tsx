@@ -14,7 +14,7 @@ const Layout: FC = ({ children }): JSX.Element => {
           const isConnected = await window.cardano.isEnabled();
           setIsConnected(isConnected);
       })();
-  }, [isConnected])
+  }, [])
 
   return (
     <AppContext.Provider value={{

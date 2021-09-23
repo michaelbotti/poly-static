@@ -1,6 +1,6 @@
 import React, { FC, SVGAttributes } from "react";
 
-import { getRarityHex } from '../../lib/helpers/nfts';
+import { getRarityHex } from '../../../src/lib/helpers/nfts';
 
 interface LogoProps extends SVGAttributes<any> {
   handle: string;

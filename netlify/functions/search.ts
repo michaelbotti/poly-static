@@ -5,18 +5,27 @@ import {
   HandlerCallback,
   HandlerResponse,
 } from "@netlify/functions";
-import { getFirebase, queryHandleOnchain, verifyAppCheck } from "../lib/functions";
-import { getBetaPhaseResponseUnavailable, getDefaultResponseAvailable, getDefaultResponseUnvailable, getTwitterResponseUnvailable, HandleResponseBody } from "../lib/helpers/search";
+import { getFirebase, queryHandleOnchain, verifyAppCheck } from "../helpers";
+import {
+  getBetaPhaseResponseUnavailable,
+  getDefaultResponseAvailable,
+  getDefaultResponseUnvailable,
+  getTwitterResponseUnvailable,
+  HandleResponseBody,
+} from "../../src/lib/helpers/search";
 import "cross-fetch/polyfill";
-import { normalizeNFTHandle } from "../lib/helpers/nfts";
+import { normalizeNFTHandle } from "../../src/lib/helpers/nfts";
 import {
   BETA_PHASE_MATCH,
   HEADER_APPCHECK,
   HEADER_HANDLE,
   HEADER_IP_ADDRESS,
   REDIS_RESERVED_HANDLES_KEY,
-} from "../lib/constants";
-import { ActiveSessionType, ReservedHandlesType } from "../context/handleSearch";
+} from "../../src/lib/constants";
+import {
+  ActiveSessionType,
+  ReservedHandlesType,
+} from "../../src/context/handleSearch";
 
 // Main handler function for GET requests.
 const handler: Handler = async (
@@ -47,7 +56,7 @@ const handler: Handler = async (
   if (!headerHandle) {
     return {
       statusCode: 400,
-      body: 'Must provide a handle.'
+      body: "Must provide a handle.",
     };
   }
 
@@ -64,7 +73,7 @@ const handler: Handler = async (
     };
   }
 
-  console.log('valid API call');
+  console.log("valid API call");
 
   const handle = normalizeNFTHandle(headerHandle);
 
@@ -84,56 +93,59 @@ const handler: Handler = async (
   console.log("not on-chain");
 
   const database = (await getFirebase()).database();
-  const reservedhandles = await (await database.ref('/reservedHandles').once('value', snapshot => snapshot.val())).val() as ReservedHandlesType;
-  const activeSessions = await (await database.ref('/activeSessions').once('value', snapshot => snapshot.val())).val() as ActiveSessionType[];
+  const reservedhandles = (await (
+    await database
+      .ref("/reservedHandles")
+      .once("value", (snapshot) => snapshot.val())
+  ).val()) as ReservedHandlesType;
+  const activeSessions = (await (
+    await database
+      .ref("/activeSessions")
+      .once("value", (snapshot) => snapshot.val())
+  ).val()) as ActiveSessionType[];
 
   if (activeSessions?.filter(({ ip }) => ip === headerIp).length >= 3) {
     return {
       statusCode: 403,
       body: JSON.stringify({
-        message: 'Too many sessions open. Try again later.',
-        available: false
-      } as HandleResponseBody)
-    }
+        message: "Too many sessions open. Try again later.",
+        available: false,
+      } as HandleResponseBody),
+    };
   }
 
-  if (activeSessions?.filter(({ handle: sessionHandle }) => sessionHandle === handle).length > 0) {
+  if (
+    activeSessions?.filter(
+      ({ handle: sessionHandle }) => sessionHandle === handle
+    ).length > 0
+  ) {
     return {
       statusCode: 403,
-      body: JSON.stringify(
-        getDefaultResponseUnvailable()
-      )
-    }
+      body: JSON.stringify(getDefaultResponseUnvailable()),
+    };
   }
 
   if (!handle.match(BETA_PHASE_MATCH)) {
     if (reservedhandles?.twitter?.includes(handle)) {
       return {
         statusCode: 403,
-        body: JSON.stringify(
-          getTwitterResponseUnvailable()
-        )
+        body: JSON.stringify(getTwitterResponseUnvailable()),
       };
     }
 
     return {
       statusCode: 403,
-      body: JSON.stringify(
-        getBetaPhaseResponseUnavailable()
-      )
-    }
+      body: JSON.stringify(getBetaPhaseResponseUnavailable()),
+    };
   }
 
   console.log("valid beta phase handle");
-
 
   console.log("not on chain");
 
   return {
     statusCode: 200,
-    body: JSON.stringify(
-      getDefaultResponseAvailable()
-    ),
+    body: JSON.stringify(getDefaultResponseAvailable()),
   };
 };
 
