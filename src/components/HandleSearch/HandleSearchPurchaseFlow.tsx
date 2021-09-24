@@ -2,12 +2,12 @@ import React, { useContext } from "react";
 import { HandleMintContext } from "../../../src/context/handleSearch";
 import ReactCountdown from "react-countdown";
 
-import { RESERVE_SESSION_LENGTH } from "../../../src/lib/constants";
+import { HEADER_TWITTER_ACCESS_TOKEN, RESERVE_SESSION_LENGTH } from "../../../src/lib/constants";
 import Button from "../button";
 import { getRarityCost, getRarityHex, getRaritySlug } from '../../../src/lib/helpers/nfts';
 
 export const HandleSearchPurchaseFlow = () => {
-  const { isPurchasing, twitter, handle } = useContext(HandleMintContext);
+  const { isPurchasing, twitterToken, handle } = useContext(HandleMintContext);
   const cost = getRarityCost(handle);
   const rarity = getRaritySlug(handle);
   const color = getRarityHex(handle);
@@ -18,21 +18,12 @@ export const HandleSearchPurchaseFlow = () => {
 
   const handleOnClick = async (e) => {
     e.preventDefault();
-    const token = await window.grecaptcha
-      .execute("6Ld0QUkcAAAAAN-_KvCv8R_qke8OYxotNJzIg2RP", { action: "submit" })
-      .then((token: string) => token);
-    const headers = {
-      "x-recaptcha": token,
-    };
 
-    if (twitter?.user) {
-      headers["x-twitter-credentials"] = JSON.stringify(twitter.credentials);
-    }
 
-    const res = await fetch("/.netlify/functions/mint", {
-      method: "POST",
-      headers,
-    });
+    // const res = await fetch("/.netlify/functions/mint", {
+    //   method: "POST",
+    //   headers,
+    // });
   };
 
   return (
