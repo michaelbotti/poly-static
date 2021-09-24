@@ -34,10 +34,7 @@ module.exports = {
       options: {
         isTSX: true,
         jsxPragma: `jsx`,
-        allExtensions: true,
-        typeRoots: [
-          './@types'
-        ]
+        allExtensions: true
       },
     },
     {

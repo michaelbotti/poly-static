@@ -10,8 +10,8 @@ export const getFirebase = async (): Promise<admin.app.App> => {
   const s3 = getS3();
   const res = await s3
     .getObject({
-      Bucket: process.env.MY_AWS_BUCKET || '',
-      Key: process.env.MY_AWS_FIREBASE_KEY || '',
+      Bucket: process.env.MY_AWS_BUCKET as string,
+      Key: process.env.MY_AWS_FIREBASE_KEY as string,
     })
     .promise();
 
