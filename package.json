@@ -38,7 +38,7 @@
     "develop": "gatsby develop",
     "netlify:dev": "netlify dev",
     "netlify:build": "netlify build",
-    "build": "gatsby build --verbose",
+    "build": "gatsby build NODE_OPTIONS='--max_old_space_size=4096'",
     "serve": "gatsby serve",
     "clean": "gatsby clean",
     "test": "echo \"Write tests! -> https://gatsby.dev/unit-testing\" && exit 1"
