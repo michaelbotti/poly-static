@@ -4,6 +4,7 @@ import SEO from "../components/seo";
 import Wallet from '../images/handle-wallet.svg';
 
 function IndexPage() {
+
   return (
     <>
       <SEO title="Home" />
@@ -19,7 +20,7 @@ function IndexPage() {
             <div className="md:w-2/3 mt-4">
               <p className="text-xl mb-8 md:pr-8">
                 Introducing <strong>custom wallet addresses</strong> for the Cardano blockchain. <strong>Secured entirely on-chain</strong>.
-              </p>              
+              </p>
               <a href="#more" className="text-dark-300 text-lg mt-8 inline-block inline-flex items-center">
                 Learn More
                 <svg className="svg-icon ml-2" viewBox="0 0 20 20">

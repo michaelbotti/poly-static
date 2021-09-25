@@ -1,6 +1,9 @@
 const tailwindConfig = require("./tailwind.config.js");
 
 module.exports = {
+  flags: {
+    LMDB_STORE: true
+  },
   siteMetadata: {
     title: `@handle`,
     description: `Introducing custom wallet addresses for the Cardano blockchain. Secured entirely on-chain.`,
@@ -10,7 +13,6 @@ module.exports = {
     `gatsby-plugin-netlify`,
     `gatsby-plugin-react-helmet`,
     `gatsby-plugin-layout`,
-    `gatsby-plugin-remove-fingerprints`,
     `gatsby-plugin-sharp`,
     {
       resolve: `gatsby-plugin-google-gtag`,
