@@ -2,7 +2,7 @@ import React, { useState, useEffect, useContext } from "react";
 
 import { AppContext } from "../context/app";
 
-export const useWalletAddress = (): [boolean, string] => {
+export const useWalletAddress = (): [boolean, string|null] => {
   const [walletAddr, setWalletAddr] = useState<string | null>(null);
   const [loadingWalletAddr, setLoadingWalletAddr] = useState<boolean>(false);
   const { isConnected } = useContext(AppContext);

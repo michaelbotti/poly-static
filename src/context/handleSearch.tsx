@@ -8,6 +8,12 @@ export interface ReservedHandlesType {
   spos: string[];
 }
 
+export interface CurrentSessionsType {
+  handle: string;
+  ip: string;
+  timestamp: string;
+}
+
 export interface ActiveSessionType {
   ip: string;
   handle: string;
@@ -22,8 +28,12 @@ export interface HandleMintContextType {
   twitterToken: string | null;
   setHandle: Dispatch<SetStateAction<string>>;
   reservedHandles: ReservedHandlesType | null;
+  currentSessions: CurrentSessionsType | null;
+  primed: boolean;
   isPurchasing: boolean;
+  setPrimed: Dispatch<SetStateAction<boolean>>;
   setReservedHandles: Dispatch<SetStateAction<ReservedHandlesType | null>>;
+  setCurrentSessions: Dispatch<SetStateAction<CurrentSessionsType | null>>;
   setHandleResponse: Dispatch<SetStateAction<HandleResponseBody | null>>;
   setTwitterToken: Dispatch<SetStateAction<string | null>>;
   setIsPurchasing: Dispatch<SetStateAction<boolean>>;
@@ -35,13 +45,17 @@ export const defaultState: HandleMintContextType = {
   handleResponse: null,
   isPurchasing: false,
   reservedHandles: null,
+  currentSessions: null,
   twitterToken: null,
+  primed: false,
   setHandleResponse: () => {},
   setFetching: () => {},
   setHandle: () => {},
   setIsPurchasing: () => {},
   setReservedHandles: () => {},
-  setTwitterToken: () => {}
+  setTwitterToken: () => {},
+  setPrimed: () => {},
+  setCurrentSessions: () => {}
 };
 
 export const HandleMintContext =

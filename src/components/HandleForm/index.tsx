@@ -1,0 +1,1 @@
+export { HandleSearchForm } from './HandleSearchForm';

@@ -10,6 +10,8 @@ module.exports = {
     `gatsby-plugin-netlify`,
     `gatsby-plugin-react-helmet`,
     `gatsby-plugin-layout`,
+    `gatsby-plugin-remove-fingerprints`,
+    `gatsby-plugin-sharp`,
     {
       resolve: `gatsby-plugin-google-gtag`,
       options: {

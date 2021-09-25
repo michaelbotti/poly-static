@@ -63,22 +63,6 @@ export const useSyncAvailableStatus = async (handle: string) => {
           await fetch(`/.netlify/functions/search`, { headers })
         ).json();
 
-        // Circumvent if reserved but not yet minted.
-        // const today = new Date();
-        // if (res.available && reservedTwitterUsernames.includes(handle.toLocaleLowerCase()) && today < RESERVE_EXPIRE_DATE) {
-        //   const day = await import('dayjs').then(module => module.default)
-        //   const relativeTime = await import('dayjs/plugin/relativeTime').then(module => module.default);
-        //   day.extend(relativeTime);
-
-        //   setFetching(false);
-        //   setHandleResponse({
-        //     available: false,
-        //     message: `Reserve status for this handle will expire ${day().to(RESERVE_EXPIRE_DATE)}.`,
-        //     twitter: true
-        //   });
-        //   return;
-        // }
-
         setFetching(false);
         setHandleResponse(res);
       })();

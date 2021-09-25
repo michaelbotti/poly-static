@@ -9,6 +9,7 @@ import { useSyncAvailableStatus } from '../../hooks/handle';
 import LogoMark from "../../images/logo-single.svg";
 import { HandleSearchConnectTwitter } from "./";
 import { Loader } from "../Loader";
+import { usePrimeMintingContext } from "../../lib/helpers/context";
 
 export const isValid = (handle: string) => !!handle.match(ALLOWED_CHAR) && handle.length < 15;
 
