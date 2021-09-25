@@ -1,4 +1,4 @@
-import React, { useState, useContext, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { PageProps, navigate, Link } from 'gatsby';
 
 // import { AppContext } from '../context/app';
@@ -10,11 +10,12 @@ import { Loader } from '../components/Loader';
 import SEO from "../components/seo";
 // import { HandleSearchReserveFlow, HandleSearchPurchaseFlow } from "../components/HandleSearch";
 
-function ReservePage({ location }: PageProps) {
+function SessionPage({ location }: PageProps) {
   const [hasSession, setHasSession] = useState<boolean>(false);
 
   // Pre-fetch state, ensure hot servers.
   useEffect(() => {
+    console.log('test');
     (async () => {
       if (!location.state) {
         setTimeout(() => {
@@ -62,4 +63,4 @@ function ReservePage({ location }: PageProps) {
   );
 }
 
-export default ReservePage;
+export default SessionPage;
