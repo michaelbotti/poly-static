@@ -12,21 +12,18 @@ export const usePrimeMintingContext = async () => {
 
   useEffect(() => {
     (async () => {
-      Promise.all([
-        fetch('/.netlify/functions/clean'),
-        fetch('/.netlify/functions/mint'),
-        fetch('/.netlify/functions/reservedHandles'),
-        fetch('/.netlify/functions/search'),
-        fetch('/.netlify/functions/session'),
-      ]).then(values => {
-        console.log(values);
-      })
-      .catch(e => console.log(e));
-
       const token = await requestToken();
       const headers = {
         [HEADER_APPCHECK]: token
       }
+
+      Promise.all([
+        fetch('/.netlify/functions/clean', { headers }).catch(),
+        fetch('/.netlify/functions/mint').catch(),
+        fetch('/.netlify/functions/reservedHandles').catch(),
+        fetch('/.netlify/functions/search').catch(),
+        fetch('/.netlify/functions/session').catch(),
+      ]).catch(e => console.log(e));
 
       // Retrieve reserved handle data store.
       const reservedHandlesRef = getReservedHandlesRef();

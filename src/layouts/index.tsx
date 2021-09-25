@@ -3,7 +3,7 @@ import React, { useState, useEffect, FC } from "react";
 import Header from "../components/header";
 import Form from '../components/mailchimp';
 import { AppContext, defaultState as appDefaultState } from '../context/app';
-import { HandleMintContext, defaultState as mintDefaultState, CurrentSessionsType } from '../context/handleSearch';
+import { HandleMintContext, defaultState as mintDefaultState, ActiveSessionType } from '../context/handleSearch';
 import { ReservedHandlesType } from "../context/handleSearch";
 import { HandleResponseBody } from "../lib/helpers/search";
 
@@ -17,7 +17,7 @@ const Layout: FC = ({ children }): JSX.Element => {
   const [twitterToken, setTwitterToken] = useState<string|null>(null);
   const [isPurchasing, setIsPurchasing] = useState<boolean>(false);
   const [reservedHandles, setReservedHandles] = useState<ReservedHandlesType|null>(null);
-  const [currentSessions, setCurrentSessions] = useState<CurrentSessionsType|null>(null);
+  const [currentSessions, setCurrentSessions] = useState<ActiveSessionType|null>(null);
   const [primed, setPrimed] = useState<boolean>(false);
 
   useEffect(() => {

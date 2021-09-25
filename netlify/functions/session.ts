@@ -1,4 +1,4 @@
-import jwt from "jsonwebtoken";
+import jwt, { decode } from "jsonwebtoken";
 import "cross-fetch/polyfill";
 import {
   Handler,
@@ -19,16 +19,20 @@ import { getS3, getFirebase, verifyAppCheck } from "../helpers";
 import { verifyTwitterUser } from "../helpers";
 import { ActiveSessionType, ReservedHandlesType } from "../../src/context/handleSearch";
 import {
-  getActiveSessionUnavailable,
-  getSessionCountUnavailable,
   HandleResponseBody,
 } from "../../src/lib/helpers/search";
+
+export interface SessionResponseBody {
+  message: string;
+  token?: string;
+  data?: jwt.JwtPayload
+}
 
 const unauthorizedResponse: HandlerResponse = {
   statusCode: 403,
   body: JSON.stringify({
     message: "Unauthorized.",
-  }),
+  } as SessionResponseBody),
 };
 
 const s3 = getS3();
@@ -86,7 +90,7 @@ const handler: Handler = async (
       statusCode: 403,
       body: JSON.stringify({
         message: "Unauthorized.",
-      }),
+      } as SessionResponseBody),
     };
   }
 
@@ -145,13 +149,14 @@ const handler: Handler = async (
     : null;
 
   // Increment IP session.
+  const sessionStart = Date.now();
   await database.ref('/activeSessions').transaction((currentValue) => {
     if (!currentValue) {
       return [
         {
           ip: headerIp,
           handle,
-          timestamp: Date.now()
+          timestamp: sessionStart
         }
       ]
     }
@@ -161,22 +166,24 @@ const handler: Handler = async (
       {
         ip: headerIp,
         handle,
-        timestamp: Date.now()
+        timestamp: sessionStart
       }
     ]
   });
 
   // Add handle to sessions.
-  const token = jwt.sign({ headerHandle }, secret as jwt.Secret, {
-    expiresIn: "10 minutes",
-  });
+  const offsetSeconds = Math.floor(((Date.now() - sessionStart) / 1000));
+  const expiresIn = Math.floor((600 - offsetSeconds)); // 10 minutes from session start.
+  const token = jwt.sign({ handle: headerHandle }, secret as jwt.Secret, { expiresIn });
+  console.log(token);
 
   return {
     statusCode: 200,
     body: JSON.stringify({
       message: "Success! Session initiated.",
-      token
-    }),
+      token,
+      data: decode(token)
+    } as SessionResponseBody),
   };
 };
 
