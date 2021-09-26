@@ -1,14 +1,12 @@
 import { useContext, useEffect } from 'react';
 import { onValue } from 'firebase/database';
 
-import { AppContext } from '../../context/app';
 import { HandleMintContext } from '../../context/handleSearch';
 import { HEADER_APPCHECK } from '../constants';
-import { getActiveSessionsRef, getReservedHandlesRef, requestToken } from '../firebase';
+import { getReservedHandlesRef, requestToken } from '../firebase';
 
 export const usePrimeMintingContext = async () => {
-  const { setErrors } = useContext(AppContext);
-  const { setReservedHandles, setCurrentSessions, setPrimed } = useContext(HandleMintContext);
+  const { setReservedHandles, setPrimed } = useContext(HandleMintContext);
 
   useEffect(() => {
     (async () => {
@@ -33,22 +31,12 @@ export const usePrimeMintingContext = async () => {
         }
       });
 
-      const currentSessions = getActiveSessionsRef();
-      onValue(currentSessions, (snapshot) => {
-        if (snapshot) {
-          setCurrentSessions(snapshot.val())
-        }
-      });
-
       if (!localStorage.getItem('ADAHANDLE_IP')) {
         const { ip } = await (await fetch('/.netlify/functions/ip', { headers })).json();
         localStorage.setItem('ADAHANDLE_IP', ip);
       }
 
       setPrimed(true);
-      // setErrors([
-      //   'Something went wrong. Please refresh and try again.'
-      // ]);
     })();
   }, []);
 }

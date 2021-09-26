@@ -46,7 +46,7 @@ const Header: FC<HeaderProps> = ({ className }) => {
         <Link to="/">
           <h1 className="flex items-center text-dark-100 no-underline">
             <span className="sr-only">$handle</span>
-            <Logo className="w-20 mr-1" />
+            <Logo />
           </h1>
         </Link>
 

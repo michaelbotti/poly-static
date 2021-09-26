@@ -17,7 +17,6 @@ const Layout: FC = ({ children }): JSX.Element => {
   const [twitterToken, setTwitterToken] = useState<string|null>(null);
   const [isPurchasing, setIsPurchasing] = useState<boolean>(false);
   const [reservedHandles, setReservedHandles] = useState<ReservedHandlesType|null>(null);
-  const [currentSessions, setCurrentSessions] = useState<ActiveSessionType|null>(null);
   const [primed, setPrimed] = useState<boolean>(false);
 
   useEffect(() => {
@@ -45,7 +44,6 @@ const Layout: FC = ({ children }): JSX.Element => {
         twitterToken,
         isPurchasing,
         reservedHandles,
-        currentSessions,
         primed,
         setFetching,
         setHandle,
@@ -53,7 +51,6 @@ const Layout: FC = ({ children }): JSX.Element => {
         setTwitterToken,
         setIsPurchasing,
         setReservedHandles,
-        setCurrentSessions,
         setPrimed,
       }}>
         {errors.length ? (

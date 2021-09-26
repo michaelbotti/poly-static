@@ -3,16 +3,17 @@ import React, {
   useContext,
   useRef,
   useEffect,
-  useState,
-  useMemo,
-  useCallback,
+  useState
 } from "react";
 import { useDebounce } from "use-debounce";
 import { Link, navigate } from "gatsby";
+import Cookie from 'js-cookie';
+import dayjs from 'dayjs';
+import relativeTime from 'dayjs/plugin/relativeTime';
+dayjs.extend(relativeTime);
 
 import { requestToken } from "../../lib/firebase";
 import {
-  ALLOWED_CHAR,
   HEADER_APPCHECK,
   HEADER_HANDLE,
   HEADER_IP_ADDRESS,
@@ -20,25 +21,22 @@ import {
   HEADER_TWITTER_ACCESS_TOKEN,
   RECAPTCHA_SITE_KEY,
 } from "../../../src/lib/constants";
-import {
-  ActiveSessionType,
-  HandleMintContext,
-} from "../../../src/context/handleSearch";
+import { HandleMintContext } from "../../../src/context/handleSearch";
+import { isValid } from "../../lib/helpers/nfts";
 import { useSyncAvailableStatus } from "../../hooks/handle";
 import LogoMark from "../../images/logo-single.svg";
 import { HandleSearchConnectTwitter } from "./";
 import { Loader } from "../Loader";
-import { hasSessionDataFromStorage } from "../../pages/session";
-
-export const isValid = (handle: string) =>
-  !!handle.match(ALLOWED_CHAR) && handle.length < 15;
+import { getSessionDataCookie } from "../../lib/helpers/session";
+import { SESSION_KEY } from "../../lib/helpers/session";
+import { SessionResponseBody } from "../../../netlify/functions/session";
+import { HandleResponseBody } from "../../lib/helpers/search";
 
 export const HandleSearchReserveFlow = ({ className = "", ...rest }) => {
   const {
     fetching,
     handleResponse,
     setHandleResponse,
-    currentSessions,
     handle,
     setHandle,
     twitterToken,
@@ -46,6 +44,9 @@ export const HandleSearchReserveFlow = ({ className = "", ...rest }) => {
   const [fetchingSession, setFetchingSession] = useState<boolean>(false);
   const [debouncedHandle] = useDebounce(handle, 600);
   const handleInputRef = useRef(null);
+
+  const currentSessions = getSessionDataCookie();
+  const nextIndex = currentSessions.length + 1;
 
   useSyncAvailableStatus(debouncedHandle);
 
@@ -95,12 +96,21 @@ export const HandleSearchReserveFlow = ({ className = "", ...rest }) => {
     setFetchingSession(true);
     const session = await fetch("/.netlify/functions/session", { headers });
     const sessionJSON = await session.json();
-    if (sessionJSON.token) {
+    if (sessionJSON.data) {
       setHandle("");
-      navigate("/session", { state: sessionJSON });
+      const res = Cookie.set(
+        `${SESSION_KEY}_${nextIndex}`,
+        JSON.stringify(sessionJSON),
+        {
+          sameSite: 'strict',
+          secure: true,
+          expires: new Date(Math.floor(sessionJSON.data.exp * 1000))
+        }
+      )
+      console.log(res);
+      navigate("/sessions", { state: { sessionIndex: nextIndex }});
     } else {
-      console.log(sessionJSON);
-      setHandleResponse(sessionJSON);
+      setHandleResponse(sessionJSON as HandleResponseBody);
       setFetchingSession(false);
     }
   };
@@ -109,21 +119,6 @@ export const HandleSearchReserveFlow = ({ className = "", ...rest }) => {
   useEffect(() => {
     (handleInputRef?.current as HTMLInputElement | null)?.focus();
   }, []);
-
-  const hasActiveSession = useMemo(hasSessionDataFromStorage, [fetchingSession]);
-  const userCurrentSessions = useMemo(() => {
-    let sessions = [];
-    (async () => {
-      let ip = localStorage.getItem("ADAHANDLE_IP");
-      if (!ip) {
-        ip = await fetch("/.netlify/functions/ip").then((res) => res.json());
-      }
-      sessions = currentSessions?.filter(
-        (session: ActiveSessionType) => session.ip === ip
-      );
-    })();
-    return sessions;
-  }, [currentSessions]);
 
   if (fetchingSession) {
     return (
@@ -139,53 +134,60 @@ export const HandleSearchReserveFlow = ({ className = "", ...rest }) => {
       <h2 className="font-bold text-3xl text-primary-100 mb-2">
         Securing Your Handle
       </h2>
-      <p className="text-lg">
-        Purchasing your own handle allows you to easily receive Cardano payments
-        just by sharing your handle name, or by sharing your unique link.
-      </p>
-      <p className="text-lg">
-        For more information, see{" "}
-        <Link className="text-primary-100" to={"/how-it-works"}>
-          How it Works
-        </Link>
-        .
-      </p>
+      {currentSessions.length > 0
+        ? (
+          <>
+            <p className="text-lg">
+              You have{" "}
+              <Link to="/sessions" className="text-primary-100">
+                active sessions
+              </Link>{" "}
+              in progress! In order to make distributing handles as fair as possible, we're limiting{" "}
+              how many you can purchase at a time. Don't worry, it goes fast.
+            </p>
+          </>
+        ) : (
+          <>
+            <p className="text-lg">
+              Purchasing your own handle allows you to easily receive Cardano payments
+              just by sharing your handle name, or by sharing your unique link.
+            </p>
+            <p className="text-lg">
+              For more information, see{" "}
+              <Link className="text-primary-100" to={"/how-it-works"}>
+                How it Works
+              </Link>
+              .
+            </p>
+          </>
+        )
+      }
+
       <hr className="w-12 border-dark-300 border-2 block my-8" />
-      {hasActiveSession && userCurrentSessions?.length < 3 && (
+
+      {currentSessions.length === 3 ? (
         <>
           <p className="text-lg">
-            You have an{" "}
-            <Link to="/session" className="text-primary-100">
-              active session
-            </Link>{" "}
-            in progress!
+            <strong>Wow, you got speed!</strong> You're clearly a pro,{" "}
+            but let's slow down. Try again in about {
+              dayjs(
+                currentSessions
+                  .sort((a, b) => a.data.exp < b.data.exp ? -1 : 1)
+                  [0]
+                  .data.exp * 1000
+              ).fromNow(true)
+            }.
           </p>
-          <p>
-            If you want, you can start {3 - userCurrentSessions?.length} more.
-          </p>
-          <a
-            href="/mint"
-            target="_blank"
-            className="inline-block cursor-pointer bg-primary-200 text-dark-100 rounded-lg p-6 mt-12 font-bold text-dark-100"
-          >
-            Open a New Session
-          </a>
+          <p className="text-lg"><Link className="text-primary-100" to="/sessions">See Active Sessions &rarr;</Link></p>
         </>
-      )}
-      {hasActiveSession && userCurrentSessions?.length > 2 && (
-        <>
-          <p className="text-lg">Well, aren't you ambitious!</p>
-          <p>
-            To make things as fair as possible, all users are limited to 3
-            active sessions. Please wait till one closes and try again later.
-            Stay awesome!
-          </p>
-        </>
-      )}
-
-      {!hasActiveSession && userCurrentSessions?.length < 3 && (
+      ) : (
         <>
           <form {...rest} onSubmit={handleOnSubmit}>
+            {currentSessions.length !== 3 && (
+              <p className="text-lg">
+                <strong>You have {3 - currentSessions.length} session{2 === currentSessions.length ? '' : 's'} left.</strong>
+              </p>
+            )}
             <div className="relative">
               <img
                 src={LogoMark}
@@ -253,9 +255,11 @@ export const HandleSearchReserveFlow = ({ className = "", ...rest }) => {
             )}
           </form>
           <p className="text-sm mt-8">
-            Once you start checking out,{" "}
-            <strong>your session will be reserved for 10 minutes</strong>. DO
-            NOT close your window, or your session will expire.
+            Once you start a session,{" "}
+            <strong>it will be active for approximately 10 minutes</strong>.{" "}
+            We use cookies and other means to ensure this is hard to get around.{" "}
+            You get a max of up to 3 sessions at any one time. If you have questions,{" "}
+            <Link className="text-primary-100" to="/support">send us an email</Link>.
           </p>
         </>
       )}

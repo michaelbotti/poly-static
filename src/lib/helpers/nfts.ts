@@ -1,7 +1,12 @@
+import { ALLOWED_CHAR } from "../constants";
+
 export type RarityType = "Legendary" | "Ultra Rare" | "Rare" | "Common";
 export type RarityColorTypes = "white" | "blue" | "green" | "red";
 export type RarityCostTypes = 750 | 450 | 100 | 10;
 export type RarityHexTypes = "#ffffff" | "#48ACF0" | "#0CD15B" | "#DF3737";
+
+export const isValid = (handle: string) =>
+  !!handle.match(ALLOWED_CHAR) && handle.length < 15;
 
 export const normalizeNFTHandle = (handle: string): string => handle.toLowerCase();
 

@@ -12,20 +12,22 @@ import {
   HEADER_HANDLE,
   HEADER_RECAPTCHA,
   HEADER_TWITTER_ACCESS_TOKEN,
-  HEADER_IP_ADDRESS
+  HEADER_IP_ADDRESS,
 } from "../../src/lib/constants";
-import { normalizeNFTHandle } from "../../src/lib/helpers/nfts";
+import { isValid, normalizeNFTHandle } from "../../src/lib/helpers/nfts";
 import { getS3, getFirebase, verifyAppCheck } from "../helpers";
 import { verifyTwitterUser } from "../helpers";
-import { ActiveSessionType, ReservedHandlesType } from "../../src/context/handleSearch";
 import {
-  HandleResponseBody,
-} from "../../src/lib/helpers/search";
+  ActiveSessionType,
+  ReservedHandlesType,
+} from "../../src/context/handleSearch";
+import { HandleResponseBody } from "../../src/lib/helpers/search";
 
 export interface SessionResponseBody {
   message: string;
+  handle: string;
   token?: string;
-  data?: jwt.JwtPayload
+  data?: jwt.JwtPayload;
 }
 
 const unauthorizedResponse: HandlerResponse = {
@@ -85,7 +87,11 @@ const handler: Handler = async (
   const headerTwitter = headers[HEADER_TWITTER_ACCESS_TOKEN];
   const headerIp = headers[HEADER_IP_ADDRESS];
 
-  if (!headerHandle || !headerAppCheck || !headerRecaptcha || !headerIp) {
+  // Normalize and validate handle.
+  const handle = headerHandle && normalizeNFTHandle(headerHandle);
+  const validHandle = handle && isValid(handle);
+
+  if (!headerAppCheck || !headerRecaptcha || !headerIp) {
     return {
       statusCode: 403,
       body: JSON.stringify({
@@ -94,17 +100,26 @@ const handler: Handler = async (
     };
   }
 
+  if (!handle || !validHandle) {
+    return {
+      statusCode: 400,
+      body: JSON.stringify({
+        message: 'Invalid handle format.'
+      } as SessionResponseBody)
+    }
+  }
+
   // Anti-bot.
   const reCaptchaValidated = await passesRecaptcha(headerRecaptcha, headerIp);
   if (!reCaptchaValidated) {
-    console.log('failed recaptcha');
+    console.log("failed recaptcha");
     return unauthorizedResponse;
   }
 
   // Verified App.
   const appCheckValidated = await verifyAppCheck(headerAppCheck);
   if (!appCheckValidated) {
-    console.log('failed app check');
+    console.log("failed app check");
     return unauthorizedResponse;
   }
 
@@ -112,28 +127,36 @@ const handler: Handler = async (
   if (headerTwitter) {
     const exp = headerTwitter && (await verifyTwitterUser(headerTwitter));
     if (!exp || exp > Date.now()) {
-      console.log('failed twitter check');
+      console.log("failed twitter check");
       return unauthorizedResponse;
     }
   }
 
-  // Normalize and set session handles.
-  const handle = normalizeNFTHandle(headerHandle);
-
   // Get session data.
   const database = (await getFirebase()).database();
-  const reservedhandles = await (await database.ref('/reservedHandles').once('value', snapshot => snapshot.val())).val() as ReservedHandlesType;
-  const activeSessions = await (await database.ref('/activeSessions').once('value', snapshot => snapshot.val())).val() as ActiveSessionType[];
-  const ipSessionCount = activeSessions?.filter(({ ip }) => ip === headerIp).length;
+  const reservedhandles = (await (
+    await database
+      .ref("/reservedHandles")
+      .once("value", (snapshot) => snapshot.val())
+  ).val()) as ReservedHandlesType;
+  const activeSessions = (await (
+    await database
+      .ref("/activeSessions")
+      .once("value", (snapshot) => snapshot.val())
+  ).val()) as ActiveSessionType[];
+  const ipSessionCount = activeSessions?.filter(
+    ({ ip }) => ip === headerIp
+  ).length;
 
   const { manual, spos } = reservedhandles;
   if (
     manual.includes(handle) ||
     spos.includes(handle) ||
-    activeSessions?.filter(({ handle }) => handle === headerHandle).length > 0 ||
+    activeSessions?.filter(({ handle }) => handle === headerHandle).length >
+      0 ||
     ipSessionCount >= 3
   ) {
-    console.log('failed reserved or spo');
+    console.log("failed reserved or spo");
     return unauthorizedResponse;
   }
 
@@ -150,15 +173,15 @@ const handler: Handler = async (
 
   // Increment IP session.
   const sessionStart = Date.now();
-  await database.ref('/activeSessions').transaction((currentValue) => {
+  await database.ref("/activeSessions").transaction((currentValue) => {
     if (!currentValue) {
       return [
         {
           ip: headerIp,
           handle,
-          timestamp: sessionStart
-        }
-      ]
+          timestamp: sessionStart,
+        },
+      ];
     }
 
     return [
@@ -166,23 +189,30 @@ const handler: Handler = async (
       {
         ip: headerIp,
         handle,
-        timestamp: sessionStart
-      }
-    ]
+        timestamp: sessionStart,
+      },
+    ];
   });
 
   // Add handle to sessions.
-  const offsetSeconds = Math.floor(((Date.now() - sessionStart) / 1000));
-  const expiresIn = Math.floor((600 - offsetSeconds)); // 10 minutes from session start.
-  const token = jwt.sign({ handle: headerHandle }, secret as jwt.Secret, { expiresIn });
-  console.log(token);
+  const offsetSeconds = Math.floor((Date.now() - sessionStart) / 1000);
+  const expiresIn = Math.floor(600 - offsetSeconds); // 10 minutes from session start.
+  const token = jwt.sign(
+    { handle: headerHandle },
+    secret as jwt.Secret,
+    { expiresIn }
+  );
 
   return {
     statusCode: 200,
+    headers: {
+
+    },
     body: JSON.stringify({
       message: "Success! Session initiated.",
       token,
-      data: decode(token)
+      handle,
+      data: decode(token),
     } as SessionResponseBody),
   };
 };
