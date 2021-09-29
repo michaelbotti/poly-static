@@ -8,7 +8,7 @@ interface LogoProps {
 export const Logo: FC<LogoProps> = ({ className = '', labeledBy }): JSX.Element => (
   <>
     <svg
-      aria-labelledBy={labeledBy}
+      aria-labelledby={labeledBy}
       className={`dark:block hidden ${className}`}
       viewBox="0 0 1189 245"
       fill="none"
@@ -41,7 +41,7 @@ export const Logo: FC<LogoProps> = ({ className = '', labeledBy }): JSX.Element 
       />
     </svg>
     <svg
-      aria-labelledBy={labeledBy}
+      aria-labelledby={labeledBy}
       className={`dark:hidden ${className}`}
       viewBox="0 0 1189 245"
       fill="none"
