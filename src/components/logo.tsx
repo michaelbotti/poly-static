@@ -1,11 +1,11 @@
 import React, { CSSProperties, FC } from "react";
 
 interface LogoProps {
-  className: string;
+  className?: string;
   style?: CSSProperties;
 }
 
-export const Logo: FC<LogoProps> = ({ className, ...rest }): JSX.Element => {
+export const Logo: FC<LogoProps> = ({ className = 'w-20 mr-2', ...rest }): JSX.Element => {
   return (
     <>
       <svg

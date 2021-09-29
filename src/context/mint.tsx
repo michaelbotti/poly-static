@@ -1,6 +1,6 @@
 import { createContext, Dispatch, SetStateAction } from "react";
 
-import { HandleResponseBody } from "../../src/lib/helpers/search";
+import { HandleResponseBody } from "../lib/helpers/search";
 
 export interface ReservedHandlesType {
   twitter: string[];

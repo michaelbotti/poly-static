@@ -16,9 +16,8 @@ export const getSessionDataCookie = (): SessionResponseBody[] => {
 
 export const getSessionDataFromState = (state: SessionResponseBody | null): false | SessionResponseBody => {
   if (
-    !state?.handle ||
-    !state?.token ||
-    !state?.data
+    !state?.payload ||
+    !state?.token
   ) {
     return false;
   }

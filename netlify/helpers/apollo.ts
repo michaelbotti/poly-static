@@ -49,14 +49,7 @@ export const queryHandleOnchain = async (handle: string): Promise<QueryHandleOnc
     variables: {
       id: fingerprint,
     },
-    query: gql`
-      query assets($id: String) {
-        assets(limit: 1, where: { fingerprint: { _eq: $id } }) {
-          policyId
-          assetName
-        }
-      }
-    `,
+    query: GET_ASSET_LOCATION,
   });
 
   const exists = !!(0 < assets.length && assets[0].policyId && assets[0].assetName);
@@ -70,3 +63,59 @@ export const queryHandleOnchain = async (handle: string): Promise<QueryHandleOnc
 
   return data;
 };
+
+export const PROTOCOL_PARAMETERS = gql`
+  query ProtocolParams {
+    cardano {
+      tip {
+        slotNo
+      }
+      currentEpoch {
+        protocolParams {
+          minFeeA
+          minFeeB
+          minUTxOValue
+          poolDeposit
+          keyDeposit
+          maxTxSize
+          maxValSize
+        }
+      }
+    }
+  }
+`
+
+export interface ProtocolParametersResponse {
+  cardano: {
+    tip: {
+      slotNo: number;
+    },
+    currentEpoch: {
+      protocolParams: {
+        minFeeA: number;
+        minFeeB: number;
+        minUTxOValue: number;
+        poolDeposit: number;
+        keyDeposit: number;
+        maxTxSize: number;
+        maxValSize: string;
+      }
+    }
+  }
+}
+
+export const GET_ASSET_LOCATION = gql`
+  query GetAssetLocation ($id: String) {
+    assets(
+      limit: 1,
+      where: {
+        fingerprint: {
+          _eq: $id
+        }
+      }
+    ) {
+      policyId
+      assetName
+    }
+  }
+`

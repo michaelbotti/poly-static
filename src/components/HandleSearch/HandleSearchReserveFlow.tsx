@@ -21,15 +21,15 @@ import {
   HEADER_TWITTER_ACCESS_TOKEN,
   RECAPTCHA_SITE_KEY,
 } from "../../../src/lib/constants";
-import { HandleMintContext } from "../../../src/context/handleSearch";
+import { HandleMintContext } from "../../context/mint";
 import { isValid } from "../../lib/helpers/nfts";
-import { useSyncAvailableStatus } from "../../hooks/handle";
+import { useSyncAvailableStatus } from "../../lib/hooks/handle";
 import LogoMark from "../../images/logo-single.svg";
 import { HandleSearchConnectTwitter } from "./";
 import { Loader } from "../Loader";
+import { SessionResponseBody } from '../../../netlify/functions/session';
 import { getSessionDataCookie } from "../../lib/helpers/session";
 import { SESSION_KEY } from "../../lib/helpers/session";
-import { SessionResponseBody } from "../../../netlify/functions/session";
 import { HandleResponseBody } from "../../lib/helpers/search";
 
 export const HandleSearchReserveFlow = ({ className = "", ...rest }) => {
@@ -71,6 +71,10 @@ export const HandleSearchReserveFlow = ({ className = "", ...rest }) => {
   const handleOnSubmit = async (e: FormEvent) => {
     e.preventDefault();
 
+    // Fire up wallet end-points.
+    fetch('/.netlify/functions/wallet-address');
+    fetch('/.netlify/functions/wallet-mint');
+
     const appCheckToken = await requestToken();
     const recaptchaToken: string = await window.grecaptcha.ready(() =>
       window.grecaptcha.execute(
@@ -104,13 +108,13 @@ export const HandleSearchReserveFlow = ({ className = "", ...rest }) => {
         {
           sameSite: 'strict',
           secure: true,
-          expires: new Date(Math.floor(sessionJSON.data.exp * 1000))
+          expires: new Date(Math.floor(sessionJSON.data.payload.exp * 1000))
         }
       )
       console.log(res);
       navigate("/sessions", { state: { sessionIndex: nextIndex }});
     } else {
-      setHandleResponse(sessionJSON as HandleResponseBody);
+      setHandleResponse(sessionJSON);
       setFetchingSession(false);
     }
   };

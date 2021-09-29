@@ -1,11 +1,11 @@
-import jwt, { decode } from "jsonwebtoken";
-import "cross-fetch/polyfill";
 import {
   Handler,
   HandlerEvent,
   HandlerContext,
-  HandlerResponse,
+  HandlerResponse
 } from "@netlify/functions";
+import jwt, { decode } from "jsonwebtoken";
+import "cross-fetch/polyfill";
 
 import {
   HEADER_APPCHECK,
@@ -13,21 +13,22 @@ import {
   HEADER_RECAPTCHA,
   HEADER_TWITTER_ACCESS_TOKEN,
   HEADER_IP_ADDRESS,
+  HEADER_AUTH_TOKEN,
 } from "../../src/lib/constants";
-import { isValid, normalizeNFTHandle } from "../../src/lib/helpers/nfts";
-import { getS3, getFirebase, verifyAppCheck } from "../helpers";
-import { verifyTwitterUser } from "../helpers";
 import {
   ActiveSessionType,
   ReservedHandlesType,
-} from "../../src/context/handleSearch";
+} from "../../src/context/mint";
+import { isValid, normalizeNFTHandle } from "../../src/lib/helpers/nfts";
+import { getFirebase, verifyAppCheck, getSecret } from "../helpers";
+import { verifyTwitterUser } from "../helpers";
 import { HandleResponseBody } from "../../src/lib/helpers/search";
 
 export interface SessionResponseBody {
   message: string;
-  handle: string;
-  token?: string;
-  data?: jwt.JwtPayload;
+  token: string;
+  address: string;
+  data: jwt.JwtPayload;
 }
 
 const unauthorizedResponse: HandlerResponse = {
@@ -36,8 +37,6 @@ const unauthorizedResponse: HandlerResponse = {
     message: "Unauthorized.",
   } as SessionResponseBody),
 };
-
-const s3 = getS3();
 
 /**
  * Verifies against ReCaptcha.
@@ -160,18 +159,9 @@ const handler: Handler = async (
     return unauthorizedResponse;
   }
 
-  const res = await s3
-    .getObject({
-      Bucket: process.env.MY_AWS_BUCKET || "",
-      Key: process.env.MY_AWS_JWT_SECRET_KEY || "",
-    })
-    .promise();
+  const secret = await getSecret();
 
-  const secret: jwt.Secret | null = res?.Body
-    ? res.Body.toString("utf-8")
-    : null;
-
-  // Increment IP session.
+  // Save interanl session.
   const sessionStart = Date.now();
   await database.ref("/activeSessions").transaction((currentValue) => {
     if (!currentValue) {
@@ -194,14 +184,21 @@ const handler: Handler = async (
     ];
   });
 
-  // Add handle to sessions.
+  // Sign token.
   const offsetSeconds = Math.floor((Date.now() - sessionStart) / 1000);
   const expiresIn = Math.floor(600 - offsetSeconds); // 10 minutes from session start.
   const token = jwt.sign(
-    { handle: headerHandle },
+    { handle },
     secret as jwt.Secret,
     { expiresIn }
-  );
+    );
+
+  // Get new payment address.
+  const { address } = await fetch(`${process.env.URL}/.netlify/functions/wallet-address`, {
+    headers: {
+      [HEADER_AUTH_TOKEN]: token
+    }
+  }).then(res => res.json());
 
   return {
     statusCode: 200,
@@ -211,8 +208,8 @@ const handler: Handler = async (
     body: JSON.stringify({
       message: "Success! Session initiated.",
       token,
-      handle,
-      data: decode(token),
+      address,
+      data: decode(token, { complete: true } )
     } as SessionResponseBody),
   };
 };

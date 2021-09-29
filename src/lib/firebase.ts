@@ -46,19 +46,13 @@ export const getReservedHandlesRef = () => {
   return dbRef;
 }
 
-let token: string;
 export const requestToken = async (): Promise<string> => {
-  if (token) {
-    return token;
-  }
-
   const app = getFirebase();
   const appCheck = initializeAppCheck(app, {
       provider: new ReCaptchaV3Provider(RECAPTCHA_SITE_KEY),
       isTokenAutoRefreshEnabled: true
   });
 
-  const { token: newToken } = await getToken(appCheck, false);
-  token = newToken;
+  const { token } = await getToken(appCheck, false);
   return token;
 }

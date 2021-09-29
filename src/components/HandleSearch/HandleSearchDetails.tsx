@@ -1,6 +1,6 @@
 import React from "react";
 import { useContext } from "react";
-import { HandleMintContext } from "../../../src/context/handleSearch";
+import { HandleMintContext } from "../../context/mint";
 import { getRarityCost, getRarityHex, getRaritySlug } from '../../../src/lib/helpers/nfts';
 
 export const HandleDetails = (): JSX.Element => {

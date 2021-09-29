@@ -1,6 +1,6 @@
 import { useContext } from "react";
 import { AdditionalUserInfo } from "firebase/auth";
-import { HandleMintContext } from "../../src/context/handleSearch";
+import { HandleMintContext } from "../../context/mint";
 
 export const useTwitter = (): [
   () => Promise<boolean>

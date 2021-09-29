@@ -1,8 +1,8 @@
 import { ALLOWED_CHAR } from "../constants";
 
-export type RarityType = "Legendary" | "Ultra Rare" | "Rare" | "Common";
+export type RarityType = "Legendary" | "Ultra Rare" | "Rare" | "Common" | "Basic";
 export type RarityColorTypes = "white" | "blue" | "green" | "red";
-export type RarityCostTypes = 750 | 450 | 100 | 10;
+export type RarityCostTypes = null | 500 | 100 | 50 | 10;
 export type RarityHexTypes = "#ffffff" | "#48ACF0" | "#0CD15B" | "#DF3737";
 
 export const isValid = (handle: string) =>
@@ -63,12 +63,14 @@ export const getRarityCost = (handle: string): RarityCostTypes => {
   const rarity = getRarityFromLength(handle.length);
   switch (rarity) {
     case "Legendary":
-      return 750;
+      return null;
     case "Ultra Rare":
-      return 450;
+      return 500;
     case "Rare":
       return 100;
     case "Common":
+      return 50;
+    case "Basic":
       return 10;
   }
 };

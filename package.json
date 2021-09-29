@@ -5,9 +5,8 @@
   "author": "Calvin Koepke <calvin@adahandle.com",
   "dependencies": {
     "@apollo/client": "^3.4.13",
-    "@emurgo/cardano-serialization-lib-asmjs": "^9.0.0",
+    "@emurgo/cardano-serialization-lib-nodejs": "^9.1.0",
     "aws-sdk": "^2.990.0",
-    "buffer": "^6.0.3",
     "cross-fetch": "^3.1.4",
     "dayjs": "^1.10.7",
     "firebase": "^9.0.1",
@@ -24,6 +23,7 @@
     "jsonwebtoken": "^8.5.1",
     "lmdb-store": "^1.6.8",
     "react": "^17.0.2",
+    "react-apollo": "^3.1.5",
     "react-countdown": "^2.3.2",
     "react-dom": "^17.0.2",
     "react-helmet": "^6.1.0",

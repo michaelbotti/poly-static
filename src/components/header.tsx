@@ -1,10 +1,7 @@
 import { Link } from "gatsby";
 import React, { useState, FC } from "react";
-import { useContext } from "react";
-import { AppContext } from "../context/app";
 
 import Logo from './logo';
-import WalletButton from "./WalletButton";
 
 interface HeaderProps {
   className?: string;
@@ -37,7 +34,6 @@ const navItems: NavItem[] = [
 ];
 
 const Header: FC<HeaderProps> = ({ className }) => {
-  const { isConnected } = useContext(AppContext);
   const [isExpanded, toggleExpansion] = useState<boolean>(false);
 
   return (
@@ -87,7 +83,6 @@ const Header: FC<HeaderProps> = ({ className }) => {
             })}
           </nav>
         </div>
-        {'undefined' !== typeof window && window.location.pathname === '/mint' && isConnected && <WalletButton />}
       </div>
     </header>
   );

@@ -1,7 +1,7 @@
 import React, { useContext, useState } from "react";
-import { HandleMintContext } from "../../../src/context/handleSearch";
+import { HandleMintContext } from "../../context/mint";
 
-import { useTwitter } from "../../hooks/twitter";
+import { useTwitter } from "../../lib/hooks/twitter";
 
 export const HandleSearchConnectTwitter = () => {
   const [isConnecting, setIsConnecting] = useState<boolean>(false);

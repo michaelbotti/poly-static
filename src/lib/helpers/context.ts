@@ -1,7 +1,7 @@
 import { useContext, useEffect } from 'react';
 import { onValue } from 'firebase/database';
 
-import { HandleMintContext } from '../../context/handleSearch';
+import { HandleMintContext } from '../../context/mint';
 import { HEADER_APPCHECK } from '../constants';
 import { getReservedHandlesRef, requestToken } from '../firebase';
 
