@@ -5,9 +5,17 @@ import {
   HandlerResponse,
 } from "@netlify/functions";
 import "cross-fetch/polyfill";
+import gql from "graphql-tag";
+import { JwtPayload } from "jsonwebtoken";
 
 import { HEADER_APPCHECK } from "../../src/lib/constants";
 import { verifyAppCheck, getApolloClient } from "../helpers";
+
+interface AccessResponseBody {
+  access: boolean;
+  token?: string;
+  payload?: JwtPayload
+}
 
 const handler: Handler = async (
   event: HandlerEvent,
@@ -29,17 +37,22 @@ const handler: Handler = async (
     }
   }
 
-  const query = JSON.parse(body);
+  let access = false;
+  const { load } = await fetch(`${process.env.URL}/.netlify/functions/chain-load`, {
+    headers: { [HEADER_APPCHECK]: headers[HEADER_APPCHECK] }
+  }).then(res => res.json());
 
-  const apolloClient = getApolloClient();
-  const { data } = await apolloClient.query({
-    ...query,
-    fetchPolicy: 'no-cache'
-  });
+  if (load < .60) {
+    access = true;
+  }
+
+  const res: AccessResponseBody = {
+    access
+  };
 
   return {
     statusCode: 200,
-    body: JSON.stringify(data),
+    body: JSON.stringify(res)
   };
 };
 
