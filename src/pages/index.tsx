@@ -47,8 +47,8 @@ function IndexPage() {
       <section id="more" className="bg-dark-100 px-16 md:px-0">
         <section className="z-10 relative w-full max-w-4xl px-4 pt-4 pb-8 mx-auto md:px-8 md:pt-16">
           <h2 className="text-white text-4xl font-bold leading-tight text-center">Partners</h2>
-          <div className="grid grid-cols-12 gap-4 placement-content-center mt-8 block">
-            <a href="https://maladex.com" className="col-span-4 md:col-span-2 col-start-6" rel="nofollow" target="_blank">
+          <div className="flex mt-8 justify-center align-center">
+            <a href="https://maladex.com" className="block w-48" rel="nofollow" target="_blank">
               <img className="w-full" src={Maladex} alt="Maladex" />
             </a>
           </div>
