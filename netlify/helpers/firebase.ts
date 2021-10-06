@@ -25,7 +25,7 @@ export const getFirebase = async (): Promise<admin.app.App> => {
   firebaseApp = admin.initializeApp({
     credential: admin.credential.cert(credentials),
     databaseURL: 'https://ada-handle-reserve-default-rtdb.firebaseio.com/'
-  });
+  }, 'adahandle-client');
 
   return firebaseApp;
 };

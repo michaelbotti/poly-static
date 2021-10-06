@@ -92,6 +92,11 @@ export const HandleSearchReserveFlow = ({ className = "", ...rest }) => {
       headers.append(HEADER_TWITTER_ACCESS_TOKEN, twitterToken);
     }
 
+    /**
+     * We use basic IP filtering to restrict active sessions. This is
+     * more reliable since users are required to authenticate with a
+     * phone number before gaining an access token.
+     */
     const ip = localStorage.getItem("ADAHANDLE_IP");
     if (ip) {
       headers.append(HEADER_IP_ADDRESS, ip);
@@ -102,7 +107,7 @@ export const HandleSearchReserveFlow = ({ className = "", ...rest }) => {
     const sessionJSON = await session.json();
     if (sessionJSON.data) {
       setHandle("");
-      const res = Cookie.set(
+      Cookie.set(
         `${SESSION_KEY}_${nextIndex}`,
         JSON.stringify(sessionJSON),
         {
@@ -110,8 +115,8 @@ export const HandleSearchReserveFlow = ({ className = "", ...rest }) => {
           secure: true,
           expires: new Date(Math.floor(sessionJSON.data.payload.exp * 1000))
         }
-      )
-      console.log(res);
+      );
+
       navigate("/sessions", { state: { sessionIndex: nextIndex }});
     } else {
       setHandleResponse(sessionJSON);

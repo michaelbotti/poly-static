@@ -13,7 +13,42 @@ import { ProtocolParametersResponse, PROTOCOL_PARAMETERS } from "../helpers/apol
 import "cross-fetch/polyfill";
 import { isValid } from "../../src/lib/helpers/nfts";
 
-const getNewAddress = async (): Promise<string> => {
+const getNewAddress = async (handle: string): Promise<string> => {
+  // const url = 'TESTNET' === process.env.CARDANO_NET
+  //   ? process.env?.WALLET_API_URL_TESTNET
+  //   : process.env?.WALLET_API_URL_MAINNET || '';
+
+  // const bearer = 'TESTNET' === process.env.CARDANO_NET
+  //   ? process.env?.WALLET_BEARER_TOKEN_TESTNET
+  //   : process.env?.WALLET_BEARER_TOKEN_MAINNET;
+
+  // const passphrase = 'TESTNET' === process.env.CARDANO_NET
+  //   ? process.env?.WALLET_PASSPHRASE_TESTNET
+  //   : process.env?.WALLET_PASSPHRASE_MAINNET;
+
+  // const data = {
+  //   name: `ADA Handle Payment Wallet: ${handle}`,
+  //   mnemonic_sentence,
+  //   passphrase,
+  //   address_pool_gap: 20
+  // };
+
+  // console.log(data);
+
+  // const wallet = await fetch(
+  //   url,
+  //   {
+  //     method: 'POST',
+  //     headers: {
+  //       'Authorization': `Bearer ${bearer}`,
+  //       'Content-Type': 'application/json'
+  //     },
+  //     body: JSON.stringify(data)
+  //   }
+  // ).then(res => res.json());
+
+  // console.log(wallet);
+
   return 'addr_test1qzwgz3vw44ky307l6xese7n4vkszf7n8tyrsdu8suuw346sm29f977p5uj28anzpt5zrwhnvunq4jcpmkps8qfa3l0yqkcr26w';
 }
 
@@ -50,7 +85,7 @@ const handler: Handler = async (
   }
 
   if ('GET' === httpMethod) {
-    const addr = await getNewAddress();
+    const addr = await getNewAddress(handle);
     if (!addr) {
       return {
         statusCode: 400,

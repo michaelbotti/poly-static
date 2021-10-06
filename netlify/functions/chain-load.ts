@@ -65,6 +65,7 @@ const handler: Handler = async (
   const maxSize = cardano?.currentEpoch?.protocolParams?.maxBlockBodySize;
   const avgSize = blocks_aggregate?.aggregate?.avg?.size;
   const load =  avgSize / maxSize;
+  console.log(load);
 
   return {
     statusCode: 200,

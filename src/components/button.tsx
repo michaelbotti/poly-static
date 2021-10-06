@@ -2,17 +2,18 @@ import React, { FC } from "react";
 import { Link } from "gatsby";
 
 interface ButtonProps {
-  style?: "primary" | "secondary" | "link";
-  internal: boolean;
+  buttonStyle?: "primary" | "secondary" | "link";
+  internal?: boolean;
   href?: string;
   className?: string;
+  [key: string]: unknown;
 }
 
 export const Button: FC<ButtonProps> = ({
   className = "",
   href,
   internal = true,
-  style = "secondary",
+  buttonStyle = "secondary",
   children,
   ...rest
 }): JSX.Element => {
@@ -20,12 +21,12 @@ export const Button: FC<ButtonProps> = ({
     "cursor-pointer hover:shadow-lg m-0 py-4 px-6 text-center rounded-lg inline-block font-bold",
   ];
 
-  switch (style) {
+  switch (buttonStyle) {
     case "primary":
-      classes.push("bg-primary-200 hover:bg-dark-100 focus:bg-dark-100 text-dark-100");
+      classes.push("bg-primary-200 hover:bg-dark-100 active:bg-dark-100 text-dark-100 hover:text-white active:text-white");
     case "secondary":
     default:
-      classes.push("bg-primary-100 hover:bg-dark-100 focus:bg-dark-100 text-white");
+      classes.push("bg-primary-100 hover:bg-dark-100 active:bg-dark-100 text-white");
   }
 
   if (internal && href?.length) {

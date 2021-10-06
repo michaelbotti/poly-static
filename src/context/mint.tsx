@@ -18,7 +18,6 @@ export interface ActiveSessionType {
 }
 
 export interface HandleMintContextType {
-  chainLoad: number;
   handle: string;
   handleResponse: HandleResponseBody | null;
   fetching: boolean;
@@ -33,7 +32,6 @@ export interface HandleMintContextType {
   setHandleResponse: Dispatch<SetStateAction<HandleResponseBody | null>>;
   setTwitterToken: Dispatch<SetStateAction<string | null>>;
   setIsPurchasing: Dispatch<SetStateAction<boolean>>;
-  setChainLoad: Dispatch<SetStateAction<number>>;
 }
 
 export const defaultState: HandleMintContextType = {
@@ -44,15 +42,13 @@ export const defaultState: HandleMintContextType = {
   reservedHandles: null,
   twitterToken: null,
   primed: false,
-  chainLoad: 0,
   setHandleResponse: () => {},
   setFetching: () => {},
   setHandle: () => {},
   setIsPurchasing: () => {},
   setReservedHandles: () => {},
   setTwitterToken: () => {},
-  setPrimed: () => {},
-  setChainLoad: () => {},
+  setPrimed: () => {}
 };
 
 export const HandleMintContext =
@@ -66,7 +62,6 @@ export const HandleMintContextProvider = ({ children, ...rest }) => {
   const [isPurchasing, setIsPurchasing] = useState<boolean>(false);
   const [reservedHandles, setReservedHandles] = useState<ReservedHandlesType|null>(null);
   const [primed, setPrimed] = useState<boolean>(false);
-  const [chainLoad, setChainLoad] = useState<number>(null);
 
   return (
     <HandleMintContext.Provider value={{
@@ -78,15 +73,13 @@ export const HandleMintContextProvider = ({ children, ...rest }) => {
       isPurchasing,
       reservedHandles,
       primed,
-      chainLoad,
       setFetching,
       setHandle,
       setHandleResponse,
       setTwitterToken,
       setIsPurchasing,
       setReservedHandles,
-      setPrimed,
-      setChainLoad
+      setPrimed
     }}>
       {children}
     </HandleMintContext.Provider>

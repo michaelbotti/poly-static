@@ -24,7 +24,7 @@ import {
 import {
   ActiveSessionType,
   ReservedHandlesType,
-} from "../../src/context/handleSearch";
+} from "../../src/context/mint";
 
 // Main handler function for GET requests.
 const handler: Handler = async (
