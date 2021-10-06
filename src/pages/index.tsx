@@ -11,7 +11,7 @@ import Payment from '../images/payment-simple.svg';
 import Ecosystem from '../images/ecosystem.svg';
 import NonCustodial from '../images/non-custodial.svg';
 
-import Maladex from '../images/maladex-text-small.png';
+import Maladex from '../images/maladex-logo-small.png';
 
 function IndexPage() {
   return (
