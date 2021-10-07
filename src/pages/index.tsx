@@ -1,5 +1,4 @@
 import React from "react";
-import { Link } from 'gatsby';
 
 import Layout from "../components/layout";
 import SEO from "../components/seo";
@@ -11,6 +10,8 @@ import Cardano from '../images/cardano.svg';
 import Payment from '../images/payment-simple.svg';
 import Ecosystem from '../images/ecosystem.svg';
 import NonCustodial from '../images/non-custodial.svg';
+
+import Maladex from '../images/maladex-logo-small.png';
 
 function IndexPage() {
   return (
@@ -44,6 +45,14 @@ function IndexPage() {
         <img className="absolute hidden md:block top-0 right-0 -mt-8 -mr-32 z-0" src={Wallet} />
       </section>
       <section id="more" className="bg-dark-100 px-16 md:px-0">
+        <section className="z-10 relative w-full max-w-4xl px-4 pt-4 pb-8 mx-auto md:px-8 md:pt-16">
+          <h2 className="text-white text-4xl font-bold leading-tight text-center">Partners</h2>
+          <div className="flex mt-8 justify-center align-center">
+            <a href="https://maladex.com" className="block w-48" rel="nofollow" target="_blank">
+              <img className="w-full" src={Maladex} alt="Maladex" />
+            </a>
+          </div>
+        </section>
         <div className="z-10 relative w-full max-w-4xl px-4 pt-4 pb-8 mx-auto md:px-8 md:pt-16 md:pb-32">
           <div className="grid grid-cols-12 py-16 gap-4 content-center">
             <div className="hidden md:block md:col-span-7 px-16 md:px-0">
