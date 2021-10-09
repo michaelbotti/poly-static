@@ -1,4 +1,4 @@
-import React, { FC } from "react";
+import React, { FC, useEffect } from "react";
 
 import Header from "../components/header";
 import Form from '../components/mailchimp';
@@ -6,8 +6,11 @@ import { HandleMintContextProvider } from '../context/mint';
 import { requestToken } from "../lib/firebase";
 
 const Layout: FC = ({ children }): JSX.Element => {
-  // Ensure appcheck.
-  requestToken();
+
+  useEffect(() => {
+    // Ensure appcheck.
+    requestToken();
+  });
 
   return (
     <HandleMintContextProvider>
