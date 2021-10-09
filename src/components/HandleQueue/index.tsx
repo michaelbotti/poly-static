@@ -1,66 +1,56 @@
 import React, { useRef, useState } from 'react';
-import Cookie from 'js-cookie';
+import PhoneInput from 'react-phone-number-input';
 
-import { COOKIE_ACCESS_KEY, HEADER_APPCHECK, HEADER_PHONE, HEADER_PHONE_AUTH } from '../../lib/constants';
+import { QueueResponseBody } from '../../../netlify/functions/queue'
+import { VerifyResponseBody } from '../../../netlify/functions/verify'
+import { HEADER_APPCHECK, HEADER_PHONE, HEADER_PHONE_AUTH } from '../../lib/constants';
 import { requestToken } from '../../lib/firebase';
 import { useAccessOpen } from '../../lib/hooks/access';
 import Button from '../button';
 import { setAccessTokenCookie } from '../../lib/helpers/session';
-import { JwtPayload } from 'jsonwebtoken';
+
+import 'react-phone-number-input/style.css'
 
 interface IntroTextProps {
   count: number;
 }
 
-interface QueueResponseBody {
-  updated: boolean;
-  alreadyExists?: boolean;
-  message?: string;
-}
-
-interface VerifyResponseBody {
-  error: boolean;
-  token?: string;
-  data?: JwtPayload;
-  verified?: boolean;
-  message?: string;
-}
-
 const IntroText = ({ count }: IntroTextProps) => {
-  console.log(count);
   if (null === count) {
     return (
-      <p className="text-primary-100 font-bold">Checking your place in line...</p>
+      <span className="text-primary-100 font-bold">Checking your place in line...</span>
     );
   }
 
   if (count < 50) {
     return (
-      <p className="text-primary-100 font-bold">Don't go anywhere, you are up next!</p>
+      <span className="text-primary-100 font-bold">Don't go anywhere, you are up next!</span>
     );
   }
 
   if (count > 50 && count < 200) {
     return (
-      <p className="text-primary-100 font-bold">You are #{count} in line. Estimated wait time is between 30 minutes and 2 hours.</p>
+      <span className="text-primary-100 font-bold">You are #{count} in line. Estimated wait time is between 30 minutes and 2 hours.</span>
     )
   }
 
   return (
-    <p className="text-primary-100 font-bold">You are #{count} in line. Estimated wait time is more than 2 hours.</p>
+    <span className="text-primary-100 font-bold">You are #{count} in line. Estimated wait time is more than 2 hours.</span>
   )
 }
 
 export const HandleQueue = (): JSX.Element => {
   const [savingSpot, setSavingSpot] = useState<boolean>(false);
   const [authenticating, setAuthenticating] = useState<boolean>(false);
-  const [, setAccessOpen, queueCount] = useAccessOpen();
+  const [queue, setQueue] = useState<number>(null);
   const [action, setAction] = useState<'save'|'auth'>('save');
   const [responseMessage, setResponseMessage] = useState<string>(null);
   const [phoneInput, setPhoneInput] = useState<string>('');
   const [authInput, setAuthInput] = useState<string>('');
   const [showPlacement, setShowPlacement] = useState<boolean>(false);
+
   const form = useRef(null);
+  const [, setAccessOpen] = useAccessOpen();
 
   const setTimeoutResponseMessage = (message: string) => {
     setResponseMessage(message);
@@ -81,7 +71,7 @@ export const HandleQueue = (): JSX.Element => {
     try {
       const appToken = await requestToken();
       const res: QueueResponseBody = await fetch(
-        'http://localhost:3000/queue',
+        `/.netlify/functions/queue`,
         {
           method: 'POST',
           headers: {
@@ -93,11 +83,12 @@ export const HandleQueue = (): JSX.Element => {
       .then(res => res.json())
       .catch(e => console.log(e));
 
+      setQueue(res?.queue);
       if (res.updated) {
-        if (queueCount < 50) {
+        if (res?.queue < 50) {
           setShowPlacement(true);
           setAction('auth');
-          setResponseMessage(`Successfully saved! We will text you an authentication code when it is your turn.`);
+          setResponseMessage(`Successfully saved! You should receive a text within five minutes.`);
         }
       } else {
         setTimeoutResponseMessage(res?.message || 'That didn\'t work. Try again.');
@@ -122,7 +113,7 @@ export const HandleQueue = (): JSX.Element => {
     try {
       const appToken = await requestToken();
       const res: VerifyResponseBody = await fetch(
-        'http://localhost:3000/verify', {
+        '/.netlify/functions/verify', {
           headers: {
             [HEADER_APPCHECK]: appToken,
             [HEADER_PHONE]: phoneInput,
@@ -142,9 +133,11 @@ export const HandleQueue = (): JSX.Element => {
       }
 
       if (!verified && error && message) {
+        setShowPlacement(false);
         setResponseMessage(message);
       }
     } catch (e) {
+      setTimeoutResponseMessage('Hmm, try that again. Something went wrong.');
       console.log(e);
     }
 
@@ -167,16 +160,15 @@ export const HandleQueue = (): JSX.Element => {
         </button>
       </div>
       <form onSubmit={(e) => e.preventDefault()} ref={form}>
-        <input
-          name="phone"
-          data-lpignore="true"
-          disabled={savingSpot}
-          placeholder={'Your mobile number...'}
-          type="number"
-          onChange={(e) => setPhoneInput(e.target.value)}
-          value={phoneInput}
-          className={`${'auth' === action ? 'rounded-none border-b-0' : ''} focus:ring-0 focus:ring-opacity-0 border-2 outline-none form-input bg-dark-100 border-dark-300 px-6 py-4 text-xl w-full appearance-none`}
-        />
+      <PhoneInput
+        name="phone"
+        data-lpignore="true"
+        disabled={savingSpot}
+        placeholder={'Your mobile number...'}
+        className={`${'auth' === action ? 'rounded-none border-b-0' : ''} focus:ring-0 focus:ring-opacity-0 border-2 outline-none form-input bg-dark-100 border-dark-300 px-6 py-4 text-xl w-full appearance-none`}
+        defaultCountry="US"
+        value={phoneInput}
+        onChange={setPhoneInput}/>
         {'auth' === action && (
           <>
             <input
@@ -202,8 +194,10 @@ export const HandleQueue = (): JSX.Element => {
           {!authenticating && !savingSpot && 'Submit'}
         </Button>
       </form>
-      {responseMessage && <p className="my-2">{responseMessage}</p>}
-      {showPlacement && <IntroText count={queueCount} />}
+      {responseMessage && <p className="my-2">
+        {responseMessage}{" "}
+        {showPlacement && <IntroText count={queue} />}
+      </p>}
     </>
   )
 };

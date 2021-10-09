@@ -4,36 +4,47 @@ import {
   getTwitterResponseUnvailable,
   getDefaultResponseUnvailable,
   getBetaPhaseResponseUnavailable,
-} from "../../../src/lib/helpers/search";
-import { HandleResponseBody } from "../../../src/lib/helpers/search";
-import { requestToken } from "../../lib/firebase";
+  getReservedUnavailable,
+  getSPOUnavailable,
+} from "../helpers/search";
+import { HandleResponseBody } from "../helpers/search";
+import { requestToken } from "../firebase";
 import {
   BETA_PHASE_MATCH,
   HEADER_APPCHECK,
   HEADER_HANDLE,
   HEADER_IP_ADDRESS,
-} from "../../../src/lib/constants";
+  IP_ADDRESS_KEY,
+} from "../constants";
 import { HandleMintContext } from "../../context/mint";
+import { normalizeNFTHandle } from "../helpers/nfts";
 
-export const useSyncAvailableStatus = async (handle: string) => {
+export const useSyncAvailableStatus = async (unsanitizedHandle: string) => {
   const { setFetching, setHandleResponse, reservedHandles } =
     useContext(HandleMintContext);
 
   useEffect(() => {
+    const handle = normalizeNFTHandle(unsanitizedHandle);
+
     if (handle.length === 0) {
       setHandleResponse(null);
       return;
     }
 
-    if (reservedHandles?.twitter?.includes(handle.toLowerCase())) {
+    if (reservedHandles?.spos?.includes(handle)) {
+      setHandleResponse(getSPOUnavailable())
+
+      return;
+    }
+
+    if (reservedHandles?.twitter?.includes(handle)) {
       setHandleResponse(getTwitterResponseUnvailable());
 
       return;
     }
 
     if (
-      reservedHandles?.spos?.includes(handle.toLowerCase()) ||
-      reservedHandles?.manual?.includes(handle.toLocaleLowerCase())
+      reservedHandles?.blacklist?.includes(handle)
     ) {
       setHandleResponse(getDefaultResponseUnvailable());
 
@@ -42,7 +53,7 @@ export const useSyncAvailableStatus = async (handle: string) => {
 
     if (
       !handle.match(BETA_PHASE_MATCH) &&
-      !reservedHandles?.twitter?.includes(handle.toLowerCase())
+      !reservedHandles?.twitter?.includes(handle)
     ) {
       setHandleResponse(getBetaPhaseResponseUnavailable());
 
@@ -55,7 +66,7 @@ export const useSyncAvailableStatus = async (handle: string) => {
       const headers: HeadersInit = {
         [HEADER_HANDLE]: handle,
         [HEADER_APPCHECK]: token,
-        [HEADER_IP_ADDRESS]: localStorage.getItem("ADAHANDLE_IP") || "",
+        [HEADER_IP_ADDRESS]: localStorage.getItem(IP_ADDRESS_KEY) || "",
       };
 
       // Search on-chain.
@@ -66,5 +77,5 @@ export const useSyncAvailableStatus = async (handle: string) => {
       setFetching(false);
       setHandleResponse(res);
     })();
-  }, [handle]);
+  }, [unsanitizedHandle]);
 };

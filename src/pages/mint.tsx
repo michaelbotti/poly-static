@@ -2,8 +2,6 @@ import React, { useContext } from "react";
 
 import { HandleMintContext } from "../context/mint";
 import { usePrimeMintingContext } from "../lib/helpers/context";
-import { requestToken } from "../lib/firebase";
-import { HEADER_APPCHECK, HEADER_PHONE } from "../lib/constants";
 import { useAccessOpen } from "../lib/hooks/access";
 
 import SEO from "../components/seo";

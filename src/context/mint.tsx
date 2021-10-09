@@ -1,11 +1,9 @@
-import gql from "graphql-tag";
-import React, { createContext, Dispatch, SetStateAction, useEffect, useState } from "react";
-import { HEADER_APPCHECK } from "../lib/constants";
-import { requestToken } from "../lib/firebase";
+import React, { createContext, Dispatch, SetStateAction, useState } from "react";
 
 import { HandleResponseBody } from "../lib/helpers/search";
 
 export interface ReservedHandlesType {
+  blacklist: string[],
   twitter: string[];
   manual: string[];
   spos: string[];

@@ -14,21 +14,24 @@ dayjs.extend(relativeTime);
 
 import { requestToken } from "../../lib/firebase";
 import {
+  ALLOWED_CHAR,
+  BETA_PHASE_MATCH,
   HEADER_APPCHECK,
   HEADER_HANDLE,
   HEADER_IP_ADDRESS,
+  HEADER_JWT_ACCESS_TOKEN,
   HEADER_RECAPTCHA,
   HEADER_TWITTER_ACCESS_TOKEN,
   RECAPTCHA_SITE_KEY,
 } from "../../../src/lib/constants";
 import { HandleMintContext } from "../../context/mint";
 import { isValid } from "../../lib/helpers/nfts";
-import { useSyncAvailableStatus } from "../../lib/hooks/handle";
+import { useSyncAvailableStatus } from "../../lib/hooks/search";
 import LogoMark from "../../images/logo-single.svg";
 import { HandleSearchConnectTwitter } from "./";
 import { Loader } from "../Loader";
 import { SessionResponseBody } from '../../../netlify/functions/session';
-import { getSessionDataCookie } from "../../lib/helpers/session";
+import { getAccessTokenFromCookie, getIpAddress, getSessionDataCookie } from "../../lib/helpers/session";
 import { SESSION_KEY } from "../../lib/helpers/session";
 import { HandleResponseBody } from "../../lib/helpers/search";
 
@@ -39,7 +42,7 @@ export const HandleSearchReserveFlow = ({ className = "", ...rest }) => {
     setHandleResponse,
     handle,
     setHandle,
-    twitterToken,
+    twitterToken
   } = useContext(HandleMintContext);
   const [fetchingSession, setFetchingSession] = useState<boolean>(false);
   const [debouncedHandle] = useDebounce(handle, 600);
@@ -71,9 +74,8 @@ export const HandleSearchReserveFlow = ({ className = "", ...rest }) => {
   const handleOnSubmit = async (e: FormEvent) => {
     e.preventDefault();
 
-    // Fire up wallet end-points.
-    fetch('/.netlify/functions/wallet-address');
-    fetch('/.netlify/functions/wallet-mint');
+    // Ping the serverless endpoint.
+    fetch('/.netlify/functions/session');
 
     const appCheckToken = await requestToken();
     const recaptchaToken: string = await window.grecaptcha.ready(() =>
@@ -88,6 +90,13 @@ export const HandleSearchReserveFlow = ({ className = "", ...rest }) => {
     headers.append(HEADER_HANDLE, handle);
     headers.append(HEADER_RECAPTCHA, recaptchaToken);
     headers.append(HEADER_APPCHECK, appCheckToken);
+    headers.append(HEADER_JWT_ACCESS_TOKEN, getAccessTokenFromCookie());
+
+    /**
+     * Add a Twitter auth token to verify on the server. This is
+     * valid only if a user successfully reserved their handle
+     * with Twitter.
+     */
     if (twitterToken) {
       headers.append(HEADER_TWITTER_ACCESS_TOKEN, twitterToken);
     }
@@ -97,29 +106,45 @@ export const HandleSearchReserveFlow = ({ className = "", ...rest }) => {
      * more reliable since users are required to authenticate with a
      * phone number before gaining an access token.
      */
-    const ip = localStorage.getItem("ADAHANDLE_IP");
+    const ip = await getIpAddress();
     if (ip) {
       headers.append(HEADER_IP_ADDRESS, ip);
     }
 
-    setFetchingSession(true);
-    const session = await fetch("/.netlify/functions/session", { headers });
-    const sessionJSON = await session.json();
-    if (sessionJSON.data) {
-      setHandle("");
-      Cookie.set(
-        `${SESSION_KEY}_${nextIndex}`,
-        JSON.stringify(sessionJSON),
-        {
-          sameSite: 'strict',
-          secure: true,
-          expires: new Date(Math.floor(sessionJSON.data.payload.exp * 1000))
-        }
-      );
+    try {
+      setFetchingSession(true);
+      const session = await fetch("/.netlify/functions/session", { headers });
+      const sessionJSON: SessionResponseBody = await session.json();
+      if (!sessionJSON.error) {
+        setHandle("");
+        Cookie.set(
+          `${SESSION_KEY}_${nextIndex}`,
+          JSON.stringify(sessionJSON),
+          {
+            sameSite: 'strict',
+            secure: true,
+            expires: new Date(Math.floor(sessionJSON.data.payload.exp * 1000))
+          }
+        );
 
-      navigate("/sessions", { state: { sessionIndex: nextIndex }});
-    } else {
-      setHandleResponse(sessionJSON);
+        navigate("/sessions", { state: { sessionIndex: nextIndex }});
+        return;
+      }
+
+      setHandleResponse({
+        available: false,
+        twitter: !!twitterToken,
+        message: sessionJSON.message
+      });
+      setFetchingSession(false);
+    } catch (e) {
+      console.log(e);
+      setHandle('');
+      setHandleResponse({
+        available: false,
+        message: 'Something went wrong. Please refresh the page.',
+        twitter: false,
+      })
       setFetchingSession(false);
     }
   };
@@ -179,6 +204,7 @@ export const HandleSearchReserveFlow = ({ className = "", ...rest }) => {
           <p className="text-lg">
             <strong>Wow, you got speed!</strong> You're clearly a pro,{" "}
             but let's slow down. Try again in about {
+              // Get the soonest expiring session.
               dayjs(
                 currentSessions
                   .sort((a, b) => a.data.exp < b.data.exp ? -1 : 1)
@@ -197,7 +223,7 @@ export const HandleSearchReserveFlow = ({ className = "", ...rest }) => {
                 <strong>You have {3 - currentSessions.length} session{2 === currentSessions.length ? '' : 's'} left.</strong>
               </p>
             )}
-            <div className="relative">
+            <div className="relative mb-2">
               <img
                 src={LogoMark}
                 className="absolute h-full left-0 top-0 px-6 py-4 opacity-10"
@@ -266,9 +292,9 @@ export const HandleSearchReserveFlow = ({ className = "", ...rest }) => {
           <p className="text-sm mt-8">
             Once you start a session,{" "}
             <strong>it will be active for approximately 10 minutes</strong>.{" "}
-            We use cookies and other means to ensure this is hard to get around.{" "}
+            We use several safeguards to ensure this is hard to get around.{" "}
             You get a max of up to 3 sessions at any one time. If you have questions,{" "}
-            <Link className="text-primary-100" to="/support">send us an email</Link>.
+            <a className="text-primary-100" href="https://discord.gg/cWYA7xwmMp" target="_blank">ask in our Discord</a>.
           </p>
         </>
       )}

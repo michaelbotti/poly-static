@@ -34,7 +34,7 @@ export const verifyAppCheck = async (token: string): Promise<boolean> => {
   const admin = await getFirebase();
   try {
     const res = await admin.appCheck().verifyToken(token);
-    return res;
+    return !!res;
   } catch (e) {
     return false;
   }
@@ -49,4 +49,9 @@ export const verifyTwitterUser = async (token: string): Promise<number | false> 
     console.log(e);
     return false;
   }
+}
+
+export const getDatabase = async (): Promise<admin.database.Database> => {
+  const app = await getFirebase();
+  return admin.database(app);
 }

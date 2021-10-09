@@ -10,7 +10,7 @@ export const config: FirebaseOptions = {
     projectId: "ada-handle-reserve",
     storageBucket: "ada-handle-reserve.appspot.com",
     messagingSenderId: "995478242710",
-    appId: "1:995478242710:web:7b01129b47c6e82e1e49b7"
+    appId: "1:995478242710:web:7b01129b47c6e82e1e49b7",
 }
 
 let firebase: FirebaseApp;
@@ -19,7 +19,7 @@ export const getFirebase = () => {
     return firebase;
   }
 
-  firebase = initializeApp(config);
+  firebase = initializeApp(config, 'adahandle-client');
   return firebase;
 }
 

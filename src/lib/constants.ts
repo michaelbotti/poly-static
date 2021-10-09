@@ -1,10 +1,11 @@
 export const RESERVE_EXPIRE_DATE = new Date('10/23/2021');
 export const RESERVE_SESSION_LENGTH = 600000; // 10 minutes
 export const RECAPTCHA_SITE_KEY = '6Ld0QUkcAAAAAN-_KvCv8R_qke8OYxotNJzIg2RP';
+export const NODEJS_APP_URL_MAINNET = 'https://node.adahandle.io';
+
+// Keys
 export const COOKIE_ACCESS_KEY = 'ADAHANDLE_HAS_ACCESS';
-export const REDIS_RESERVED_HANDLES_KEY = 'reservedHandles';
-export const REDIS_ACTIVE_SESSIONS_HANDLE_KEY = 'activeSessionsHandle';
-export const REDIS_ACTIVE_SESSIONS_IP_PREFIX = 'activeSessionsIP'
+export const IP_ADDRESS_KEY ='ADAHANDLE_IP_ADDRESS';
 
 // Headers.
 export const HEADER_IP_ADDRESS = 'x-ip-address';
@@ -16,18 +17,19 @@ export const TWITTER_UNLOCK_HEADER = 'x-twitter-credentials';
 export const HEADER_PHONE = 'x-phone';
 export const HEADER_PHONE_AUTH = 'x-phone-authcode';
 export const HEADER_JWT_ACCESS_TOKEN = 'x-access-token';
-export const HEADER_AUTH_TOKEN = 'x-auth-token';
+export const HEADER_JWT_SESSION_TOKEN = 'x-session-token';
 
 /**
  * a-z
  * 0-9
  * _
  * -
+ * .
  */
-export const ALLOWED_CHAR = new RegExp(/^[a-zA-Z|0-9|\-|\_]*$/g);
+export const ALLOWED_CHAR = new RegExp(/^[a-zA-Z|0-9|\-|\_|\.]*$/g);
 
 /**
  * Must match all:
  * - 4 characters or more
  */
-export const BETA_PHASE_MATCH: RegExp = new RegExp(/.{4,}/g);
+export const BETA_PHASE_MATCH: RegExp = new RegExp(/.{2,}/g);

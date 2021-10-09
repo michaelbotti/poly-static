@@ -1,4 +1,4 @@
-import { ALLOWED_CHAR } from "../constants";
+import { ALLOWED_CHAR, BETA_PHASE_MATCH } from "../constants";
 
 export type RarityType = "Legendary" | "Ultra Rare" | "Rare" | "Common" | "Basic";
 export type RarityColorTypes = "white" | "blue" | "green" | "red";
@@ -6,7 +6,7 @@ export type RarityCostTypes = null | 500 | 100 | 50 | 10;
 export type RarityHexTypes = "#ffffff" | "#48ACF0" | "#0CD15B" | "#DF3737";
 
 export const isValid = (handle: string) =>
-  !!handle.match(ALLOWED_CHAR) && handle.length < 15;
+  handle.match(ALLOWED_CHAR) && handle.length < 15;
 
 export const normalizeNFTHandle = (handle: string): string => handle.toLowerCase();
 

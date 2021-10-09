@@ -53,7 +53,6 @@ export const queryHandleOnchain = async (handle: string): Promise<QueryHandleOnc
   });
 
   const exists = !!(0 < assets.length && assets[0].policyId && assets[0].assetName);
-
   const data: QueryHandleOnchainResponse = { exists };
 
   if (exists) {

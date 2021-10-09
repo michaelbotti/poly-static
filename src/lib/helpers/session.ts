@@ -1,6 +1,7 @@
 import Cookie from 'js-cookie';
+
 import { SessionResponseBody } from "../../../netlify/functions/session";
-import { COOKIE_ACCESS_KEY, HEADER_APPCHECK, HEADER_AUTH_TOKEN } from '../constants';
+import { COOKIE_ACCESS_KEY, HEADER_APPCHECK, IP_ADDRESS_KEY, RECAPTCHA_SITE_KEY } from '../constants';
 import { requestToken } from '../firebase';
 
 export const SESSION_KEY = 'currentHandleSession';
@@ -38,4 +39,30 @@ export const setAccessTokenCookie = (token: string, exp: number) => {
       expires: new Date(Math.floor(exp) * 1000), // convert to miliseconds
     }
   )
+}
+
+export const getIpAddress = async (): Promise<string> => {
+  const appCheck = await requestToken();
+
+  if (!localStorage.getItem(IP_ADDRESS_KEY)) {
+    const { ip } = await (await fetch('/.netlify/functions/ip', {
+      headers: {
+        [HEADER_APPCHECK]: appCheck
+      }
+    })).json();
+    ip && localStorage.setItem(IP_ADDRESS_KEY, ip);
+  }
+
+  return localStorage.getItem(IP_ADDRESS_KEY);
+}
+
+export const getRecaptchaToken = async (): Promise<string> => {
+  return await window.grecaptcha.ready(
+    () =>
+      window.grecaptcha.execute(
+        RECAPTCHA_SITE_KEY,
+        { action: "submit" },
+        (token: string) => token
+      )
+  );
 }

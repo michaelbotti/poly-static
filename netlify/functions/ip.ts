@@ -28,16 +28,6 @@ const handler: Handler = async (
     }
   }
 
-  // const data = await (
-  //   await fetch(`https://api.ipdata.co?api-key=${process.env.IPDATA_API_KEY}`)
-  // ).json();
-
-  // return {
-  //   statusCode: 200,
-  //   body: JSON.stringify({
-  //     ip: data?.ip,
-  //   }),
-  // };
   return {
     statusCode: 200,
     body: JSON.stringify({
