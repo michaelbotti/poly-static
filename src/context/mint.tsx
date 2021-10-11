@@ -12,7 +12,9 @@ export interface ReservedHandlesType {
 export interface ActiveSessionType {
   ip: string;
   handle: string;
-  timestamp: number;
+  address: string;
+  paid: boolean;
+  start: number;
 }
 
 export interface HandleMintContextType {

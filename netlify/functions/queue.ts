@@ -27,7 +27,7 @@ const handler: Handler = async (
       statusCode: 403,
       body: JSON.stringify({
         error: true,
-        message: 'Unauthorized.'
+        message: 'Unauthorized. An AppCheck token was not provided.'
       } as QueueResponseBody)
     }
   }
@@ -48,7 +48,7 @@ const handler: Handler = async (
       statusCode: 403,
       body: JSON.stringify({
         error: true,
-        message: 'Unauthorized.'
+        message: `Unauthorized. Invalid AppCheck token: ${headers[HEADER_APPCHECK]}.`
       } as QueueResponseBody)
     }
   }

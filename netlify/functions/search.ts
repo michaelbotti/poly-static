@@ -31,8 +31,8 @@ const handler: Handler = async (
   const { headers } = event;
 
   const headerAppCheck = headers[HEADER_APPCHECK];
-  const headerHandle = headers[HEADER_HANDLE];
   const headerIp = headers[HEADER_IP_ADDRESS];
+  const headerHandle = headers[HEADER_HANDLE];
 
   // Ensure an AppCheck credential.
   if (!headerAppCheck || !headerIp) {
@@ -40,7 +40,7 @@ const handler: Handler = async (
       statusCode: 403,
       body: JSON.stringify({
         available: false,
-        message: "Unauthorized.",
+        message: "Unauthorized. No AppCheck or IP address found in request.",
       } as HandleResponseBody),
     };
   }
@@ -61,7 +61,7 @@ const handler: Handler = async (
       statusCode: 403,
       body: JSON.stringify({
         available: false,
-        message: "Unauthorized.",
+        message: `Unauthorized. Invalid AppCheck token: ${headerAppCheck}`,
       } as HandleResponseBody),
     };
   }

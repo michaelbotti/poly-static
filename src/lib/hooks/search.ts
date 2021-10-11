@@ -14,10 +14,10 @@ import {
   HEADER_APPCHECK,
   HEADER_HANDLE,
   HEADER_IP_ADDRESS,
-  IP_ADDRESS_KEY,
 } from "../constants";
 import { HandleMintContext } from "../../context/mint";
 import { normalizeNFTHandle } from "../helpers/nfts";
+import { getIpAddress } from "../helpers/session";
 
 export const useSyncAvailableStatus = async (unsanitizedHandle: string) => {
   const { setFetching, setHandleResponse, reservedHandles } =
@@ -31,23 +31,23 @@ export const useSyncAvailableStatus = async (unsanitizedHandle: string) => {
       return;
     }
 
-    if (reservedHandles?.spos?.includes(handle)) {
-      setHandleResponse(getSPOUnavailable())
+    if (reservedHandles?.manual?.includes(handle)) {
+      setHandleResponse(getReservedUnavailable());
+      return;
+    }
 
+    if (reservedHandles?.spos?.includes(handle)) {
+      setHandleResponse(getSPOUnavailable());
       return;
     }
 
     if (reservedHandles?.twitter?.includes(handle)) {
       setHandleResponse(getTwitterResponseUnvailable());
-
       return;
     }
 
-    if (
-      reservedHandles?.blacklist?.includes(handle)
-    ) {
+    if (reservedHandles?.blacklist?.includes(handle)) {
       setHandleResponse(getDefaultResponseUnvailable());
-
       return;
     }
 
@@ -56,7 +56,6 @@ export const useSyncAvailableStatus = async (unsanitizedHandle: string) => {
       !reservedHandles?.twitter?.includes(handle)
     ) {
       setHandleResponse(getBetaPhaseResponseUnavailable());
-
       return;
     }
 
@@ -66,7 +65,7 @@ export const useSyncAvailableStatus = async (unsanitizedHandle: string) => {
       const headers: HeadersInit = {
         [HEADER_HANDLE]: handle,
         [HEADER_APPCHECK]: token,
-        [HEADER_IP_ADDRESS]: localStorage.getItem(IP_ADDRESS_KEY) || "",
+        [HEADER_IP_ADDRESS]: await getIpAddress(),
       };
 
       // Search on-chain.

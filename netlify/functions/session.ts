@@ -4,7 +4,7 @@ import {
   HandlerContext,
   HandlerResponse
 } from "@netlify/functions";
-import jwt, { decode } from "jsonwebtoken";
+import jwt, { decode, JwtPayload } from "jsonwebtoken";
 import "cross-fetch/polyfill";
 
 import {
@@ -13,7 +13,7 @@ import {
   HEADER_RECAPTCHA,
   HEADER_TWITTER_ACCESS_TOKEN,
   HEADER_IP_ADDRESS,
-  RESERVE_SESSION_LENGTH,
+  MAX_SESSION_LENGTH,
   HEADER_JWT_ACCESS_TOKEN,
   HEADER_JWT_SESSION_TOKEN
 } from "../../src/lib/constants";
@@ -22,16 +22,22 @@ import {
   ReservedHandlesType,
 } from "../../src/context/mint";
 import { isValid, normalizeNFTHandle } from "../../src/lib/helpers/nfts";
-import { getFirebase, verifyAppCheck, getSecret } from "../helpers";
+import { verifyAppCheck, getSecret } from "../helpers";
 import { verifyTwitterUser } from "../helpers";
 import { HandleResponseBody } from "../../src/lib/helpers/search";
 import { getDatabase } from "../helpers/firebase";
+export interface NodeSessionResponseBody {
+  error: boolean,
+  message?: string;
+  address?: string;
+}
 
 export interface SessionResponseBody {
   error: boolean,
   message?: string;
-  address?: string;
-  data?: jwt.JwtPayload;
+  address: string;
+  token: string;
+  data: JwtPayload
 }
 
 const unauthorizedResponse: HandlerResponse = {
@@ -165,35 +171,47 @@ const handler: Handler = async (
     };
   }
 
+  // Sign a JWT session.
   const sessionSecret = await getSecret('session');
   const sessionToken = jwt.sign(
     {
+      iat: Date.now(),
       handle,
       ip: headerIp
     },
     sessionSecret,
     {
-      expiresIn: Math.floor(RESERVE_SESSION_LENGTH / 1000) // 10 minutes
+      expiresIn: (MAX_SESSION_LENGTH * 1000).toString() // 10 minutes
     }
   );
 
-  const res: SessionResponseBody = await (await fetch(`${process.env.NODEJS_APP_URL}/session`, {
+  // Get payment details from server.
+  const res: NodeSessionResponseBody = await (await fetch(`${process.env.NODEJS_APP_URL}/session`, {
     headers: {
+      'Authorization': `Basic ${process.env.NODE_AUTH_TOKEN_MAINNET}`,
       [HEADER_JWT_ACCESS_TOKEN]: accessToken,
       [HEADER_JWT_SESSION_TOKEN]: sessionToken,
     }
-  })).json()
+  })).json();
+
+  const mutatedRes: SessionResponseBody = {
+    error: res.error,
+    message: res?.message || '',
+    address: res?.address || '',
+    token: sessionToken,
+    data: decode(sessionToken) as JwtPayload,
+  }
 
   if (res.error) {
     return {
       statusCode: 500,
-      body: JSON.stringify(res)
+      body: JSON.stringify(mutatedRes),
     }
   }
 
   return {
     statusCode: 200,
-    body: JSON.stringify(res)
+    body: JSON.stringify(mutatedRes),
   }
 };
 

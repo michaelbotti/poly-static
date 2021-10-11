@@ -1,15 +1,13 @@
 import Cookie from 'js-cookie';
 
 import { SessionResponseBody } from "../../../netlify/functions/session";
-import { COOKIE_ACCESS_KEY, HEADER_APPCHECK, IP_ADDRESS_KEY, RECAPTCHA_SITE_KEY } from '../constants';
+import { COOKIE_ACCESS_KEY, COOKIE_SESSION_PREFIX, HEADER_APPCHECK, IP_ADDRESS_KEY, RECAPTCHA_SITE_KEY } from '../constants';
 import { requestToken } from '../firebase';
-
-export const SESSION_KEY = 'currentHandleSession';
 
 export const getSessionDataCookie = (): SessionResponseBody[] => {
   const sessions = [1,2,3]
     .map(sessionIndex => {
-      const session = Cookie.get(`${SESSION_KEY}_${sessionIndex}`);
+      const session = Cookie.get(`${COOKIE_SESSION_PREFIX}_${sessionIndex}`);
       return session ? JSON.parse(session) : null;
     })
     .filter(session => null !== session)
@@ -20,7 +18,7 @@ export const getSessionDataCookie = (): SessionResponseBody[] => {
 export const getSessionDataFromState = (state: SessionResponseBody | null): false | SessionResponseBody => {
   if (
     !state?.data ||
-    !state?.token
+    !state?.address
   ) {
     return false;
   }
@@ -37,6 +35,26 @@ export const setAccessTokenCookie = (token: string, exp: number) => {
       sameSite: 'strict',
       secure: true,
       expires: new Date(Math.floor(exp) * 1000), // convert to miliseconds
+    }
+  )
+}
+
+export const getSessionTokenFromCookie = (index: number): SessionResponseBody | false => {
+  const data = Cookie.get(`${COOKIE_SESSION_PREFIX}_${index}`);
+  if (!data) {
+    return false;
+  }
+
+  return JSON.parse(data);
+};
+export const setSessionTokenCookie = (data: SessionResponseBody, exp: Date, index: number) => {
+  Cookie.set(
+    `${COOKIE_SESSION_PREFIX}_${index}`,
+    JSON.stringify(data),
+    {
+      sameSite: 'strict',
+      secure: true,
+      expires: new Date(exp)
     }
   )
 }

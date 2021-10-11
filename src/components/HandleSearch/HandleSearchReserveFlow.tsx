@@ -14,8 +14,7 @@ dayjs.extend(relativeTime);
 
 import { requestToken } from "../../lib/firebase";
 import {
-  ALLOWED_CHAR,
-  BETA_PHASE_MATCH,
+  COOKIE_SESSION_PREFIX,
   HEADER_APPCHECK,
   HEADER_HANDLE,
   HEADER_IP_ADDRESS,
@@ -31,9 +30,8 @@ import LogoMark from "../../images/logo-single.svg";
 import { HandleSearchConnectTwitter } from "./";
 import { Loader } from "../Loader";
 import { SessionResponseBody } from '../../../netlify/functions/session';
-import { getAccessTokenFromCookie, getIpAddress, getSessionDataCookie } from "../../lib/helpers/session";
+import { getAccessTokenFromCookie, getIpAddress, getSessionDataCookie, setSessionTokenCookie } from "../../lib/helpers/session";
 import { SESSION_KEY } from "../../lib/helpers/session";
-import { HandleResponseBody } from "../../lib/helpers/search";
 
 export const HandleSearchReserveFlow = ({ className = "", ...rest }) => {
   const {
@@ -115,16 +113,13 @@ export const HandleSearchReserveFlow = ({ className = "", ...rest }) => {
       setFetchingSession(true);
       const session = await fetch("/.netlify/functions/session", { headers });
       const sessionJSON: SessionResponseBody = await session.json();
+      console.log(sessionJSON);
       if (!sessionJSON.error) {
         setHandle("");
-        Cookie.set(
-          `${SESSION_KEY}_${nextIndex}`,
-          JSON.stringify(sessionJSON),
-          {
-            sameSite: 'strict',
-            secure: true,
-            expires: new Date(Math.floor(sessionJSON.data.payload.exp * 1000))
-          }
+        setSessionTokenCookie(
+          sessionJSON,
+          new Date(sessionJSON.data.exp),
+          nextIndex
         );
 
         navigate("/sessions", { state: { sessionIndex: nextIndex }});
