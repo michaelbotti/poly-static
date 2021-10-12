@@ -21,7 +21,7 @@ import {
   ActiveSessionType,
   ReservedHandlesType,
 } from "../../src/context/mint";
-import { isValid, normalizeNFTHandle } from "../../src/lib/helpers/nfts";
+import { getRarityCost, isValid, normalizeNFTHandle } from "../../src/lib/helpers/nfts";
 import { verifyAppCheck, getSecret } from "../helpers";
 import { verifyTwitterUser } from "../helpers";
 import { HandleResponseBody } from "../../src/lib/helpers/search";
@@ -177,6 +177,7 @@ const handler: Handler = async (
     {
       iat: Date.now(),
       handle,
+      cost: getRarityCost(handle),
       ip: headerIp
     },
     sessionSecret,

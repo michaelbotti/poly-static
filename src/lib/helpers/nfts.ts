@@ -1,4 +1,4 @@
-import { ALLOWED_CHAR, BETA_PHASE_MATCH } from "../constants";
+import { ALLOWED_CHAR } from "../constants";
 
 export type RarityType = "Legendary" | "Ultra Rare" | "Rare" | "Common" | "Basic";
 export type RarityColorTypes = "white" | "blue" | "green" | "red";

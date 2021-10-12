@@ -3,13 +3,12 @@ import { PageProps, navigate, Link } from "gatsby";
 import Countdown from "react-countdown";
 
 import { SessionResponseBody } from "../../netlify/functions/session";
-import { PaymentAddressBody, PaymentAddresses, PaymentAddressResponse, PaymentResponseBody } from "../../netlify/functions/payment";
+import { PaymentAddressBody, PaymentResponseBody } from "../../netlify/functions/payment";
 import { LogoMark } from "../components/logo";
 import SEO from "../components/seo";
 import { getAccessTokenFromCookie, getSessionDataCookie, getSessionTokenFromCookie } from "../lib/helpers/session";
 import NFTPreview from "../components/NFTPreview";
 import { getRarityCost, getRarityHex, getRaritySlug, getRarityColor } from "../lib/helpers/nfts";
-import Button from "../components/button";
 import { HEADER_HANDLE, HEADER_APPCHECK, HEADER_JWT_ACCESS_TOKEN, HEADER_JWT_SESSION_TOKEN } from "../lib/constants";
 import { requestToken } from "../lib/firebase";
 import { Loader } from "../components/Loader";
@@ -22,6 +21,7 @@ function SessionPage({
   const [currentIndex, setCurrentIndex] = useState<number>(0);
   const [sessionsData, setSessionsData] = useState<SessionResponseBody[]>([]);
   const [paymentsData, setPaymentsData] = useState<PaymentAddressBody[]>([]);
+  const [invalidNotices, setInvalidNotices] = useState<string[]>(null);
 
   useEffect(() => {
     (async () => {
@@ -32,7 +32,7 @@ function SessionPage({
         setPaymentsData(
           sessionsFromCookie.map(session => ({
             address: session.address,
-            paid: false
+            state: 'empty'
           }))
         )
 
@@ -68,6 +68,7 @@ function SessionPage({
           [HEADER_APPCHECK]: appCheck,
           [HEADER_JWT_ACCESS_TOKEN]: getAccessTokenFromCookie(),
           [HEADER_JWT_SESSION_TOKEN]: sessionToken.token,
+          [HEADER_HANDLE]: sessionToken.data.handle
         }
       }).then(res => res.json())
 
@@ -79,6 +80,16 @@ function SessionPage({
       if (payments) {
         setPaymentsData(res.addresses)
       }
+
+      const invalidNotices = payments.map((pm, index) => {
+        if ('invalid' === pm.state) {
+          return `You sent an invalid payment! We are refunding you, please allow 1-3 hours for confirmation.`;
+        }
+
+        return null;
+      });
+
+      setInvalidNotices(invalidNotices);
     }, 10000);
 
     return () => clearInterval(checkPayments);
@@ -86,6 +97,7 @@ function SessionPage({
 
   const currentSessionData = sessionsData[currentIndex];
   const currentPaymentData = paymentsData && paymentsData.find(data => data.address === currentSessionData.address);
+  const currentNotice = invalidNotices && invalidNotices.find((notice, index) => index === currentIndex);
 
   return (
     <>
@@ -99,7 +111,7 @@ function SessionPage({
                 onClick={() => setCurrentIndex(index)}
                 className={`${index !== currentIndex ? `bg-dark-100 opacity-60` : `bg-dark-200`} flex-inline items-center justify-center px-4 py-2 rounded-t-lg mr-4`}
               >
-                <h4>Session {index + 1}</h4>
+                <h4>Session {index + 1} {currentNotice && <>(Error)</>}</h4>
               </button>
             )
           })}
@@ -153,10 +165,14 @@ function SessionPage({
                 <span className="text-lg font-normal">to the following address:</span>
               </h4>
               <div className="relative">
-                <pre className="p-4 rounded-t-lg shadow-inner shadow-lg bg-dark-300 overflow-hidden opacity-70">
-                  {currentSessionData.address}
-                </pre>
-                <button className="absolute top-0 right-0 h-full w-16 bg-primary-100 rounded-tr-lg">Copy</button>
+                {'empty' === currentPaymentData.state && (
+                  <>
+                    <pre className="p-4 rounded-t-lg shadow-inner shadow-lg bg-dark-300 overflow-hidden opacity-70">
+                      {currentSessionData.address}
+                    </pre>
+                    <button className="absolute top-0 right-0 h-full w-16 bg-primary-100 rounded-tr-lg">Copy</button>
+                  </>
+                )}
               </div>
               <Countdown
                 date={currentSessionData.data.exp}
@@ -168,15 +184,15 @@ function SessionPage({
                   }
                 }}
                 renderer={({ formatted, total }) => {
-                  const isWarning = !currentPaymentData?.paid && total < 120 * 1000;
+                  const isWarning = currentPaymentData?.state !== 'paid' && total < 120 * 1000;
                   return (
                     <div
-                      className={`${currentPaymentData?.paid ? 'bg-primary-100' : 'bg-dark-100'} border-t-4 border-primary-100 flex items-center justify-between p-8 rounded-lg rounded-t-none shadow-lg`}
+                      className={`${currentPaymentData?.state === 'paid' ? 'bg-primary-100' : 'bg-dark-100'} border-t-4 border-primary-100 flex items-center justify-between p-8 rounded-lg rounded-t-none shadow-lg`}
                       style={{
                         borderColor: isWarning ? 'red' : ''
                       }}
                     >
-                      {currentPaymentData?.paid ? (
+                      {currentPaymentData?.state === 'paid' ? (
                         <>
                           <div>
                             <h2 className="text-xl font-bold mb-2">We're minting your handle!</h2>
@@ -186,14 +202,22 @@ function SessionPage({
                         </>
                       ) : (
                         <>
-                          <div>
-                            {isWarning && <h6 className="text-lg font-bold" style={{ color: 'red' }}>Hurry Up!</h6>}
-                            <h2 className="text-xl font-bold mb-2">Waiting for payment...</h2>
-                            <h4 className="text-xl">
-                              Time Left: <strong>{formatted.minutes}:{formatted.seconds}</strong>
-                            </h4>
-                          </div>
-                          <Loader className="mx-0" />
+                          {currentNotice ? (
+                            <div className="mt-4">
+                              {currentNotice && <p className="text-lg">Whoops! {currentNotice}</p>}
+                            </div>
+                          ) : (
+                            <>
+                              <div>
+                                {isWarning && <h6 className="text-lg font-bold" style={{ color: 'red' }}>Hurry Up!</h6>}
+                                <h2 className="text-xl font-bold mb-2">Waiting for payment...</h2>
+                                <h4 className="text-xl">
+                                  Time Left: <strong>{formatted.minutes}:{formatted.seconds}</strong>
+                                </h4>
+                              </div>
+                              <Loader className="mx-0" />
+                            </>
+                          )}
                         </>
                       )}
                     </div>

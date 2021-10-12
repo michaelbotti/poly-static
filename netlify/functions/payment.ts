@@ -7,14 +7,15 @@ import {
 import jwt from 'jsonwebtoken';
 import { fetch } from 'cross-fetch';
 
-import { HEADER_APPCHECK, HEADER_JWT_ACCESS_TOKEN, HEADER_JWT_SESSION_TOKEN, HEADER_PHONE } from "../../src/lib/constants";
+import { HEADER_APPCHECK, HEADER_HANDLE, HEADER_JWT_ACCESS_TOKEN, HEADER_JWT_SESSION_TOKEN, HEADER_PHONE } from "../../src/lib/constants";
 import { getSecret, verifyAppCheck } from "../helpers";
+import { getRarityCost } from "../../src/lib/helpers/nfts";
 
 export interface PaymentAddressResponse {
   address: string;
   summary: {
     assetBalances: {
-      quantity: number;
+      quantity: string;
       asset: {
         assetName: string;
       }
@@ -24,7 +25,7 @@ export interface PaymentAddressResponse {
 
 export interface PaymentAddressBody {
   address: string;
-  paid: boolean;
+  state: 'paid' | 'empty' | 'invalid';
 }
 
 export interface PaymentResponseBody {
@@ -46,6 +47,7 @@ const handler: Handler = async (
   const { headers, queryStringParameters } = event;
 
   const addresses = queryStringParameters?.addresses;
+  const handle = headers[HEADER_HANDLE];
   const appCheck = headers[HEADER_APPCHECK];
   const accessToken = headers[HEADER_JWT_ACCESS_TOKEN];
   const sessionToken = headers[HEADER_JWT_SESSION_TOKEN];
@@ -112,6 +114,8 @@ const handler: Handler = async (
     ? process.env.GRAPHQL_TESTNET_URL
     : process.env.GRAPHQL_MAINNET_URL
 
+  console.log(url);
+
   const res: GraphqlPaymentAddressesResponse = await fetch(url, {
     method: 'POST',
     headers: {
@@ -157,22 +161,16 @@ const handler: Handler = async (
     },
   } = res;
 
+  console.log(paymentAddresses);
+
   const data: PaymentResponseBody = {
     error: false,
     addresses: paymentAddresses.map((paymentAddress) => {
       const utxos = paymentAddress?.summary?.assetBalances || null;
-      if (!utxos || !utxos.find(
-        ({ quantity, asset }) => asset.assetName === "ada" && quantity > 0
-      )) {
-        return {
-          address: paymentAddress.address,
-          paid: false
-        };
-      }
-
+      const ada = utxos && utxos.find(({ asset }) => 'ada' === asset.assetName);
       return {
         address: paymentAddress.address,
-        paid: true
+        state: ada ? getStateByBalance(ada.quantity, getRarityCost(handle) * 1000000) : 'empty'
       };
     })
   };
@@ -180,6 +178,20 @@ const handler: Handler = async (
   return {
     statusCode: 200,
     body: JSON.stringify(data)
+  }
+}
+
+const getStateByBalance = (balance: string, cost: number): 'paid' | 'invalid' | 'empty' => {
+  if (parseInt(balance) !== cost && parseInt(balance) !== 0) {
+    return 'invalid';
+  }
+
+  if (parseInt(balance) === 0) {
+    return 'empty';
+  }
+
+  if (parseInt(balance) === cost) {
+    return 'paid';
   }
 }
 
