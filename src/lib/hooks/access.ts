@@ -1,18 +1,6 @@
 import { Dispatch, SetStateAction, useEffect, useState } from "react";
-import Cookie from 'js-cookie';
 
-import { requestToken } from "../firebase";
-import { HEADER_JWT_ACCESS_TOKEN, HEADER_APPCHECK, COOKIE_ACCESS_KEY } from "../constants";
-import { JwtPayload } from "jsonwebtoken";
-import { getAccessTokenFromCookie, getSessionDataCookie } from "../helpers/session";
-
-interface VerifyResponseBody {
-  error: boolean;
-  token?: string;
-  data?: JwtPayload;
-  verified?: boolean;
-  message?: string;
-}
+import { getAccessTokenFromCookie } from "../helpers/session";
 
 export const useAccessOpen = (): [
   boolean | null,

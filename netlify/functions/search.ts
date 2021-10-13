@@ -96,12 +96,13 @@ const handler: Handler = async (
   }
 
   const { exists, policyId, assetName } = await queryHandleOnchain(handle);
+  const domain = process.env.NODE_ENV === 'development' ? 'testnet.cardanoscan.io' : 'cardanoscan.io';
   if (exists) {
     return {
       statusCode: 200,
       body: JSON.stringify({
         available: false,
-        link: `https://cardanoscan.io/token/${policyId}.${assetName}`,
+        link: `https://${domain}/token/${policyId}.${assetName}`,
         message: "Handle already exists!",
         twitter: false,
       } as HandleResponseBody),

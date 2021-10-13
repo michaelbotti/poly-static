@@ -5,6 +5,7 @@ import {
   NormalizedCacheObject,
   gql,
 } from "@apollo/client";
+import cardano from '@emurgo/cip14-js';
 
 let apolloClient: ApolloClient<NormalizedCacheObject>;
 export const getApolloClient = (): ApolloClient<NormalizedCacheObject> => {
@@ -14,7 +15,7 @@ export const getApolloClient = (): ApolloClient<NormalizedCacheObject> => {
 
   apolloClient = new ApolloClient({
     link: new HttpLink({
-      uri: process.env.GRAPHQL_MAINNET_URL,
+      uri: process.env.NODE_ENV === 'development' ? process.env.GRAPHQL_TESTNET_URL : process.env.GRAPHQL_MAINNET_URL,
       fetch: fetch,
     }),
     cache: new InMemoryCache(),
@@ -38,16 +39,17 @@ export const queryHandleOnchain = async (handle: string): Promise<QueryHandleOnc
    * with cardano-lib based on:
    * - assetName.policyId
    */
-  let fingerprint = handle;
-  if ("onchain" === handle) {
-    fingerprint = "asset1d79zgp6s9pdmp6vvcaty8tdy4c572k3avrehfr";
-  }
+
+  let fingerprint = cardano.fromParts(
+    Buffer.from('5b7e2b5608c0f38eb186241f8b883d2e7bcad382f78c1e4e8993e513', 'hex'),
+    Buffer.from(handle)
+  );
 
   const {
     data: { assets },
   } = await client.query({
     variables: {
-      id: fingerprint,
+      id: fingerprint.fingerprint(),
     },
     query: GET_ASSET_LOCATION,
   });

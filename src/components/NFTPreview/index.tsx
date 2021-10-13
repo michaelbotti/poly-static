@@ -61,7 +61,7 @@ const NFTPreview: FC<NFTPreviewProps> = ({
             </p>
             <Logo handle={handle} className="absolute top-6 right-6 w-12" />
             <p className="m-0 text-xs font-bold absolute bottom-6 right-6">
-              adahandle.com
+              handle.me/{handle}
             </p>
           </div>
         </div>

@@ -10,6 +10,7 @@ import Button from '../button';
 import { setAccessTokenCookie } from '../../lib/helpers/session';
 
 import 'react-phone-number-input/style.css'
+import { Link } from 'gatsby';
 
 interface IntroTextProps {
   count: number;
@@ -48,6 +49,7 @@ export const HandleQueue = (): JSX.Element => {
   const [phoneInput, setPhoneInput] = useState<string>('');
   const [authInput, setAuthInput] = useState<string>('');
   const [showPlacement, setShowPlacement] = useState<boolean>(false);
+  const [touChecked, setTouChecked] = useState<boolean>(false);
 
   const form = useRef(null);
   const [, setAccessOpen] = useAccessOpen();
@@ -147,35 +149,52 @@ export const HandleQueue = (): JSX.Element => {
   return (
     <>
       <div className="flex align-center justify-stretch bg-dark-200 rounded-t-lg border-2 border-b-0 border-dark-300">
-        <button onClick={() => {
-          setAuthInput('');
-          setAction('save')
-        }} className={`text-white text-center p-4 w-1/2 rounded-lg rounded-r-none rounded-bl-none border-b-4 ${'save' === action ? 'border-primary-100' : 'opacity-80 border-dark-200'}`}>
+        <button
+          onClick={() => {
+            setAuthInput("");
+            setAction("save");
+          }}
+          className={`text-white text-center p-4 w-1/2 rounded-lg rounded-r-none rounded-bl-none border-b-4 ${
+            "save" === action
+              ? "border-primary-100"
+              : "opacity-80 border-dark-200"
+          }`}
+        >
           Enter Queue
         </button>
-        <button onClick={() => {
-          setAction('auth')
-        }} className={`text-white text-center p-4 w-1/2 rounded-lg rounded-l-none rounded-br-none border-b-4 ${'auth' === action ? 'border-primary-100' : 'opacity-80 border-dark-200'}`}>
+        <button
+          onClick={() => {
+            setAction("auth");
+          }}
+          className={`text-white text-center p-4 w-1/2 rounded-lg rounded-l-none rounded-br-none border-b-4 ${
+            "auth" === action
+              ? "border-primary-100"
+              : "opacity-80 border-dark-200"
+          }`}
+        >
           Authenticate
         </button>
       </div>
       <form onSubmit={(e) => e.preventDefault()} ref={form}>
-      <PhoneInput
-        name="phone"
-        data-lpignore="true"
-        disabled={savingSpot}
-        placeholder={'Your mobile number...'}
-        className={`${'auth' === action ? 'rounded-none border-b-0' : ''} focus:ring-0 focus:ring-opacity-0 border-2 outline-none form-input bg-dark-100 border-dark-300 px-6 py-4 text-xl w-full appearance-none`}
-        defaultCountry="US"
-        value={phoneInput}
-        onChange={setPhoneInput}/>
-        {'auth' === action && (
+        <PhoneInput
+          name="phone"
+          data-lpignore="true"
+          disabled={savingSpot}
+          placeholder={"Your mobile number..."}
+          className={`${
+            "auth" === action ? "rounded-none border-b-0" : ""
+          } focus:ring-0 focus:ring-opacity-0 border-2 outline-none form-input bg-dark-100 border-dark-300 px-6 py-4 text-xl w-full appearance-none`}
+          defaultCountry="US"
+          value={phoneInput}
+          onChange={setPhoneInput}
+        />
+        {"auth" === action && (
           <>
             <input
               name="auth"
               data-lpignore="true"
               disabled={authenticating}
-              placeholder={'Your 6 digit code...'}
+              placeholder={"Your 6 digit code..."}
               type="number"
               onChange={(e) => setAuthInput(e.target.value)}
               value={authInput}
@@ -184,20 +203,37 @@ export const HandleQueue = (): JSX.Element => {
           </>
         )}
         <Button
-          className={`w-full rounded-t-none ${authenticating || savingSpot ? 'cursor-not-allowed bg-dark-400' : ''}`}
+          className={`w-full rounded-t-none ${
+            authenticating || savingSpot ? "cursor-not-allowed bg-dark-400" : ""
+          }`}
           buttonStyle="primary"
           type="submit"
-          disabled={authenticating}
-          onClick={'auth' === action ? handleAuthenticating : handleSaving}>
-          {authenticating && 'Authenticating...'}
-          {savingSpot && 'Entering queue...'}
-          {!authenticating && !savingSpot && 'Submit'}
+          disabled={authenticating || !touChecked}
+          onClick={"auth" === action ? handleAuthenticating : handleSaving}
+        >
+          {authenticating && "Authenticating..."}
+          {savingSpot && "Entering queue..."}
+          {!authenticating && !savingSpot && "Submit"}
         </Button>
       </form>
-      {responseMessage && <p className="my-2">
-        {responseMessage}{" "}
-        {showPlacement && <IntroText count={queue} />}
-      </p>}
+      <div className="flex items-center m-2 text-sm">
+        <input
+          className="form-checkbox text-primary-200 rounded focus:ring-primary-200"
+          id="tou"
+          name="tou"
+          type="checkbox"
+          checked={touChecked}
+          onChange={() => setTouChecked(!touChecked)}
+        />
+        <label className="ml-2 text-white" htmlFor="gdpr">
+          I agree to the <Link to="/tou" className="text-primary-100">Terms of Use</Link>
+        </label>
+      </div>
+      {responseMessage && (
+        <p className="my-2">
+          {responseMessage} {showPlacement && <IntroText count={queue} />}
+        </p>
+      )}
     </>
-  )
+  );
 };

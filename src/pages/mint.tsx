@@ -9,19 +9,21 @@ import { HandleSearchReserveFlow } from "../components/HandleSearch";
 import { Loader } from "../components/Loader";
 import NFTPreview from "../components/NFTPreview";
 import { HandleQueue } from "../components/HandleQueue";
+import { useChainLoad } from "../lib/hooks/chainLoad";
 
 function MintPage() {
   const { primed, handle } = useContext(HandleMintContext);
   const [accessOpen] = useAccessOpen();
 
   usePrimeMintingContext();
+  const [load] = useChainLoad();
 
   return (
     <>
       <SEO title="Mint" />
       <section id="top">
         <div
-          className="grid grid-cols-12 gap-16 bg-dark-200 rounded-lg place-content-start p-8"
+          className="grid grid-cols-12 gap-16 bg-dark-200 rounded-lg place-content-start p-8 mb-16"
           style={{ minHeight: "60vh" }}
           >
             {null === accessOpen && (
@@ -35,7 +37,7 @@ function MintPage() {
             {false === accessOpen && (
               <>
                 <div className="col-span-6 relative z-10">
-                  <h4 className="w-full text-4xl font-bold text-primary-100 mb-4">🎉 Beta Launch! 🎉</h4>
+                  <h2 className="w-full text-4xl font-bold text-primary-100 mb-4">🎉 Beta Launch! 🎉</h2>
                   <div className="text-lg">
                     <p>To achieve the fairest launch possible, we are <strong>requiring one-time phone authentication</strong> during the beta phase ONLY.</p>
                     <p>We <strong>do not keep any data</strong>, your details are <strong>completely private</strong>, and our code <strong>is completely <a href="https://github.com/adahandle" target="_blank" className="text-primary-100">open-source</a> and viewable by the public</strong>.</p>
@@ -46,8 +48,13 @@ function MintPage() {
                   <p>If you want more information explaining the process, read our <a href="#" className="text-primary-100">detailed Medium post &rarr;</a>.</p>
                 </div>
                 <div className="col-span-6">
-                  <h5 className="text-2xl text-white text-center mb-4">Get Started</h5>
+                  <h3 className="text-2xl text-white text-center mb-4">Get Started</h3>
                   <HandleQueue />
+                  <h4 className="text-2xl text-white text-center my-4">Current Chain Load</h4>
+                  <p className={`text-4xl text-primary-100 text-center m-0 text-primary-100`}
+                    style={{
+                      color: parseInt(load) > 80 ? 'red' : ''
+                    }}>{load ? `${load}%` : <Loader />}</p>
                 </div>
               </>
             )}
