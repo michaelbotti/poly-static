@@ -5,6 +5,8 @@ import Form from '../components/mailchimp';
 import { HandleMintContextProvider } from '../context/mint';
 import { requestToken } from "../lib/firebase";
 
+import "../../src/styles/global.css";
+
 const Layout: FC = ({ children }): JSX.Element => {
 
   // Ensure appcheck.

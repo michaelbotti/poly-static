@@ -4,7 +4,6 @@ import {
   HandlerContext,
   HandlerResponse,
 } from "@netlify/functions";
-import "cross-fetch/polyfill";
 import { HEADER_APPCHECK } from "../../src/lib/constants";
 import { verifyAppCheck } from "../helpers";
 

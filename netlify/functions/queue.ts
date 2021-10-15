@@ -8,6 +8,7 @@ import { fetch } from 'cross-fetch';
 
 import { HEADER_APPCHECK, HEADER_PHONE } from "../../src/lib/constants";
 import { verifyAppCheck } from "../helpers";
+import { getNodeEndpointUrl } from "../helpers/util";
 
 
 interface AppendAccessResponse {
@@ -59,7 +60,7 @@ const handler: Handler = async (
   // }
 
   try {
-    const data: QueueResponseBody = await (await fetch(`${process.env.NODEJS_APP_URL}/queue`, {
+    const data: QueueResponseBody = await (await fetch(`${getNodeEndpointUrl()}/queue`, {
       method: 'POST',
       headers: {
         'Authorization': `Basic ${process.env.NODE_AUTH_TOKEN_MAINNET}`,

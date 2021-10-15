@@ -32,7 +32,7 @@ export const Button: FC<ButtonProps> = ({
       !disabled && classes.push("bg-primary-200 hover:bg-dark-100 active:bg-dark-100 text-dark-100 hover:text-white active:text-white");
     case "secondary":
     default:
-      !disabled && classes.push("hover:bg-dark-100 active:bg-dark-100 text-white");
+      !disabled && classes.push("bg-primary-100 hover:bg-primary-200 active:bg-dark-100 text-white");
   }
 
   if (internal && href?.length) {

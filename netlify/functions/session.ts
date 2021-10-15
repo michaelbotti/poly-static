@@ -5,7 +5,6 @@ import {
   HandlerResponse
 } from "@netlify/functions";
 import jwt, { decode, JwtPayload } from "jsonwebtoken";
-import "cross-fetch/polyfill";
 
 import {
   HEADER_APPCHECK,
@@ -21,6 +20,7 @@ import {
   ActiveSessionType,
   ReservedHandlesType,
 } from "../../src/context/mint";
+import { fetchNodeApp, getNodeEndpointUrl } from '../helpers/util';
 import { getRarityCost, isValid, normalizeNFTHandle } from "../../src/lib/helpers/nfts";
 import { verifyAppCheck, getSecret } from "../helpers";
 import { verifyTwitterUser } from "../helpers";
@@ -189,13 +189,12 @@ const handler: Handler = async (
   );
 
   // Get payment details from server.
-  const res: NodeSessionResponseBody = await (await fetch(`${process.env.NODEJS_APP_URL}/session`, {
+  const res: NodeSessionResponseBody = await fetchNodeApp('/session', {
     headers: {
-      'Authorization': `Basic ${process.env.NODE_AUTH_TOKEN_MAINNET}`,
       [HEADER_JWT_ACCESS_TOKEN]: accessToken,
       [HEADER_JWT_SESSION_TOKEN]: sessionToken,
     }
-  })).json();
+  }).then(res => res.json());
 
   const mutatedRes: SessionResponseBody = {
     error: res.error,

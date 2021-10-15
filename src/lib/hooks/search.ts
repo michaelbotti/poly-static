@@ -31,26 +31,6 @@ export const useSyncAvailableStatus = async (unsanitizedHandle: string) => {
       return;
     }
 
-    if (reservedHandles?.manual?.includes(handle)) {
-      setHandleResponse(getReservedUnavailable());
-      return;
-    }
-
-    if (reservedHandles?.spos?.includes(handle)) {
-      setHandleResponse(getSPOUnavailable());
-      return;
-    }
-
-    if (reservedHandles?.twitter?.includes(handle)) {
-      setHandleResponse(getTwitterResponseUnvailable());
-      return;
-    }
-
-    if (reservedHandles?.blacklist?.includes(handle)) {
-      setHandleResponse(getDefaultResponseUnvailable());
-      return;
-    }
-
     if (
       !handle.match(BETA_PHASE_MATCH) &&
       !reservedHandles?.twitter?.includes(handle)

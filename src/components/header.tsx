@@ -29,6 +29,10 @@ const navItems: NavItem[] = [
     title: 'Team'
   },
   {
+    route: '/tou',
+    title: 'Terms of Use'
+  },
+  {
     route: `/mint`,
     title: 'Get Your Handle',
     highlight: true

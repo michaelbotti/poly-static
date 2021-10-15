@@ -5,11 +5,10 @@ import {
   HandlerResponse,
 } from "@netlify/functions";
 import jwt from 'jsonwebtoken';
-import { fetch } from 'cross-fetch';
 
-import { HEADER_APPCHECK, HEADER_HANDLE, HEADER_JWT_ACCESS_TOKEN, HEADER_JWT_SESSION_TOKEN, HEADER_PHONE } from "../../src/lib/constants";
+import { HEADER_APPCHECK, HEADER_JWT_ACCESS_TOKEN, HEADER_JWT_SESSION_TOKEN, HEADER_PHONE } from "../../src/lib/constants";
 import { getSecret, verifyAppCheck } from "../helpers";
-import { getRarityCost } from "../../src/lib/helpers/nfts";
+import { fetchNodeApp } from "../helpers/util";
 
 export interface PaymentAddressResponse {
   address: string;
@@ -23,21 +22,21 @@ export interface PaymentAddressResponse {
   }
 }
 
-export interface PaymentAddressBody {
+export interface PaymentData {
   address: string;
-  state: 'paid' | 'empty' | 'invalid';
+  amount: number;
+};
+
+export interface GraphqlPaymentAddressesResponse {
+  error: boolean;
+  message?: string;
+  addresses?: PaymentData[];
 }
 
 export interface PaymentResponseBody {
   error: boolean;
   message?: string;
-  addresses: PaymentAddressBody[]
-}
-
-export interface GraphqlPaymentAddressesResponse {
-  data: {
-    paymentAddresses: PaymentAddressResponse[]
-  }
+  data: GraphqlPaymentAddressesResponse;
 }
 
 const handler: Handler = async (
@@ -47,17 +46,16 @@ const handler: Handler = async (
   const { headers, queryStringParameters } = event;
 
   const addresses = queryStringParameters?.addresses;
-  const handles = queryStringParameters?.handles;
   const appCheck = headers[HEADER_APPCHECK];
   const accessToken = headers[HEADER_JWT_ACCESS_TOKEN];
   const sessionToken = headers[HEADER_JWT_SESSION_TOKEN];
 
-  if (!accessToken || !sessionToken || !appCheck || !addresses || !handles) {
+  if (!accessToken || !sessionToken || !appCheck || !addresses) {
     return {
       statusCode: 400,
       body: JSON.stringify({
         error: true,
-        message: 'Must provide a valid access and session token.'
+        message: 'Missing required headers and parameters.'
       } as PaymentResponseBody)
     };
   }
@@ -110,86 +108,30 @@ const handler: Handler = async (
     }
   }
 
-  const url = process.env.NODE_ENV === 'development'
-    ? process.env.GRAPHQL_TESTNET_URL
-    : process.env.GRAPHQL_MAINNET_URL
-
-  const res: GraphqlPaymentAddressesResponse = await fetch(url, {
-    method: 'POST',
+  const res: GraphqlPaymentAddressesResponse = await fetchNodeApp(`/payment?addresses=${addresses}`, {
     headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      variables: {
-        addresses: addresses.split(','),
-      },
-      query: `
-        query ($addresses: [String!]!) {
-          paymentAddresses(
-            addresses: $addresses
-          ) {
-            address
-            summary{
-              assetBalances {
-                quantity
-                asset {
-                  assetName
-                }
-              }
-            }
-          }
-        }
-      `,
-    })
+      [HEADER_APPCHECK]: appCheck,
+      [HEADER_JWT_ACCESS_TOKEN]: accessToken,
+      [HEADER_JWT_SESSION_TOKEN]: sessionToken
+    }
   }).then(res => res.json())
 
-  if (!res?.data) {
+  if (res.error) {
     return {
       statusCode: 500,
       body: JSON.stringify({
         error: true,
-        message: 'Could not query payment address.'
+        message: res.message || ''
       } as PaymentResponseBody)
     }
   }
 
-  const {
-    data: {
-      paymentAddresses
-    },
-  } = res;
-
-  console.log(paymentAddresses);
-
-  const data: PaymentResponseBody = {
-    error: false,
-    addresses: paymentAddresses.map((paymentAddress, index) => {
-      const utxos = paymentAddress?.summary?.assetBalances || null;
-      const ada = utxos && utxos.find(({ asset }) => 'ada' === asset.assetName);
-      return {
-        address: paymentAddress.address,
-        state: ada ? getStateByBalance(ada.quantity, getRarityCost(handles.split(',')[index]) * 1000000) : 'empty'
-      };
-    })
-  };
-
   return {
     statusCode: 200,
-    body: JSON.stringify(data)
-  }
-}
-
-const getStateByBalance = (balance: string, cost: number): 'paid' | 'invalid' | 'empty' => {
-  if (parseInt(balance) !== cost && parseInt(balance) !== 0) {
-    return 'invalid';
-  }
-
-  if (parseInt(balance) === 0) {
-    return 'empty';
-  }
-
-  if (parseInt(balance) === cost) {
-    return 'paid';
+    body: JSON.stringify({
+      error: false,
+      data: res
+    })
   }
 }
 

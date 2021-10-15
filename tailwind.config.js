@@ -1,11 +1,18 @@
 // See https://tailwindcss.com/docs/configuration
 module.exports = {
   darkMode: 'media',
-  purge: [
-    "./src/**/*.js",
-    "./src/**/*.ts",
-    "./src/**/*.tsx"
-  ],
+  purge: {
+    content: [
+      "./src/**/*.js",
+      "./src/**/*.ts",
+      "./src/**/*.tsx"
+    ],
+    options: {
+      safelist: [
+        "PhoneInputInput"
+      ],
+    }
+  },
   // https://github.com/tailwindlabs/tailwindcss-forms
   plugins: [require("@tailwindcss/forms")],
   theme: {

@@ -4,11 +4,11 @@ import {
   HandlerContext,
   HandlerResponse,
 } from "@netlify/functions";
-import { fetch } from 'cross-fetch';
 import { JwtPayload } from 'jsonwebtoken';
 
 import { HEADER_APPCHECK, HEADER_PHONE, HEADER_PHONE_AUTH } from "../../src/lib/constants";
 import { verifyAppCheck } from "../helpers";
+import { fetchNodeApp } from "../helpers/util";
 
 export interface VerifyResponseBody {
   error: boolean;
@@ -55,16 +55,14 @@ const handler: Handler = async (
   // }
 
   try {
-    const data = await (await fetch(`${process.env.NODEJS_APP_URL}/verify`, {
+    const data = await fetchNodeApp(`/verify`, {
       method: 'GET',
       headers: {
         'Authorization': `Basic ${process.env.NODE_AUTH_TOKEN_MAINNET}`,
         [HEADER_PHONE]: headers[HEADER_PHONE],
         [HEADER_PHONE_AUTH]: headers[HEADER_PHONE_AUTH]
       }
-    })).json();
-
-    console.log(data);
+    }).then(res => res.json());
 
     return {
       statusCode: 200,

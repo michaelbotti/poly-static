@@ -3,17 +3,15 @@ import { PageProps, navigate, Link } from "gatsby";
 import Countdown from "react-countdown";
 
 import { SessionResponseBody } from "../../netlify/functions/session";
-import { PaymentAddressBody, PaymentResponseBody } from "../../netlify/functions/payment";
+import { PaymentData, PaymentResponseBody } from "../../netlify/functions/payment";
 import { LogoMark } from "../components/logo";
 import SEO from "../components/seo";
 import { getAccessTokenFromCookie, getSessionDataCookie, getSessionTokenFromCookie } from "../lib/helpers/session";
 import NFTPreview from "../components/NFTPreview";
-import { getRarityCost, getRarityHex, getRaritySlug, getRarityColor } from "../lib/helpers/nfts";
-import { HEADER_HANDLE, HEADER_APPCHECK, HEADER_JWT_ACCESS_TOKEN, HEADER_JWT_SESSION_TOKEN } from "../lib/constants";
+import { getRarityCost, getRarityHex } from "../lib/helpers/nfts";
+import { HEADER_APPCHECK, HEADER_JWT_ACCESS_TOKEN, HEADER_JWT_SESSION_TOKEN } from "../lib/constants";
 import { requestToken } from "../lib/firebase";
 import { Loader } from "../components/Loader";
-import { QueryHandleOnchainResponse } from "../../netlify/helpers/apollo";
-import { MintingStatusResponseBody } from "../../netlify/functions/mint";
 
 function SessionPage({
   location,
@@ -22,8 +20,7 @@ function SessionPage({
   const [message, setMessage] = useState<string>(null);
   const [currentIndex, setCurrentIndex] = useState<number>(0);
   const [sessionsData, setSessionsData] = useState<SessionResponseBody[]>([]);
-  const [paymentsData, setPaymentsData] = useState<PaymentAddressBody[]>([]);
-  const [mintingData, setMintingData] = useState<QueryHandleOnchainResponse[]>([]);
+  const [paymentsData, setPaymentsData] = useState<PaymentData[]>([]);
   const [invalidNotices, setInvalidNotices] = useState<string[]>(null);
 
   useEffect(() => {
@@ -35,7 +32,7 @@ function SessionPage({
         setPaymentsData(
           sessionsFromCookie.map(session => ({
             address: session.address,
-            state: 'empty'
+            amount: 0
           }))
         )
 
@@ -66,8 +63,7 @@ function SessionPage({
       }
 
       const addrs = sessionsData.map(sesh => sesh.address).join(',');
-      const handles = sessionsData.map(sesh => sesh.data.handle).join(',');
-      const res: PaymentResponseBody = await fetch(`/.netlify/functions/payment?addresses=${addrs}&handles=${handles}`, {
+      const res: PaymentResponseBody = await fetch(`/.netlify/functions/payment?addresses=${addrs}`, {
         headers: {
           [HEADER_APPCHECK]: appCheck,
           [HEADER_JWT_ACCESS_TOKEN]: getAccessTokenFromCookie(),
@@ -75,17 +71,17 @@ function SessionPage({
         }
       }).then(res => res.json())
 
-      if (!res) {
+      if (!res || res.error) {
         return;
       }
 
-      const payments = res.addresses;
+      const payments = res.data.addresses;
       if (payments) {
-        setPaymentsData(res.addresses)
+        setPaymentsData(payments)
       }
 
       const invalidNotices = payments.map((pm, index) => {
-        if ('invalid' === pm.state) {
+        if (pm.amount !== 0 && pm.amount !== currentSessionData.data.cost * 1000000) {
           return `You sent an invalid payment! We are refunding you, please allow 1-3 hours for confirmation.`;
         }
 
@@ -98,46 +94,8 @@ function SessionPage({
     return () => clearInterval(checkPayments);
   }, [currentIndex, paymentsData]);
 
-  useEffect(() => {
-    if (!paymentsData?.length || currentPaymentData?.state !== 'paid') {
-      return;
-    }
-
-    const checkMinting = setInterval(async () => {
-      console.log('checking mint status');
-      const appCheck = await requestToken();
-      const accessToken = getAccessTokenFromCookie();
-      const sessionToken = getSessionTokenFromCookie(currentIndex + 1);
-
-      if (!accessToken || !sessionToken) {
-        return;
-      }
-
-      const handle = sessionsData.map(sesh => sesh.data.handle).join(',');
-      const res: MintingStatusResponseBody[] = await fetch(`/.netlify/functions/mint?handles=${handle}`, {
-        headers: {
-          [HEADER_APPCHECK]: appCheck,
-          [HEADER_JWT_ACCESS_TOKEN]: getAccessTokenFromCookie(),
-          [HEADER_JWT_SESSION_TOKEN]: sessionToken.token,
-          [HEADER_HANDLE]: sessionToken.data.handle
-        }
-      }).then(res => res.json())
-
-      if (!res) {
-        return;
-      }
-
-      if (res.length) {
-        setMintingData(res.map(res => res.res))
-      }
-    }, 10000);
-
-    return () => clearInterval(checkMinting);
-  }, [currentIndex, paymentsData, mintingData])
-
-  const currentSessionData = sessionsData[currentIndex];
-  const currentPaymentData = paymentsData && paymentsData.find(data => data.address === currentSessionData.address);
-  const currentMintingData = mintingData && mintingData[currentIndex];
+  const currentSessionData: SessionResponseBody = sessionsData[currentIndex];
+  const currentPaymentData: PaymentData = paymentsData && paymentsData.find(data => data.address === currentSessionData.address);
   const currentNotice = invalidNotices && invalidNotices.find((notice, index) => index === currentIndex);
 
   return (
@@ -201,46 +159,40 @@ function SessionPage({
                 </span>
               </h2>
               <hr className="w-12 border-dark-300 border-2 block my-8" />
-              <h4 className="text-xl font-bold mb-8">
-                Send exactly {getRarityCost(currentSessionData.data.handle)} $ADA<br/>
-                <span className="text-lg font-normal">to the following address:</span>
-              </h4>
-              <div className="relative">
-                {'empty' === currentPaymentData.state && (
-                  <>
+              {(currentSessionData.data.cost * 1000000 !== currentPaymentData.amount) && currentPaymentData.amount === 0 && (
+                <>
+                  <h4 className="text-xl font-bold mb-8">
+                    Send exactly {getRarityCost(currentSessionData.data.handle)} $ADA<br/>
+                    <span className="text-lg font-normal">to the following address:</span>
+                  </h4>
+                  <div className="relative">
                     <pre className="p-4 rounded-t-lg shadow-inner shadow-lg bg-dark-300 overflow-hidden opacity-70">
                       {currentSessionData.address}
                     </pre>
                     <button className="absolute top-0 right-0 h-full w-16 bg-primary-100 rounded-tr-lg">Copy</button>
-                  </>
-                )}
-              </div>
+                  </div>
+                </>
+              )}
               <Countdown
+                onComplete={() => {
+                  window.location.reload();
+                }}
                 date={currentSessionData.data.exp}
                 renderer={({ formatted, total }) => {
-                  const isWarning = currentPaymentData?.state !== 'paid' && total < 120 * 1000;
+                  const isWarning = (currentPaymentData.amount !== currentSessionData.data.cost * 1000000) && total < 120 * 1000;
                   return (
                     <div
-                      className={`${currentPaymentData?.state === 'paid' ? 'bg-primary-100' : 'rounded-t-none bg-dark-100'} border-t-4 border-primary-100 flex items-center justify-between p-8 rounded-lg shadow-lg`}
+                      className={`${(currentPaymentData.amount === currentSessionData.data.cost * 1000000) ? 'bg-dark-100' : 'rounded-t-none bg-dark-100'} border-t-4 border-primary-100 flex items-center justify-between p-8 rounded-lg shadow-lg`}
                       style={{
                         borderColor: isWarning ? 'red' : ''
                       }}
                     >
-                      {currentMintingData?.exists && (
+                      {currentPaymentData.amount === currentSessionData.data.cost * 1000000 ? (
                         <>
                           <div>
-                            <h2 className="text-xl font-bold mb-2">You did it!</h2>
-                            <p className="text-lg">Congratulations, we've minted your handle.</p>
-                            <p className="text-lg"><a className="underline" href={`https://cardanoscan.io/${currentMintingData.txHash}`}>View on CardanoScan &rarr;</a></p>
-                          </div>
-                          <LogoMark className="w-16" fill={'#fff'}  />
-                        </>
-                      )}
-                      {currentPaymentData?.state === 'paid' && !currentMintingData?.exists ? (
-                        <>
-                          <div>
-                            <h2 className="text-xl font-bold mb-2">We're minting your handle!</h2>
-                            <p className="text-lg">Congratulations, you've successfully paid for: {currentSessionData.data.handle}</p>
+                            <h2 className="text-xl font-bold mb-2"><strong>Yay!</strong> Your payment was successful!</h2>
+                            <p className="text-lg">We're minting your handle right now, but we do it in batches. Please allow 1-2 hours for your handle to arrive in your wallet.</p>
+                            <p className="text-lg">This session will automatically close in <strong>{formatted.minutes}:{formatted.seconds}</strong></p>
                           </div>
                           <LogoMark className="w-16" fill={'#fff'}  />
                         </>

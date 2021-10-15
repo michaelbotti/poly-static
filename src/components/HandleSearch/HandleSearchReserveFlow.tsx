@@ -7,14 +7,12 @@ import React, {
 } from "react";
 import { useDebounce } from "use-debounce";
 import { Link, navigate } from "gatsby";
-import Cookie from 'js-cookie';
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
 dayjs.extend(relativeTime);
 
 import { requestToken } from "../../lib/firebase";
 import {
-  COOKIE_SESSION_PREFIX,
   HEADER_APPCHECK,
   HEADER_HANDLE,
   HEADER_IP_ADDRESS,
@@ -31,7 +29,6 @@ import { HandleSearchConnectTwitter } from "./";
 import { Loader } from "../Loader";
 import { SessionResponseBody } from '../../../netlify/functions/session';
 import { getAccessTokenFromCookie, getIpAddress, getSessionDataCookie, setSessionTokenCookie } from "../../lib/helpers/session";
-import { SESSION_KEY } from "../../lib/helpers/session";
 
 export const HandleSearchReserveFlow = ({ className = "", ...rest }) => {
   const {
@@ -51,8 +48,11 @@ export const HandleSearchReserveFlow = ({ className = "", ...rest }) => {
 
   useSyncAvailableStatus(debouncedHandle);
 
+  // Warm server.
   useEffect(() => {
-    fetch('/.netlify/functions/session')
+    try {
+      fetch('/.netlify/functions/session')
+    } catch (e) {}
   }, []);
 
   // Handles the input validation and updates.
@@ -63,7 +63,7 @@ export const HandleSearchReserveFlow = ({ className = "", ...rest }) => {
     }
 
     if (valid) {
-      setHandle(newHandle);
+      setHandle(newHandle.toLowerCase());
     }
   };
 
@@ -84,8 +84,6 @@ export const HandleSearchReserveFlow = ({ className = "", ...rest }) => {
         (token: string) => token
       )
     );
-
-    console.log(appCheckToken)
 
     const headers = new Headers();
     headers.append(HEADER_HANDLE, handle);

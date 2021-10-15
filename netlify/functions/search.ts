@@ -6,13 +6,16 @@ import {
   HandlerResponse,
 } from "@netlify/functions";
 import admin from 'firebase-admin';
-import { queryHandleOnchain, verifyAppCheck } from "../helpers";
+import { verifyAppCheck } from "../helpers";
 import {
   getDefaultActiveSessionUnvailable,
   getDefaultResponseAvailable,
+  getDefaultResponseUnvailable,
+  getReservedUnavailable,
+  getSPOUnavailable,
+  getTwitterResponseUnvailable,
   HandleResponseBody,
 } from "../../src/lib/helpers/search";
-import "cross-fetch/polyfill";
 import { normalizeNFTHandle } from "../../src/lib/helpers/nfts";
 import {
   HEADER_APPCHECK,
@@ -20,9 +23,10 @@ import {
   HEADER_IP_ADDRESS
 } from "../../src/lib/constants";
 import {
-  ActiveSessionType,
+  ActiveSessionType, ReservedHandlesType,
 } from "../../src/context/mint";
 import { initFirebase } from "../helpers/firebase";
+import { fetchNodeApp } from "../helpers/util";
 
 // Main handler function for GET requests.
 const handler: Handler = async (
@@ -97,18 +101,73 @@ const handler: Handler = async (
     };
   }
 
-  const { exists, policyId, assetName } = await queryHandleOnchain(handle);
-  const domain = process.env.NODE_ENV === 'development' ? 'testnet.cardanoscan.io' : 'cardanoscan.io';
+  const paidSessions = (await (
+    await admin.database()
+      .ref("/paidSessions")
+      .once("value", (snapshot) => snapshot.val())
+  ).val()) as ActiveSessionType[];
+
+  if (
+    paidSessions?.find(s => s.handle === handle)
+  ) {
+    return {
+      statusCode: 403,
+      body: JSON.stringify(getDefaultActiveSessionUnvailable()),
+    }
+  }
+
+  const { exists, policyID, assetName } = await fetchNodeApp('/exists', {
+    headers: {
+      [HEADER_HANDLE]: handle,
+      [HEADER_APPCHECK]: headerAppCheck
+    }
+  }).then(res => res.json());
+
   if (exists) {
+    const domain = process.env.NODE_ENV === 'development' ? 'testnet.cardanoscan.io' : 'cardanoscan.io';
     return {
       statusCode: 200,
       body: JSON.stringify({
         available: false,
-        link: `https://${domain}/token/${policyId}.${assetName}`,
+        link: `https://${domain}/token/${policyID}.${assetName}`,
         message: "Handle already exists!",
         twitter: false,
       } as HandleResponseBody),
     };
+  }
+
+  const reservedHandles = (await (
+    await admin.database()
+      .ref("/reservedHandles")
+      .once("value", (snapshot) => snapshot.val())
+  ).val()) as ReservedHandlesType;
+
+  if (reservedHandles?.manual?.includes(handle)) {
+    return {
+      statusCode: 403,
+      body: JSON.stringify(getReservedUnavailable()),
+    }
+  }
+
+  if (reservedHandles?.spos?.includes(handle)) {
+    return {
+      statusCode: 403,
+      body: JSON.stringify(getSPOUnavailable()),
+    }
+  }
+
+  if (reservedHandles?.twitter?.includes(handle)) {
+    return {
+      statusCode: 403,
+      body: JSON.stringify(getTwitterResponseUnvailable()),
+    }
+  }
+
+  if (reservedHandles?.blacklist?.includes(handle)) {
+    return {
+      statusCode: 403,
+      body: JSON.stringify(getDefaultResponseUnvailable()),
+    }
   }
 
   return {
