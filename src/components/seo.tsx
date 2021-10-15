@@ -29,7 +29,7 @@ function SEO({ description = '', lang = 'en', meta = [], keywords = [], title })
         },
         {
           property: `og:title`,
-          content: title,
+          content: `${title} | ${site.siteMetadata.title}`,
         },
         {
           name: `og:image`,

@@ -5,8 +5,8 @@ module.exports = {
     LMDB_STORE: true
   },
   siteMetadata: {
-    title: `@handle`,
-    description: `Introducing custom wallet addresses for the Cardano blockchain. Secured entirely on-chain.`,
+    title: `ADA Handle`,
+    description: `Introducing custom wallet addresses for the Cardano blockchain, secured on-chain.`,
     author: `@adahandle`,
   },
   plugins: [
