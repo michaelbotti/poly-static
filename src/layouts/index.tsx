@@ -1,4 +1,4 @@
-import React, { FC, useEffect } from "react";
+import React, { FC, useEffect, useState } from "react";
 
 import Header from "../components/header";
 import Form from '../components/mailchimp';
@@ -8,15 +8,17 @@ import { requestToken } from "../lib/firebase";
 import "../../src/styles/global.css";
 
 const Layout: FC = ({ children }): JSX.Element => {
+  const [mintPage, setMintPage] = useState<boolean>(false);
 
   // Ensure appcheck.
   useEffect(() => {
+    setMintPage(window.location.pathname === '/mint')
     requestToken();
   });
 
   return (
     <HandleMintContextProvider>
-      <Header className="dark:bg-dark-100 dark:text-dark-400 text-gray-900" />
+      <Header showMint={!mintPage} className="dark:bg-dark-100 dark:text-dark-400 text-gray-900" />
       <div className="flex flex-col min-h-screen font-sans dark:bg-dark-100 dark:text-dark-400 text-gray-900 overflow-hidden">
 
         <main className="w-full max-w-5xl px-4 pt-8 mx-auto md:px-8 md:pt-16">
