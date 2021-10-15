@@ -1,8 +1,10 @@
 export const RESERVE_EXPIRE_DATE = new Date('10/23/2021');
 export const CRON_LENGTH = 60000; // 1 minute
 export const MAX_SESSION_LENGTH = 600000; // 10 minutes
+export const MAX_ACCESS_LENGTH = 18000000; // 5 hours
+export const AUTH_CODE_EXPIRE = 60000; // 10 minutes
+export const MAX_CHAIN_LOAD = 0.8;
 export const RECAPTCHA_SITE_KEY = '6Ld0QUkcAAAAAN-_KvCv8R_qke8OYxotNJzIg2RP';
-export const NODEJS_APP_URL_MAINNET = 'https://node.adahandle.io';
 
 // Keys
 export const COOKIE_SESSION_PREFIX = 'CURRENT_HANDLE_SESSION';

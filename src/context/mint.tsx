@@ -1,4 +1,5 @@
 import React, { createContext, Dispatch, SetStateAction, useState } from "react";
+import { getFirebase } from "../lib/firebase";
 
 import { HandleResponseBody } from "../lib/helpers/search";
 

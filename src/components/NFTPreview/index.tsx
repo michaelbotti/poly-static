@@ -3,6 +3,7 @@ import { HandleMintContext } from "../../context/mint";
 
 import Background from "../../images/code.svg";
 import FullLogo from "../../images/logo-dark.svg";
+import { normalizeNFTHandle } from "../../lib/helpers/nfts";
 import { HandleDetails } from "../HandleSearch";
 import Logo from "./logo";
 
@@ -17,7 +18,7 @@ const NFTPreview: FC<NFTPreviewProps> = ({
   showPrice = true,
   showHeader = true,
 }) => {
-  const { isPurchasing } = useContext(HandleMintContext);
+  const { isPurchasing, reservedHandles, primed } = useContext(HandleMintContext);
   const textSize = () => {
     if (handle.length < 3) {
       return "text-jumbo";
@@ -63,6 +64,11 @@ const NFTPreview: FC<NFTPreviewProps> = ({
             <p className="m-0 text-xs font-bold absolute bottom-6 right-6">
               handle.me/{handle}
             </p>
+            {primed && reservedHandles.twitter.includes(normalizeNFTHandle(handle)) && (
+              <p className="m-0 text-xs font-bold absolute bottom-6 left-6" style={{
+                color: '#FFCD59'
+              }}>OG {primed && reservedHandles.twitter.indexOf(handle)}/{primed && reservedHandles.twitter.length}</p>
+            )}
           </div>
         </div>
       </div>

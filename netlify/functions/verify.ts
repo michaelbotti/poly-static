@@ -26,7 +26,7 @@ const handler: Handler = async (
 
   if (!headers[HEADER_APPCHECK]) {
     return {
-      statusCode: 403,
+      statusCode: 401,
       body: 'Unauthorized.'
     }
   }
@@ -46,13 +46,13 @@ const handler: Handler = async (
     }
   }
 
-  const verified = await verifyAppCheck(headers[HEADER_APPCHECK] as string);
-  if (!verified) {
-    return {
-      statusCode: 403,
-      body: 'Unauthorized.'
-    }
-  }
+  // const verified = await verifyAppCheck(headers[HEADER_APPCHECK] as string);
+  // if (!verified) {
+  //   return {
+  //     statusCode: 401,
+  //     body: 'Unauthorized.'
+  //   }
+  // }
 
   try {
     const data = await (await fetch(`${process.env.NODEJS_APP_URL}/verify`, {

@@ -25,7 +25,7 @@ import { getRarityCost, isValid, normalizeNFTHandle } from "../../src/lib/helper
 import { verifyAppCheck, getSecret } from "../helpers";
 import { verifyTwitterUser } from "../helpers";
 import { HandleResponseBody } from "../../src/lib/helpers/search";
-import { getDatabase } from "../helpers/firebase";
+import { getDatabase, initFirebase } from "../helpers/firebase";
 export interface NodeSessionResponseBody {
   error: boolean,
   message?: string;
@@ -41,7 +41,7 @@ export interface SessionResponseBody {
 }
 
 const unauthorizedResponse: HandlerResponse = {
-  statusCode: 403,
+  statusCode: 401,
   body: JSON.stringify({
     error: true,
     message: "Unauthorized.",
@@ -67,7 +67,7 @@ const handler: Handler = async (
 
   if (!headerAppCheck || !headerRecaptcha || !headerIp || !accessToken) {
     return {
-      statusCode: 403,
+      statusCode: 401,
       body: JSON.stringify({
         error: true,
         message: "Unauthorized.",
@@ -85,6 +85,8 @@ const handler: Handler = async (
     }
   }
 
+  await initFirebase();
+
   // Anti-bot.
   const reCaptchaValidated = await passesRecaptcha(headerRecaptcha, headerIp);
   if (!reCaptchaValidated) {
@@ -92,10 +94,10 @@ const handler: Handler = async (
   }
 
   // Verified App.
-  const appCheckValidated = await verifyAppCheck(headerAppCheck);
-  if (!appCheckValidated) {
-    return unauthorizedResponse;
-  }
+  // const appCheckValidated = await verifyAppCheck(headerAppCheck);
+  // if (!appCheckValidated) {
+  //   return unauthorizedResponse;
+  // }
 
   // Verified Twitter user if needed.
   if (headerTwitter) {

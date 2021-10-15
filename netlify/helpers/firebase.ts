@@ -1,10 +1,10 @@
-import * as admin from "firebase-admin";
+import admin from "firebase-admin";
 import { getS3 } from "./aws";
 
-let firebaseApp: admin.app.App;
-export const getFirebase = async (): Promise<admin.app.App> => {
-  if (firebaseApp) {
-    return firebaseApp;
+let firebase: admin.app.App;
+export const initFirebase = async (): Promise<void> => {
+  if (firebase) {
+    return;
   }
 
   const s3 = getS3();
@@ -22,16 +22,13 @@ export const getFirebase = async (): Promise<admin.app.App> => {
     throw new Error("Firebase did not successfully initialize.");
   }
 
-  firebaseApp = admin.initializeApp({
+  firebase = admin.initializeApp({
     credential: admin.credential.cert(credentials),
     databaseURL: 'https://ada-handle-reserve-default-rtdb.firebaseio.com/'
-  }, 'adahandle-client');
-
-  return firebaseApp;
+  });
 };
 
 export const verifyAppCheck = async (token: string): Promise<boolean> => {
-  const admin = await getFirebase();
   try {
     const res = await admin.appCheck().verifyToken(token);
     return !!res;
@@ -41,7 +38,6 @@ export const verifyAppCheck = async (token: string): Promise<boolean> => {
 };
 
 export const verifyTwitterUser = async (token: string): Promise<number | false> => {
-  const admin = await getFirebase();
   try {
     const { exp } = await admin.auth().verifyIdToken(token)
     return exp;
@@ -52,6 +48,5 @@ export const verifyTwitterUser = async (token: string): Promise<number | false> 
 }
 
 export const getDatabase = async (): Promise<admin.database.Database> => {
-  const app = await getFirebase();
-  return admin.database(app);
+  return admin.database();
 }

@@ -9,12 +9,17 @@ import { fetch } from 'cross-fetch';
 import { HEADER_APPCHECK, HEADER_PHONE } from "../../src/lib/constants";
 import { verifyAppCheck } from "../helpers";
 
-export interface QueueResponseBody {
+
+interface AppendAccessResponse {
+  updated: boolean;
+  alreadyExists: boolean;
+  position: number;
+  chainLoad: number | null;
+}
+
+export interface QueueResponseBody extends AppendAccessResponse {
   error: boolean;
-  updated?: boolean;
-  alreadyExists?: boolean;
   message?: string;
-  queue?: number;
 }
 
 const handler: Handler = async (
@@ -24,7 +29,7 @@ const handler: Handler = async (
   const { headers } = event;
   if (!headers[HEADER_APPCHECK]) {
     return {
-      statusCode: 403,
+      statusCode: 401,
       body: JSON.stringify({
         error: true,
         message: 'Unauthorized. An AppCheck token was not provided.'
@@ -42,16 +47,16 @@ const handler: Handler = async (
     }
   }
 
-  const verified = await verifyAppCheck(headers[HEADER_APPCHECK] as string);
-  if (!verified) {
-    return {
-      statusCode: 403,
-      body: JSON.stringify({
-        error: true,
-        message: `Unauthorized. Invalid AppCheck token: ${headers[HEADER_APPCHECK]}.`
-      } as QueueResponseBody)
-    }
-  }
+  // const verified = await verifyAppCheck(headers[HEADER_APPCHECK] as string);
+  // if (!verified) {
+  //   return {
+  //     statusCode: 401,
+  //     body: JSON.stringify({
+  //       error: true,
+  //       message: `Unauthorized. Invalid AppCheck token: ${headers[HEADER_APPCHECK]}.`
+  //     } as QueueResponseBody)
+  //   }
+  // }
 
   try {
     const data: QueueResponseBody = await (await fetch(`${process.env.NODEJS_APP_URL}/queue`, {

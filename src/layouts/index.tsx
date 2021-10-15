@@ -7,8 +7,8 @@ import { requestToken } from "../lib/firebase";
 
 const Layout: FC = ({ children }): JSX.Element => {
 
+  // Ensure appcheck.
   useEffect(() => {
-    // Ensure appcheck.
     requestToken();
   });
 

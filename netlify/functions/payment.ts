@@ -47,12 +47,12 @@ const handler: Handler = async (
   const { headers, queryStringParameters } = event;
 
   const addresses = queryStringParameters?.addresses;
-  const handle = headers[HEADER_HANDLE];
+  const handles = queryStringParameters?.handles;
   const appCheck = headers[HEADER_APPCHECK];
   const accessToken = headers[HEADER_JWT_ACCESS_TOKEN];
   const sessionToken = headers[HEADER_JWT_SESSION_TOKEN];
 
-  if (!accessToken || !sessionToken || !appCheck || !addresses) {
+  if (!accessToken || !sessionToken || !appCheck || !addresses || !handles) {
     return {
       statusCode: 400,
       body: JSON.stringify({
@@ -62,16 +62,16 @@ const handler: Handler = async (
     };
   }
 
-  const verified = await verifyAppCheck(appCheck as string);
-  if (!verified) {
-    return {
-      statusCode: 403,
-      body: JSON.stringify({
-        error: true,
-        message: `Unauthorized. Invalid AppCheck token: ${appCheck}.`
-      } as PaymentResponseBody)
-    }
-  }
+  // const verified = await verifyAppCheck(appCheck as string);
+  // if (!verified) {
+  //   return {
+  //     statusCode: 401,
+  //     body: JSON.stringify({
+  //       error: true,
+  //       message: `Unauthorized. Invalid AppCheck token: ${appCheck}.`
+  //     } as PaymentResponseBody)
+  //   }
+  // }
 
   const accessSecret = await getSecret('access');
   const sessionSecret = await getSecret('session');
@@ -113,8 +113,6 @@ const handler: Handler = async (
   const url = process.env.NODE_ENV === 'development'
     ? process.env.GRAPHQL_TESTNET_URL
     : process.env.GRAPHQL_MAINNET_URL
-
-  console.log(url);
 
   const res: GraphqlPaymentAddressesResponse = await fetch(url, {
     method: 'POST',
@@ -165,12 +163,12 @@ const handler: Handler = async (
 
   const data: PaymentResponseBody = {
     error: false,
-    addresses: paymentAddresses.map((paymentAddress) => {
+    addresses: paymentAddresses.map((paymentAddress, index) => {
       const utxos = paymentAddress?.summary?.assetBalances || null;
       const ada = utxos && utxos.find(({ asset }) => 'ada' === asset.assetName);
       return {
         address: paymentAddress.address,
-        state: ada ? getStateByBalance(ada.quantity, getRarityCost(handle) * 1000000) : 'empty'
+        state: ada ? getStateByBalance(ada.quantity, getRarityCost(handles.split(',')[index]) * 1000000) : 'empty'
       };
     })
   };

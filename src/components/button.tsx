@@ -6,6 +6,7 @@ interface ButtonProps {
   internal?: boolean;
   href?: string;
   className?: string;
+  disabled?: boolean;
   [key: string]: unknown;
 }
 
@@ -15,18 +16,23 @@ export const Button: FC<ButtonProps> = ({
   internal = true,
   buttonStyle = "secondary",
   children,
+  disabled,
   ...rest
 }): JSX.Element => {
   const classes = [
     "cursor-pointer hover:shadow-lg m-0 py-4 px-6 text-center rounded-lg inline-block font-bold",
   ];
 
+  if (disabled) {
+    classes.push("cursor-not-allowed bg-dark-300 hover:bg-dark-300 active:bg-dark-300 text-dark-350");
+  }
+
   switch (buttonStyle) {
     case "primary":
-      classes.push("bg-primary-200 hover:bg-dark-100 active:bg-dark-100 text-dark-100 hover:text-white active:text-white");
+      !disabled && classes.push("bg-primary-200 hover:bg-dark-100 active:bg-dark-100 text-dark-100 hover:text-white active:text-white");
     case "secondary":
     default:
-      classes.push("bg-primary-100 hover:bg-dark-100 active:bg-dark-100 text-white");
+      !disabled && classes.push("hover:bg-dark-100 active:bg-dark-100 text-white");
   }
 
   if (internal && href?.length) {
@@ -46,7 +52,7 @@ export const Button: FC<ButtonProps> = ({
   }
 
   return (
-    <button className={classes.join(" ") + " " + className} {...rest}>
+    <button className={classes.join(" ") + " " + className} disabled={disabled} {...rest}>
       {children}
     </button>
   );

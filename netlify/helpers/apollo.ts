@@ -24,21 +24,15 @@ export const getApolloClient = (): ApolloClient<NormalizedCacheObject> => {
   return apolloClient;
 };
 
-interface QueryHandleOnchainResponse {
+export interface QueryHandleOnchainResponse {
   exists: boolean;
   assetName?: string;
   policyId?: string;
+  txHash?: string;
 }
 
 export const queryHandleOnchain = async (handle: string): Promise<QueryHandleOnchainResponse> => {
   const client = getApolloClient();
-
-  /**
-   * Example query to demonstrate chain lookup.
-   * Later we'll need to encode the fingerprint
-   * with cardano-lib based on:
-   * - assetName.policyId
-   */
 
   let fingerprint = cardano.fromParts(
     Buffer.from('5b7e2b5608c0f38eb186241f8b883d2e7bcad382f78c1e4e8993e513', 'hex'),
@@ -46,7 +40,7 @@ export const queryHandleOnchain = async (handle: string): Promise<QueryHandleOnc
   );
 
   const {
-    data: { assets },
+    data: { assets, txHash },
   } = await client.query({
     variables: {
       id: fingerprint.fingerprint(),
@@ -55,7 +49,7 @@ export const queryHandleOnchain = async (handle: string): Promise<QueryHandleOnc
   });
 
   const exists = !!(0 < assets.length && assets[0].policyId && assets[0].assetName);
-  const data: QueryHandleOnchainResponse = { exists };
+  const data: QueryHandleOnchainResponse = { exists, txHash };
 
   if (exists) {
     data.assetName = assets[0].assetName;
@@ -108,7 +102,7 @@ export interface ProtocolParametersResponse {
 export const GET_ASSET_LOCATION = gql`
   query GetAssetLocation ($id: String) {
     assets(
-      limit: 1,
+      limit: 2,
       where: {
         fingerprint: {
           _eq: $id
@@ -117,6 +111,18 @@ export const GET_ASSET_LOCATION = gql`
     ) {
       policyId
       assetName
+      tokenMints {
+        transaction {
+          outputs(
+            order_by: {
+              index:asc
+            }
+          ) {
+            address
+            txHash
+          }
+        }
+      }
     }
   }
 `

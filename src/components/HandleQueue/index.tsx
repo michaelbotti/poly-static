@@ -85,12 +85,16 @@ export const HandleQueue = (): JSX.Element => {
       .then(res => res.json())
       .catch(e => console.log(e));
 
-      setQueue(res?.queue);
+      setQueue(res?.position);
       if (res.updated) {
-        if (res?.queue < 50) {
+        if (res?.position < 50) {
           setShowPlacement(true);
           setAction('auth');
           setResponseMessage(`Successfully saved! You should receive a text within five minutes.`);
+        } else {
+          setResponseMessage(`Successfully saved! You are currently #${res.position} in line. Please allow some time to receive your authentication code. ${res.chainLoad && (`
+            Current chain load is ${(res.chainLoad * 100).toString().substring(0, 5)}%
+          `)}`)
         }
       } else {
         setTimeoutResponseMessage(res?.message || 'That didn\'t work. Try again.');
@@ -203,13 +207,11 @@ export const HandleQueue = (): JSX.Element => {
           </>
         )}
         <Button
-          className={`w-full rounded-t-none ${
-            authenticating || savingSpot ? "cursor-not-allowed bg-dark-400" : ""
-          }`}
-          buttonStyle="primary"
+          className={`w-full rounded-t-none`}
+          buttonStyle={"primary"}
           type="submit"
-          disabled={authenticating || !touChecked}
-          onClick={"auth" === action ? handleAuthenticating : handleSaving}
+          disabled={authenticating || savingSpot || !touChecked}
+          onClick={touChecked && "auth" === action ? handleAuthenticating : handleSaving}
         >
           {authenticating && "Authenticating..."}
           {savingSpot && "Entering queue..."}
@@ -225,7 +227,7 @@ export const HandleQueue = (): JSX.Element => {
           checked={touChecked}
           onChange={() => setTouChecked(!touChecked)}
         />
-        <label className="ml-2 text-white" htmlFor="gdpr">
+        <label className="ml-2 text-white" htmlFor="tou">
           I agree to the <Link to="/tou" className="text-primary-100">Terms of Use</Link>
         </label>
       </div>

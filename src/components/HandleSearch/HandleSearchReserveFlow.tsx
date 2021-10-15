@@ -51,6 +51,10 @@ export const HandleSearchReserveFlow = ({ className = "", ...rest }) => {
 
   useSyncAvailableStatus(debouncedHandle);
 
+  useEffect(() => {
+    fetch('/.netlify/functions/session')
+  }, []);
+
   // Handles the input validation and updates.
   const onUpdateHandle = async (newHandle: string) => {
     const valid = isValid(newHandle);
@@ -72,9 +76,6 @@ export const HandleSearchReserveFlow = ({ className = "", ...rest }) => {
   const handleOnSubmit = async (e: FormEvent) => {
     e.preventDefault();
 
-    // Ping the serverless endpoint.
-    fetch('/.netlify/functions/session');
-
     const appCheckToken = await requestToken();
     const recaptchaToken: string = await window.grecaptcha.ready(() =>
       window.grecaptcha.execute(
@@ -83,6 +84,8 @@ export const HandleSearchReserveFlow = ({ className = "", ...rest }) => {
         (token: string) => token
       )
     );
+
+    console.log(appCheckToken)
 
     const headers = new Headers();
     headers.append(HEADER_HANDLE, handle);

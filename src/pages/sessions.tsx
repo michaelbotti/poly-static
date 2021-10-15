@@ -12,6 +12,8 @@ import { getRarityCost, getRarityHex, getRaritySlug, getRarityColor } from "../l
 import { HEADER_HANDLE, HEADER_APPCHECK, HEADER_JWT_ACCESS_TOKEN, HEADER_JWT_SESSION_TOKEN } from "../lib/constants";
 import { requestToken } from "../lib/firebase";
 import { Loader } from "../components/Loader";
+import { QueryHandleOnchainResponse } from "../../netlify/helpers/apollo";
+import { MintingStatusResponseBody } from "../../netlify/functions/mint";
 
 function SessionPage({
   location,
@@ -21,6 +23,7 @@ function SessionPage({
   const [currentIndex, setCurrentIndex] = useState<number>(0);
   const [sessionsData, setSessionsData] = useState<SessionResponseBody[]>([]);
   const [paymentsData, setPaymentsData] = useState<PaymentAddressBody[]>([]);
+  const [mintingData, setMintingData] = useState<QueryHandleOnchainResponse[]>([]);
   const [invalidNotices, setInvalidNotices] = useState<string[]>(null);
 
   useEffect(() => {
@@ -63,12 +66,12 @@ function SessionPage({
       }
 
       const addrs = sessionsData.map(sesh => sesh.address).join(',');
-      const res: PaymentResponseBody = await fetch(`/.netlify/functions/payment?addresses=${addrs}`, {
+      const handles = sessionsData.map(sesh => sesh.data.handle).join(',');
+      const res: PaymentResponseBody = await fetch(`/.netlify/functions/payment?addresses=${addrs}&handles=${handles}`, {
         headers: {
           [HEADER_APPCHECK]: appCheck,
           [HEADER_JWT_ACCESS_TOKEN]: getAccessTokenFromCookie(),
-          [HEADER_JWT_SESSION_TOKEN]: sessionToken.token,
-          [HEADER_HANDLE]: sessionToken.data.handle
+          [HEADER_JWT_SESSION_TOKEN]: sessionToken.token
         }
       }).then(res => res.json())
 
@@ -95,8 +98,46 @@ function SessionPage({
     return () => clearInterval(checkPayments);
   }, [currentIndex, paymentsData]);
 
+  useEffect(() => {
+    if (!paymentsData?.length || currentPaymentData?.state !== 'paid') {
+      return;
+    }
+
+    const checkMinting = setInterval(async () => {
+      console.log('checking mint status');
+      const appCheck = await requestToken();
+      const accessToken = getAccessTokenFromCookie();
+      const sessionToken = getSessionTokenFromCookie(currentIndex + 1);
+
+      if (!accessToken || !sessionToken) {
+        return;
+      }
+
+      const handle = sessionsData.map(sesh => sesh.data.handle).join(',');
+      const res: MintingStatusResponseBody[] = await fetch(`/.netlify/functions/mint?handles=${handle}`, {
+        headers: {
+          [HEADER_APPCHECK]: appCheck,
+          [HEADER_JWT_ACCESS_TOKEN]: getAccessTokenFromCookie(),
+          [HEADER_JWT_SESSION_TOKEN]: sessionToken.token,
+          [HEADER_HANDLE]: sessionToken.data.handle
+        }
+      }).then(res => res.json())
+
+      if (!res) {
+        return;
+      }
+
+      if (res.length) {
+        setMintingData(res.map(res => res.res))
+      }
+    }, 10000);
+
+    return () => clearInterval(checkMinting);
+  }, [currentIndex, paymentsData, mintingData])
+
   const currentSessionData = sessionsData[currentIndex];
   const currentPaymentData = paymentsData && paymentsData.find(data => data.address === currentSessionData.address);
+  const currentMintingData = mintingData && mintingData[currentIndex];
   const currentNotice = invalidNotices && invalidNotices.find((notice, index) => index === currentIndex);
 
   return (
@@ -176,23 +217,26 @@ function SessionPage({
               </div>
               <Countdown
                 date={currentSessionData.data.exp}
-                onComplete={() => {
-                  if (sessionsData.length > 1) {
-                    window.location.reload()
-                  } else {
-                    navigate('/mint');
-                  }
-                }}
                 renderer={({ formatted, total }) => {
                   const isWarning = currentPaymentData?.state !== 'paid' && total < 120 * 1000;
                   return (
                     <div
-                      className={`${currentPaymentData?.state === 'paid' ? 'bg-primary-100' : 'bg-dark-100'} border-t-4 border-primary-100 flex items-center justify-between p-8 rounded-lg rounded-t-none shadow-lg`}
+                      className={`${currentPaymentData?.state === 'paid' ? 'bg-primary-100' : 'rounded-t-none bg-dark-100'} border-t-4 border-primary-100 flex items-center justify-between p-8 rounded-lg shadow-lg`}
                       style={{
                         borderColor: isWarning ? 'red' : ''
                       }}
                     >
-                      {currentPaymentData?.state === 'paid' ? (
+                      {currentMintingData?.exists && (
+                        <>
+                          <div>
+                            <h2 className="text-xl font-bold mb-2">You did it!</h2>
+                            <p className="text-lg">Congratulations, we've minted your handle.</p>
+                            <p className="text-lg"><a className="underline" href={`https://cardanoscan.io/${currentMintingData.txHash}`}>View on CardanoScan &rarr;</a></p>
+                          </div>
+                          <LogoMark className="w-16" fill={'#fff'}  />
+                        </>
+                      )}
+                      {currentPaymentData?.state === 'paid' && !currentMintingData?.exists ? (
                         <>
                           <div>
                             <h2 className="text-xl font-bold mb-2">We're minting your handle!</h2>

@@ -5,7 +5,8 @@ import {
   HandlerCallback,
   HandlerResponse,
 } from "@netlify/functions";
-import { getFirebase, queryHandleOnchain, verifyAppCheck } from "../helpers";
+import admin from 'firebase-admin';
+import { queryHandleOnchain, verifyAppCheck } from "../helpers";
 import {
   getDefaultActiveSessionUnvailable,
   getDefaultResponseAvailable,
@@ -21,6 +22,7 @@ import {
 import {
   ActiveSessionType,
 } from "../../src/context/mint";
+import { initFirebase } from "../helpers/firebase";
 
 // Main handler function for GET requests.
 const handler: Handler = async (
@@ -37,7 +39,7 @@ const handler: Handler = async (
   // Ensure an AppCheck credential.
   if (!headerAppCheck || !headerIp) {
     return {
-      statusCode: 403,
+      statusCode: 401,
       body: JSON.stringify({
         available: false,
         message: "Unauthorized. No AppCheck or IP address found in request.",
@@ -55,21 +57,21 @@ const handler: Handler = async (
     };
   }
 
-  const validAPICall = await verifyAppCheck(headerAppCheck as string);
-  if (!validAPICall) {
-    return {
-      statusCode: 403,
-      body: JSON.stringify({
-        available: false,
-        message: `Unauthorized. Invalid AppCheck token: ${headerAppCheck}`,
-      } as HandleResponseBody),
-    };
-  }
+  // const validAPICall = await verifyAppCheck(headerAppCheck as string);
+  // if (!validAPICall) {
+  //   return {
+  //     statusCode: 401,
+  //     body: JSON.stringify({
+  //       available: false,
+  //       message: `Unauthorized. Invalid AppCheck token: ${headerAppCheck}`,
+  //     } as HandleResponseBody),
+  //   };
+  // }
 
   const handle = normalizeNFTHandle(headerHandle);
-  const database = (await getFirebase()).database();
+  await initFirebase();
   const activeSessions = (await (
-    await database
+    await admin.database()
       .ref("/activeSessions")
       .once("value", (snapshot) => snapshot.val())
   ).val()) as ActiveSessionType[];

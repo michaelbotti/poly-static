@@ -9,14 +9,12 @@ import { HandleSearchReserveFlow } from "../components/HandleSearch";
 import { Loader } from "../components/Loader";
 import NFTPreview from "../components/NFTPreview";
 import { HandleQueue } from "../components/HandleQueue";
-import { useChainLoad } from "../lib/hooks/chainLoad";
 
 function MintPage() {
   const { primed, handle } = useContext(HandleMintContext);
   const [accessOpen] = useAccessOpen();
 
   usePrimeMintingContext();
-  const [load] = useChainLoad();
 
   return (
     <>
@@ -50,11 +48,6 @@ function MintPage() {
                 <div className="col-span-6">
                   <h3 className="text-2xl text-white text-center mb-4">Get Started</h3>
                   <HandleQueue />
-                  <h4 className="text-2xl text-white text-center my-4">Current Chain Load</h4>
-                  <p className={`text-4xl text-primary-100 text-center m-0 text-primary-100`}
-                    style={{
-                      color: parseInt(load) > 80 ? 'red' : ''
-                    }}>{load ? `${load}%` : <Loader />}</p>
                 </div>
               </>
             )}
