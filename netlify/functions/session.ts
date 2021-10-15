@@ -196,6 +196,8 @@ const handler: Handler = async (
     }
   }).then(res => res.json());
 
+  console.log(res);
+
   const mutatedRes: SessionResponseBody = {
     error: res.error,
     message: res?.message || '',
