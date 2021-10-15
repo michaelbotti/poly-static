@@ -4,6 +4,7 @@ import {
   HandlerContext,
   HandlerResponse
 } from "@netlify/functions";
+import { fetch } from 'cross-fetch';
 import jwt, { decode, JwtPayload } from "jsonwebtoken";
 
 import {
