@@ -1,6 +1,5 @@
 // See https://tailwindcss.com/docs/configuration
 module.exports = {
-  darkMode: 'class',
   purge: {
     content: [
       "./src/**/*.js",

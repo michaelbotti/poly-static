@@ -2,10 +2,6 @@ import React from 'react';
 import { RECAPTCHA_SITE_KEY } from './src/lib/constants';
 
 export const onRenderBody = ({ setHeadComponents, setHtmlAttributes }) => {
-  setHtmlAttributes({
-    className: 'dark'
-  });
-
   setHeadComponents([
       <script
           async
