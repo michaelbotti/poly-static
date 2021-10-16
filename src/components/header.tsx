@@ -37,7 +37,6 @@ const navItems: NavItem[] = [
 
 const Header: FC<HeaderProps> = ({ className, showMint = true }) => {
   const [isExpanded, toggleExpansion] = useState<boolean>(false);
-  const [accessOpen] = useAccessOpen();
 
   return (
     <>
