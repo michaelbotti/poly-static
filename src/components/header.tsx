@@ -43,7 +43,7 @@ const Header: FC<HeaderProps> = ({ className, showMint = true }) => {
     <>
       <header className={`flex flex-wrap items-center justify-between p-4 mx-auto md:p-8 ${className}`} style={{ minHeight: 108 }}>
         <Link to="/">
-          <h1 className="flex items-center text-dark-100 no-underline">
+          <h1 className="flex items-center no-underline">
             <span className="sr-only">$handle</span>
             <Logo />
           </h1>
@@ -51,7 +51,7 @@ const Header: FC<HeaderProps> = ({ className, showMint = true }) => {
 
         <div className="flex items-center justify-center mr-auto">
           <button
-            className="items-center block px-3 py-2 border-dark-100 text-dark-100 dark:text-white border dark:border-white rounded md:hidden"
+            className="items-center block px-3 py-2 border-dark-100 text-white border border-white rounded md:hidden"
             onClick={() => toggleExpansion(!isExpanded)}
           >
             <svg
@@ -72,7 +72,7 @@ const Header: FC<HeaderProps> = ({ className, showMint = true }) => {
             {navItems.map((link) => {
               return (
                 <Link
-                  className={'block mt-4 text-dark-300 hover:text-primary-200 no-underline md:inline-block md:mt-0 md:ml-6 dark:text-dark-400'}
+                  className={'block mt-4 text-dark-300 hover:text-primary-200 no-underline md:inline-block md:mt-0 md:ml-6 text-dark-400'}
                   activeClassName="border-primary-200"
                   key={link.title}
                   to={link.route}
@@ -85,7 +85,7 @@ const Header: FC<HeaderProps> = ({ className, showMint = true }) => {
         </div>
         {showMint && (
           <Link
-            className={'block mt-4 text-dark-300 border-2 border-primary-200 px-4 py-2 rounded-lg font-bold no-underline md:inline-block md:mt-0 md:ml-6 dark:text-dark-400'}
+            className={'block mt-4 text-dark-300 border-2 border-primary-200 px-4 py-2 rounded-lg font-bold no-underline md:inline-block md:mt-0 md:ml-6 text-dark-400'}
             to={'/mint'}
           >
             Beta Sale Open! &rarr;
