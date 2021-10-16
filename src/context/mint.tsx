@@ -1,7 +1,8 @@
-import React, { createContext, Dispatch, SetStateAction, useState } from "react";
-import { getFirebase } from "../lib/firebase";
+import React, { createContext, Dispatch, SetStateAction, useEffect, useState } from "react";
+import { SessionResponseBody } from "../../netlify/functions/session";
 
 import { HandleResponseBody } from "../lib/helpers/search";
+import { getAllCurrentSessionData } from "../lib/helpers/session";
 
 export interface ReservedHandlesType {
   blacklist: string[],
@@ -18,21 +19,29 @@ export interface ActiveSessionType {
   start: number;
 }
 
+interface PaymentSession {
+  sessionResponse: SessionResponseBody;
+}
+
 export interface HandleMintContextType {
   handle: string;
-  handleResponse: HandleResponseBody | null;
+  handleResponse: HandleResponseBody;
   fetching: boolean;
   setFetching: Dispatch<SetStateAction<boolean>>;
-  twitterToken: string | null;
+  twitterToken: string;
   setHandle: Dispatch<SetStateAction<string>>;
-  reservedHandles: ReservedHandlesType | null;
+  reservedHandles: ReservedHandlesType;
+  pendingSessions: string[];
+  paymentSessions: PaymentSession[];
   primed: boolean;
   isPurchasing: boolean;
   setPrimed: Dispatch<SetStateAction<boolean>>;
-  setReservedHandles: Dispatch<SetStateAction<ReservedHandlesType | null>>;
-  setHandleResponse: Dispatch<SetStateAction<HandleResponseBody | null>>;
-  setTwitterToken: Dispatch<SetStateAction<string | null>>;
+  setReservedHandles: Dispatch<SetStateAction<ReservedHandlesType>>;
+  setHandleResponse: Dispatch<SetStateAction<HandleResponseBody>>;
+  setTwitterToken: Dispatch<SetStateAction<string>>;
   setIsPurchasing: Dispatch<SetStateAction<boolean>>;
+  setPendingSessions: Dispatch<SetStateAction<string[]>>;
+  setPaymentSessions: Dispatch<SetStateAction<PaymentSession[]>>;
 }
 
 export const defaultState: HandleMintContextType = {
@@ -41,6 +50,8 @@ export const defaultState: HandleMintContextType = {
   handleResponse: null,
   isPurchasing: false,
   reservedHandles: null,
+  pendingSessions: [],
+  paymentSessions: [],
   twitterToken: null,
   primed: false,
   setHandleResponse: () => {},
@@ -49,7 +60,9 @@ export const defaultState: HandleMintContextType = {
   setIsPurchasing: () => {},
   setReservedHandles: () => {},
   setTwitterToken: () => {},
-  setPrimed: () => {}
+  setPrimed: () => {},
+  setPendingSessions: () => {},
+  setPaymentSessions: () => {}
 };
 
 export const HandleMintContext =
@@ -62,7 +75,16 @@ export const HandleMintContextProvider = ({ children, ...rest }) => {
   const [twitterToken, setTwitterToken] = useState<string|null>(null);
   const [isPurchasing, setIsPurchasing] = useState<boolean>(false);
   const [reservedHandles, setReservedHandles] = useState<ReservedHandlesType|null>(null);
+  const [pendingSessions, setPendingSessions] = useState<string[]>(null);
+  const [paymentSessions, setPaymentSessions] = useState<PaymentSession[]>([]);
   const [primed, setPrimed] = useState<boolean>(false);
+
+  useEffect(() => {
+    const paymentSessions = getAllCurrentSessionData();
+    setPaymentSessions(paymentSessions.map(session => ({
+      sessionResponse: session
+    })));
+  }, []);
 
   return (
     <HandleMintContext.Provider value={{
@@ -73,6 +95,8 @@ export const HandleMintContextProvider = ({ children, ...rest }) => {
       twitterToken,
       isPurchasing,
       reservedHandles,
+      pendingSessions,
+      paymentSessions,
       primed,
       setFetching,
       setHandle,
@@ -80,7 +104,9 @@ export const HandleMintContextProvider = ({ children, ...rest }) => {
       setTwitterToken,
       setIsPurchasing,
       setReservedHandles,
-      setPrimed
+      setPrimed,
+      setPendingSessions,
+      setPaymentSessions
     }}>
       {children}
     </HandleMintContext.Provider>

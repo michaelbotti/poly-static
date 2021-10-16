@@ -38,17 +38,9 @@ const navItems: NavItem[] = [
 const Header: FC<HeaderProps> = ({ className, showMint = true }) => {
   const [isExpanded, toggleExpansion] = useState<boolean>(false);
   const [accessOpen] = useAccessOpen();
-  const sessions = getSessionDataCookie();
 
   return (
     <>
-      {accessOpen && sessions.length < 3 && (
-        <div className="bg-primary-100 text-white">
-          <div className="mx-auto p-4 flex items-center justify-center text-center w-full">
-            <p className="m-0">You are in an active purchasing window! <Link className="font-bold underline" to={'/mint'}>Purchase a $handle &rarr;</Link></p>
-          </div>
-        </div>
-      )}
       <header className={`flex flex-wrap items-center justify-between p-4 mx-auto md:p-8 ${className}`} style={{ minHeight: 108 }}>
         <Link to="/">
           <h1 className="flex items-center text-dark-100 no-underline">

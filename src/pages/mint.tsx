@@ -1,7 +1,7 @@
-import React, { useContext } from "react";
+import React, { useContext, useState } from "react";
 
 import { HandleMintContext } from "../context/mint";
-import { usePrimeMintingContext } from "../lib/helpers/context";
+import { usePrimeMintingContext } from "../lib/hooks/primeMintingContext";
 import { useAccessOpen } from "../lib/hooks/access";
 
 import SEO from "../components/seo";
@@ -9,9 +9,12 @@ import { HandleSearchReserveFlow } from "../components/HandleSearch";
 import { Loader } from "../components/Loader";
 import NFTPreview from "../components/NFTPreview";
 import { HandleQueue } from "../components/HandleQueue";
+import { getSessionDataCookie } from "../lib/helpers/session";
+import { HandleSession } from "../components/HandleSession";
 
 function MintPage() {
-  const { primed, handle } = useContext(HandleMintContext);
+  const { primed, handle, paymentSessions } = useContext(HandleMintContext);
+  const [currentIndex, setCurrentIndex] = useState<number>(-1);
   const [accessOpen] = useAccessOpen();
 
   usePrimeMintingContext();
@@ -20,12 +23,34 @@ function MintPage() {
     <>
       <SEO title="Mint" />
       <section id="top">
+        <div className="flex justify-start place-content-center">
+          <button
+            onClick={() => setCurrentIndex(-1)}
+            className={`${currentIndex !== -1 ? 'opacity-40' : ''} bg-dark-200 flex-inline items-center justify-center px-4 py-2 rounded-t-lg mr-4 relative`}
+          >
+            <div className="absolute bg-primary-100 w-8 h-8 flex items-center justify-center rounded-full -top-2 -left-2">
+              {3 - paymentSessions.length}
+            </div>
+            <h4 className="text-lg p-4">Mint a Handle!</h4>
+          </button>
+          {paymentSessions.map((session, index) => {
+            return (
+              <button
+                key={index}
+                onClick={() => setCurrentIndex(index + 1)}
+                className={`${index + 1 !== currentIndex ? `bg-dark-100 opacity-60` : `bg-dark-200`} flex-inline items-center justify-center px-4 py-2 rounded-t-lg mr-4`}
+              >
+                <h4>${getSessionDataCookie(index + 1).data.handle}</h4>
+              </button>
+            )
+          })}
+        </div>
         <div
-          className="grid grid-cols-12 gap-16 bg-dark-200 rounded-lg place-content-start p-8 mb-16"
+          className="grid grid-cols-12 gap-4 bg-dark-200 rounded-lg rounded-tl-none place-content-start p-8 mb-16"
           style={{ minHeight: "60vh" }}
           >
             {null === accessOpen && (
-              <div className="col-span-12 relative z-10">
+              <div className="col-span-12 md:col-span-6 relative z-10">
                 <div className="grid justify-center content-center h-full w-full p-8 flex-wrap">
                   <p className="w-full text-center">Fetching details...</p>
                   <Loader />
@@ -34,7 +59,7 @@ function MintPage() {
             )}
             {false === accessOpen && (
               <>
-                <div className="col-span-6 relative z-10">
+                <div className="col-span-12 md:col-span-6 relative z-10">
                   <h2 className="w-full text-4xl font-bold text-primary-100 mb-4">🎉 Beta Launch! 🎉</h2>
                   <div className="text-lg">
                     <p>To achieve the fairest launch possible, we are <strong>requiring one-time phone authentication</strong> during the beta phase ONLY.</p>
@@ -53,20 +78,26 @@ function MintPage() {
             )}
             {accessOpen && (
               <>
-                <div className="col-span-12 lg:col-span-6 relative z-10">
-                  {primed ? (
-                    <div className="p-8">
-                      <HandleSearchReserveFlow />
-                    </div>
-                  ) : (
-                    <div className="grid justify-center content-center h-full w-full p-8 flex-wrap">
-                      <p className="w-full text-center">Fetching bytes...</p>
-                      <Loader />
-                    </div>
+                <div className="col-span-12 md:col-span-6 relative z-10">
+                  {currentIndex === -1 && (
+                    primed ? (
+                      <div className="p-8">
+                        <HandleSearchReserveFlow setActiveSession={setCurrentIndex} />
+                      </div>
+                    ) : (
+                      <div className="grid justify-center content-center h-full w-full p-8 flex-wrap">
+                        <p className="w-full text-center">Fetching bytes...</p>
+                        <Loader />
+                      </div>
+                    )
+                  )}
+
+                  {currentIndex !== -1 && (
+                    <HandleSession currentIndex={currentIndex - 1} />
                   )}
                 </div>
                 <div className="col-span-12 lg:col-span-6 py-8">
-                  <NFTPreview handle={handle} />
+                  <NFTPreview handle={currentIndex === -1 ? handle : getSessionDataCookie(currentIndex).data.handle} />
                 </div>
               </>
             )}

@@ -15,15 +15,21 @@ export const config: FirebaseOptions = {
 
 export const firebase = initializeApp(config);
 
-export const getActiveSessionsRef = () => {
+export const getPendingSessionsRef = () => {
   const database = getFirebaseDatabase(firebase);
-  const dbRef = ref(database, '/activeSessions');
+  const dbRef = ref(database, '/pendingSessions');
   return dbRef;
 }
 
 export const getReservedHandlesRef = () => {
   const database = getFirebaseDatabase(firebase);
   const dbRef = ref(database, '/reservedHandles');
+  return dbRef;
+}
+
+export const getMintedHandlesRef = () => {
+  const database = getFirebaseDatabase(firebase);
+  const dbRef = ref(database, '/mintedHandles');
   return dbRef;
 }
 

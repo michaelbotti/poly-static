@@ -21,12 +21,13 @@ import {
   ActiveSessionType,
   ReservedHandlesType,
 } from "../../src/context/mint";
-import { fetchNodeApp, getNodeEndpointUrl } from '../helpers/util';
+import { fetchNodeApp } from '../helpers/util';
 import { getRarityCost, isValid, normalizeNFTHandle } from "../../src/lib/helpers/nfts";
 import { verifyAppCheck, getSecret } from "../helpers";
 import { verifyTwitterUser } from "../helpers";
-import { HandleResponseBody } from "../../src/lib/helpers/search";
+import { getActiveSessionUnavailable, HandleResponseBody } from "../../src/lib/helpers/search";
 import { getDatabase, initFirebase } from "../helpers/firebase";
+import { firebase } from "../../src/lib/firebase";
 export interface NodeSessionResponseBody {
   error: boolean,
   message?: string;
@@ -197,8 +198,6 @@ const handler: Handler = async (
     }
   }).then(res => res.json());
 
-  console.log(res);
-
   const mutatedRes: SessionResponseBody = {
     error: res.error,
     message: res?.message || '',
@@ -211,6 +210,33 @@ const handler: Handler = async (
     return {
       statusCode: 500,
       body: JSON.stringify(mutatedRes),
+    }
+  }
+
+  // Ping pending sessions.
+  let pendingSessionCutLine = false;
+  await database
+    .ref("/pendingSessions")
+      .transaction((snapshot: string[] | null) => {
+        if (!snapshot) {
+          return [handle];
+        }
+
+        if (snapshot.includes(handle)) {
+          pendingSessionCutLine = true;
+          return snapshot;
+        }
+
+        return [
+          ...snapshot,
+          handle
+        ];
+    });
+
+  if (pendingSessionCutLine) {
+    return {
+      statusCode: 403,
+      body: JSON.stringify(getActiveSessionUnavailable())
     }
   }
 

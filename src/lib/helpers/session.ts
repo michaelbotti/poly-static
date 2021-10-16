@@ -4,15 +4,20 @@ import { SessionResponseBody } from "../../../netlify/functions/session";
 import { COOKIE_ACCESS_KEY, COOKIE_SESSION_PREFIX, HEADER_APPCHECK, IP_ADDRESS_KEY, RECAPTCHA_SITE_KEY } from '../constants';
 import { requestToken } from '../firebase';
 
-export const getSessionDataCookie = (): SessionResponseBody[] => {
-  const sessions = [1,2,3]
-    .map(sessionIndex => {
-      const session = Cookie.get(`${COOKIE_SESSION_PREFIX}_${sessionIndex}`);
-      return session ? JSON.parse(session) : null;
-    })
-    .filter(session => null !== session)
+export const getAllCurrentSessionData = (): SessionResponseBody[] => {
+  return [1,2,3].reduce((count, session, index) => {
+    const data = getSessionDataCookie(index);
+    if (null !== data) {
+      return [...count, data];
+    }
 
-  return sessions;
+    return count;
+  }, []);
+}
+
+export const getSessionDataCookie = (index: number): SessionResponseBody => {
+  const session = Cookie.get(`${COOKIE_SESSION_PREFIX}_${index}`);
+  return session ? JSON.parse(session) : null;
 }
 
 export const getSessionDataFromState = (state: SessionResponseBody | null): false | SessionResponseBody => {

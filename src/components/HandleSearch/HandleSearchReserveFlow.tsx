@@ -28,9 +28,10 @@ import LogoMark from "../../images/logo-single.svg";
 import { HandleSearchConnectTwitter } from "./";
 import { Loader } from "../Loader";
 import { SessionResponseBody } from '../../../netlify/functions/session';
-import { getAccessTokenFromCookie, getIpAddress, getSessionDataCookie, setSessionTokenCookie } from "../../lib/helpers/session";
+import { getAccessTokenFromCookie, getAllCurrentSessionData, getIpAddress, setSessionTokenCookie } from "../../lib/helpers/session";
+import { getActiveSessionUnavailable } from "../../lib/helpers/search";
 
-export const HandleSearchReserveFlow = ({ className = "", ...rest }) => {
+export const HandleSearchReserveFlow = ({ className = "", setActiveSession, ...rest }) => {
   const {
     fetching,
     handleResponse,
@@ -39,11 +40,12 @@ export const HandleSearchReserveFlow = ({ className = "", ...rest }) => {
     setHandle,
     twitterToken
   } = useContext(HandleMintContext);
+  const { pendingSessions, paymentSessions, setPaymentSessions } = useContext(HandleMintContext);
   const [fetchingSession, setFetchingSession] = useState<boolean>(false);
   const [debouncedHandle] = useDebounce(handle, 600);
   const handleInputRef = useRef(null);
 
-  const currentSessions = getSessionDataCookie();
+  const currentSessions = getAllCurrentSessionData();
   const nextIndex = currentSessions.length + 1;
 
   useSyncAvailableStatus(debouncedHandle);
@@ -110,27 +112,39 @@ export const HandleSearchReserveFlow = ({ className = "", ...rest }) => {
       headers.append(HEADER_IP_ADDRESS, ip);
     }
 
+    // Check pending sessions.
+    if (pendingSessions && pendingSessions.includes(handle)) {
+      setHandleResponse(getActiveSessionUnavailable());
+      return;
+    }
+
     try {
       setFetchingSession(true);
       const session = await fetch("/.netlify/functions/session", { headers });
-      const sessionJSON: SessionResponseBody = await session.json();
-      console.log(sessionJSON);
-      if (!sessionJSON.error) {
+      const sessionResponse: SessionResponseBody = await session.json();
+      if (!sessionResponse.error) {
         setHandle("");
         setSessionTokenCookie(
-          sessionJSON,
-          new Date(sessionJSON.data.exp),
+          sessionResponse,
+          new Date(sessionResponse.data.exp),
           nextIndex
         );
 
-        navigate("/sessions", { state: { sessionIndex: nextIndex }});
+        setPaymentSessions([
+          ...paymentSessions,
+          {
+            sessionResponse
+          }
+        ]);
+
+        setActiveSession(nextIndex);
         return;
       }
 
       setHandleResponse({
         available: false,
         twitter: !!twitterToken,
-        message: sessionJSON.message
+        message: sessionResponse.message
       });
       setFetchingSession(false);
     } catch (e) {

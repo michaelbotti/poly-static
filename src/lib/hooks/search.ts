@@ -20,7 +20,7 @@ import { normalizeNFTHandle } from "../helpers/nfts";
 import { getIpAddress } from "../helpers/session";
 
 export const useSyncAvailableStatus = async (unsanitizedHandle: string) => {
-  const { setFetching, setHandleResponse, reservedHandles } =
+  const { setFetching, setHandleResponse, activeSessions, reservedHandles } =
     useContext(HandleMintContext);
 
   useEffect(() => {
