@@ -175,6 +175,33 @@ const handler: Handler = async (
     };
   }
 
+  // Ping pending sessions.
+  let pendingSessionCutLine = false;
+  await database
+    .ref("/pendingSessions")
+      .transaction((snapshot: string[] | null) => {
+        if (!snapshot) {
+          return [handle];
+        }
+
+        if (snapshot.includes(handle)) {
+          pendingSessionCutLine = true;
+          return snapshot;
+        }
+
+        return [
+          ...snapshot,
+          handle
+        ];
+    });
+
+  if (pendingSessionCutLine) {
+    return {
+      statusCode: 403,
+      body: JSON.stringify(getActiveSessionUnavailable())
+    }
+  }
+
   // Sign a JWT session.
   const sessionSecret = await getSecret('session');
   const sessionToken = jwt.sign(
@@ -210,33 +237,6 @@ const handler: Handler = async (
     return {
       statusCode: 500,
       body: JSON.stringify(mutatedRes),
-    }
-  }
-
-  // Ping pending sessions.
-  let pendingSessionCutLine = false;
-  await database
-    .ref("/pendingSessions")
-      .transaction((snapshot: string[] | null) => {
-        if (!snapshot) {
-          return [handle];
-        }
-
-        if (snapshot.includes(handle)) {
-          pendingSessionCutLine = true;
-          return snapshot;
-        }
-
-        return [
-          ...snapshot,
-          handle
-        ];
-    });
-
-  if (pendingSessionCutLine) {
-    return {
-      statusCode: 403,
-      body: JSON.stringify(getActiveSessionUnavailable())
     }
   }
 
