@@ -22,10 +22,6 @@ const navItems: NavItem[] = [
     title: `FAQ`,
   },
   {
-    route: `/solutions`,
-    title: `Solutions`,
-  },
-  {
     route: '/team',
     title: 'Team'
   },
@@ -48,7 +44,7 @@ const Header: FC<HeaderProps> = ({ className, showMint = true }) => {
           </h1>
         </Link>
 
-        <div className="flex items-center justify-center mr-auto">
+        <div className="flex items-center justify-center mr-auto relative">
           <button
             className="items-center block px-3 py-2 border-dark-100 text-white border border-white rounded md:hidden"
             onClick={() => toggleExpansion(!isExpanded)}
@@ -65,8 +61,8 @@ const Header: FC<HeaderProps> = ({ className, showMint = true }) => {
 
           <nav
             className={`${
-              isExpanded ? `block` : `hidden`
-            } md:block md:items-center w-full md:w-auto`}
+              isExpanded ? `block absolute top-full left-0 bg-dark-100 p-8 z-50 shadow-lg w-48` : `hidden w-full`
+            } md:block md:items-center md:w-auto`}
           >
             {navItems.map((link) => {
               return (

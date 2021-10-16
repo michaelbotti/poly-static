@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext, useEffect, useRef, useState } from "react";
 import Countdown from "react-countdown";
 import { PaymentData, PaymentResponseBody } from "../../../netlify/functions/payment";
 import { HandleMintContext } from "../../context/mint";
@@ -15,6 +15,7 @@ export const HandleSession = ({
   const { paymentSessions } = useContext(HandleMintContext);
   const [paymentStatus, setPaymentStatus] = useState<PaymentData[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
+  const [copying, setCopying] = useState<boolean>(false);
 
   const sessionData = paymentSessions[currentIndex];
   const validPayment = paymentStatus.length >= 1 && paymentStatus[0].amount !== 0 && paymentStatus[0].amount === sessionData.sessionResponse.data.cost * 1000000;
@@ -69,8 +70,12 @@ export const HandleSession = ({
     }
   }, [paymentStatus]);
 
-  const handleCopy = () => {
+  const handleCopy = async () => {
     navigator.clipboard.writeText(sessionData.sessionResponse.address);
+    setCopying(true);
+    setTimeout(() => {
+      setCopying(false);
+    }, 1000);
   }
 
   return loading ? (
@@ -84,24 +89,38 @@ export const HandleSession = ({
     <>
       <div className="col-span-6 p-8">
         <h2 className="font-bold text-3xl mb-2">
-          Purchasing:<br/>
-          <span className="font-normal text-2xl">
-            <LogoMark fill={getRarityHex(sessionData.sessionResponse.data.handle)} className="w-4 -mr-1" />{" "}
-            {sessionData.sessionResponse.data.handle}
-          </span>
+          Session Active
         </h2>
+        <p className="text-lg">Submit your payment <u>exactly</u> in the amount shown. Invalid payments will be refunded, but your session will remain till it expires!</p>
         <hr className="w-12 border-dark-300 border-2 block my-8" />
         {!validPayment && paymentStatus[0].amount === 0 && (
           <>
-            <h4 className="text-xl font-bold mb-8">
-              Send <u>exactly</u> {getRarityCost(sessionData.sessionResponse.data.handle)} $ADA<br/>
-              <span className="text-lg font-normal">to the following address:</span>
+            <h4 className="text-xl mb-8">
+              Send exaclty <strong className="border-2 border-primary-100 px-2 inline-block text-base rounded-lg">{getRarityCost(sessionData.sessionResponse.data.handle)} $ADA</strong> to the following address:
             </h4>
             <div className="relative">
-              <pre className="p-4 rounded-t-lg shadow-inner shadow-lg bg-dark-300 overflow-hidden opacity-70">
+              <pre className="p-4 rounded-t-lg shadow-inner shadow-lg bg-dark-300 overflow-hidden overflow-scroll pr-24 border-2 border-b-0 border-primary-100">
                 {sessionData.sessionResponse.address}
               </pre>
-              <button onClick={handleCopy} className="absolute top-0 right-0 h-full w-16 bg-primary-100 rounded-tr-lg">Copy</button>
+              <button onClick={handleCopy} className="absolute top-0 right-0 h-full w-16 bg-primary-100 rounded-tr-lg">
+                <svg className={`w-full height-full p-5 ${copying ? 'hidden' : 'block'}`} viewBox="0 0 20 20">
+                  <path
+                    fill="#fff"
+                    d="M18.783 13.198H15.73a.78.78 0 010-1.559h2.273V3.652H7.852v.922c0 .433-.349.78-.78.78a.778.778 0 01-.78-.78V2.872c0-.43.349-.78.78-.78h11.711c.431 0 .78.35.78.78v9.546a.781.781 0 01-.78.78z"
+                  />
+                  <path
+                    fill="#fff"
+                    d="M12.927 17.908H1.217a.781.781 0 01-.78-.78V7.581c0-.43.349-.78.78-.78h11.709c.431 0 .78.35.78.78v9.546c0 .43-.349.781-.779.781zm-10.93-1.56h10.15V8.361H1.997v7.987z"
+                  />
+                </svg>
+
+                <svg className={`w-full height-full p-5 ${copying ? 'block' : 'hidden'}`} viewBox="0 0 20 20">
+                  <path
+                    fill="#fff"
+                    d="M7.197 16.963h-.002a.773.773 0 01-.544-.227L.612 10.654a.769.769 0 011.09-1.084l5.495 5.536L18.221 4.083a.767.767 0 011.087 0c.301.3.301.787 0 1.087L7.741 16.738a.772.772 0 01-.544.225z"
+                  />
+                </svg>
+              </button>
             </div>
           </>
         )}

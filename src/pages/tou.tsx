@@ -7,7 +7,7 @@ function TOUPage() {
   return (
     <>
       <SEO title="Terms of Use" />
-      <section id="faq" className="mt-16 max-w-xl mx-auto">
+      <section id="faq" className="my-16 max-w-3xl mx-auto">
         <h2 className="inline-block mb-4 text-4xl font-bold leading-none">
           ADA Handle Terms of Use
         </h2>
