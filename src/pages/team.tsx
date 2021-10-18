@@ -24,9 +24,9 @@ function TeamPage() {
         <p className="text-lg">What started as a simple side-project has become so much more. ADA Handle was started by 3 dudes who were tired
         of long crypto addresses, and thought things could be more simple (and more extendable) than current solutions.</p>
       </section>
-      <section className="my-16 max-w-5xl mx-auto">
+      <section className="my-16 max-w-6xl mx-auto">
         <div className="grid grid-cols-12 gap-16">
-          <div className="col-12 lg:col-span-4">
+          <div className="col-12 lg:col-span-4 p-4 lg:p-8 bg-dark-200 rounded-lg shadow-lg">
             <div className="flex align-center justify-between">
               <div>
                 <h3 className="text-5xl font-bold">Calvin</h3>
@@ -39,11 +39,11 @@ function TeamPage() {
             </div>
             <hr className="w-12 border-dark-300 border-2 block my-8" />
             <p>Calvin has nearly 15 years of web software experience ranging from small side-projects to fortune 500 companies, to Facebook.</p>
-            <p>Always a tinkerer and idea-person, Calvin immediately fell in love with the Cardano ecosystem and blockchain in general.</p>
             <p>Before starting ADA Handle, he started <a className="text-primary-100" href="https://thecryptodrip.com" target="_blank">The Crypto Drip</a> with Goose, a growing
             community of like-minded crypto enthusiests intent on redefining decentralized media.</p>
+            <p>Calvin lives in Boise, Idaho with his wife, Tanya, and has 3 boys.</p>
           </div>
-          <div className="col-12 lg:col-span-4">
+          <div className="col-12 lg:col-span-4 p-4 lg:p-8 bg-dark-200 rounded-lg shadow-lg">
             <div className="flex align-center justify-between">
               <div>
                 <h3 className="text-5xl font-bold">Conrad</h3>
@@ -55,12 +55,11 @@ function TeamPage() {
               <img src={Calvin} className="w-24 h-24 rounded-full" />
             </div>
             <hr className="w-12 border-dark-300 border-2 block my-8" />
-            <p>Calvin has nearly 15 years of web software experience ranging from small side-projects to fortune 500 companies, to Facebook.</p>
-            <p>Always a tinkerer and idea-person, Calvin immediately fell in love with the Cardano ecosystem and blockchain in general.</p>
-            <p>Before starting ADA Handle, he started <a className="text-primary-100" href="https://thecryptodrip.com" target="_blank">The Crypto Drip</a> with Goose, a growing
-            community of like-minded crypto enthusiests intent on redefining decentralized media.</p>
+            <p>Mr. Goose comes from the competitive suit-and-tie world of commercial lending in Silicon Valley.</p>
+            <p>After years of stringent professionalism working with some of the largest tech companies in the world, Mr. Goose decided it was time for an about face.</p>
+            <p>Finding Cardano was a perfect fit for his ethos as he brings a light-hearted yet severely professional approach to negotiation, management and business trategy.</p>
           </div>
-          <div className="col-12 lg:col-span-4">
+          <div className="col-12 lg:col-span-4 p-4 lg:p-8 bg-dark-200 rounded-lg shadow-lg">
             <div className="flex align-center justify-between">
               <div>
                 <h3 className="text-5xl font-bold">Mr. Goose</h3>
@@ -72,10 +71,9 @@ function TeamPage() {
               <img src={Calvin} className="w-24 h-24 rounded-full" />
             </div>
             <hr className="w-12 border-dark-300 border-2 block my-8" />
-            <p>Calvin has nearly 15 years of web software experience ranging from small side-projects to fortune 500 companies, to Facebook.</p>
-            <p>Always a tinkerer and idea-person, Calvin immediately fell in love with the Cardano ecosystem and blockchain in general.</p>
-            <p>Before starting ADA Handle, he started <a className="text-primary-100" href="https://thecryptodrip.com" target="_blank">The Crypto Drip</a> with Goose, a growing
-            community of like-minded crypto enthusiests intent on redefining decentralized media.</p>
+            <p>Conrad is an InfoSec and  IT infrastructure engineer, with 20 years of corporate experience, 10 of those in New York City.</p>
+            <p>Conrad is a sports aficionado. When he's not working, you'll catch him on the West Side Highway cycling or skateboarding.</p>
+            <p>Originally from São Paulo, Conrad moved to New York in 2011. Conrad is married to Caroline.</p>
           </div>
         </div>
       </section>

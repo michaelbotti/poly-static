@@ -1,6 +1,6 @@
 import { useContext } from "react";
 
-import { firebase } from "../firebase";
+// import { firebase } from "../firebase";
 import { AdditionalUserInfo } from "firebase/auth";
 import { HandleMintContext } from "../../context/mint";
 
@@ -19,7 +19,7 @@ export const useTwitter = (): [
     } = await import("firebase/auth");
 
     const provider = new TwitterAuthProvider();
-    const auth = getAuth(firebase);
+    const auth = getAuth();
     return signInWithPopup(auth, provider)
       .then(async (result) => {
         const user: AdditionalUserInfo | null = getAdditionalUserInfo(result);

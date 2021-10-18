@@ -1,8 +1,7 @@
 import Cookie from 'js-cookie';
 
 import { SessionResponseBody } from "../../../netlify/functions/session";
-import { COOKIE_ACCESS_KEY, COOKIE_SESSION_PREFIX, HEADER_APPCHECK, IP_ADDRESS_KEY, RECAPTCHA_SITE_KEY } from '../constants';
-import { requestToken } from '../firebase';
+import { COOKIE_ACCESS_KEY, COOKIE_SESSION_PREFIX, IP_ADDRESS_KEY, RECAPTCHA_SITE_KEY } from '../constants';
 
 export const getAllCurrentSessionData = (): SessionResponseBody[] => {
   return [1,2,3].reduce((count, session, index) => {
@@ -15,7 +14,7 @@ export const getAllCurrentSessionData = (): SessionResponseBody[] => {
   }, []);
 }
 
-export const getSessionDataCookie = (index: number): SessionResponseBody => {
+export const getSessionDataCookie = (index: number): SessionResponseBody | null => {
   const session = Cookie.get(`${COOKIE_SESSION_PREFIX}_${index}`);
   return session ? JSON.parse(session) : null;
 }
@@ -62,21 +61,6 @@ export const setSessionTokenCookie = (data: SessionResponseBody, exp: Date, inde
       expires: new Date(exp)
     }
   )
-}
-
-export const getIpAddress = async (): Promise<string> => {
-  const appCheck = await requestToken();
-
-  if (!localStorage.getItem(IP_ADDRESS_KEY)) {
-    const { ip } = await (await fetch('/.netlify/functions/ip', {
-      headers: {
-        [HEADER_APPCHECK]: appCheck
-      }
-    })).json();
-    ip && localStorage.setItem(IP_ADDRESS_KEY, ip);
-  }
-
-  return localStorage.getItem(IP_ADDRESS_KEY);
 }
 
 export const getRecaptchaToken = async (): Promise<string> => {

@@ -1,19 +1,19 @@
 import React, { FC, useEffect, useState } from "react";
+import { initializeApp } from "firebase/app";
+import { initializeAppCheck, ReCaptchaV3Provider } from "firebase/app-check";
 
 import Header from "../components/header";
 import Form from '../components/mailchimp';
 import { HandleMintContextProvider } from '../context/mint';
-import { requestToken } from "../lib/firebase";
+// import { config, requestToken } from "../lib/firebase";
 
-import "../../src/styles/global.css";
+import { RECAPTCHA_SITE_KEY } from "../lib/constants";
 
 const Layout: FC = ({ children }): JSX.Element => {
   const [mintPage, setMintPage] = useState<boolean>(false);
 
-  // Ensure appcheck.
   useEffect(() => {
     setMintPage(window.location.pathname.includes('mint'));
-    requestToken();
   });
 
   return (

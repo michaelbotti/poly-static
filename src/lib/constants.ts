@@ -13,7 +13,6 @@ export const IP_ADDRESS_KEY ='ADAHANDLE_IP_ADDRESS';
 
 // Headers.
 export const HEADER_IP_ADDRESS = 'x-ip-address';
-export const HEADER_APPCHECK = 'x-firebase-appcheck';
 export const HEADER_HANDLE = 'x-handle';
 export const HEADER_RECAPTCHA = 'x-recaptcha';
 export const HEADER_TWITTER_ACCESS_TOKEN = 'x-twitter-token';

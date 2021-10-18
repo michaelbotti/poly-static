@@ -3,8 +3,7 @@ import PhoneInput from 'react-phone-number-input';
 
 import { QueueResponseBody } from '../../../netlify/functions/queue'
 import { VerifyResponseBody } from '../../../netlify/functions/verify'
-import { HEADER_APPCHECK, HEADER_PHONE, HEADER_PHONE_AUTH } from '../../lib/constants';
-import { requestToken } from '../../lib/firebase';
+import { HEADER_PHONE, HEADER_PHONE_AUTH } from '../../lib/constants';
 import { useAccessOpen } from '../../lib/hooks/access';
 import Button from '../button';
 import { setAccessTokenCookie } from '../../lib/helpers/session';
@@ -25,7 +24,7 @@ const IntroText = ({ count }: IntroTextProps) => {
 
   if (count < 50) {
     return (
-      <span className="text-primary-100 font-bold">Don't go anywhere, you are up next!</span>
+      <span className="text-primary-100 font-bold">Don't go anywhere, you are {count === 0 ? 'first' : `#${count}`} in line and part of the next batch!</span>
     );
   }
 
@@ -71,13 +70,11 @@ export const HandleQueue = (): JSX.Element => {
 
     setSavingSpot(true);
     try {
-      const appToken = await requestToken();
       const res: QueueResponseBody = await fetch(
         `/.netlify/functions/queue`,
         {
           method: 'POST',
           headers: {
-            [HEADER_APPCHECK]: appToken,
             [HEADER_PHONE]: phoneInput
           }
         }
@@ -90,7 +87,7 @@ export const HandleQueue = (): JSX.Element => {
         if (res?.position < 50) {
           setShowPlacement(true);
           setAction('auth');
-          setResponseMessage(`Successfully saved! You should receive a text within five minutes.`);
+          setResponseMessage(`Successfully saved! We send out auth codes in batches, every five minutes.`);
         } else {
           setResponseMessage(`Successfully saved! You are currently #${res.position} in line. Please allow some time to receive your authentication code. ${res.chainLoad && (`
             Current chain load is ${(res.chainLoad * 100).toString().substring(0, 5)}%
@@ -117,11 +114,9 @@ export const HandleQueue = (): JSX.Element => {
 
     setAuthenticating(true);
     try {
-      const appToken = await requestToken();
       const res: VerifyResponseBody = await fetch(
         '/.netlify/functions/verify', {
           headers: {
-            [HEADER_APPCHECK]: appToken,
             [HEADER_PHONE]: phoneInput,
             [HEADER_PHONE_AUTH]: authInput
           }

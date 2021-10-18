@@ -2,9 +2,9 @@ import admin from "firebase-admin";
 import { getS3 } from "./aws";
 
 let firebase: admin.app.App;
-export const initFirebase = async (): Promise<void> => {
+export const initFirebase = async (): Promise<admin.app.App> => {
   if (firebase) {
-    return;
+    return firebase;
   }
 
   const s3 = getS3();
@@ -26,20 +26,13 @@ export const initFirebase = async (): Promise<void> => {
     credential: admin.credential.cert(credentials),
     databaseURL: 'https://ada-handle-reserve-default-rtdb.firebaseio.com/'
   });
-};
 
-export const verifyAppCheck = async (token: string): Promise<boolean> => {
-  try {
-    const res = await admin.appCheck().verifyToken(token);
-    return !!res;
-  } catch (e) {
-    return false;
-  }
+  return firebase;
 };
 
 export const verifyTwitterUser = async (token: string): Promise<number | false> => {
   try {
-    const { exp } = await admin.auth().verifyIdToken(token)
+    const { exp } = await admin.auth(firebase).verifyIdToken(token)
     return exp;
   } catch (e) {
     console.log(e);
@@ -48,5 +41,5 @@ export const verifyTwitterUser = async (token: string): Promise<number | false> 
 }
 
 export const getDatabase = async (): Promise<admin.database.Database> => {
-  return admin.database();
+  return admin.database(firebase);
 }

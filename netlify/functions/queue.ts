@@ -6,8 +6,8 @@ import {
 } from "@netlify/functions";
 import { fetch } from 'cross-fetch';
 
-import { HEADER_APPCHECK, HEADER_PHONE } from "../../src/lib/constants";
-import { verifyAppCheck } from "../helpers";
+import { HEADER_PHONE } from "../../src/lib/constants";
+import { initFirebase } from "../helpers/firebase";
 import { getNodeEndpointUrl } from "../helpers/util";
 
 
@@ -28,16 +28,6 @@ const handler: Handler = async (
   context: HandlerContext
 ): Promise<HandlerResponse> => {
   const { headers } = event;
-  if (!headers[HEADER_APPCHECK]) {
-    return {
-      statusCode: 401,
-      body: JSON.stringify({
-        error: true,
-        message: 'Unauthorized. An AppCheck token was not provided.'
-      } as QueueResponseBody)
-    }
-  }
-
   if (!headers[HEADER_PHONE]) {
     return {
       statusCode: 400,
@@ -48,23 +38,13 @@ const handler: Handler = async (
     }
   }
 
-  // const verified = await verifyAppCheck(headers[HEADER_APPCHECK] as string);
-  // if (!verified) {
-  //   return {
-  //     statusCode: 401,
-  //     body: JSON.stringify({
-  //       error: true,
-  //       message: `Unauthorized. Invalid AppCheck token: ${headers[HEADER_APPCHECK]}.`
-  //     } as QueueResponseBody)
-  //   }
-  // }
+  await initFirebase();
 
   try {
     const data: QueueResponseBody = await (await fetch(`${getNodeEndpointUrl()}/queue`, {
       method: 'POST',
       headers: {
         'Authorization': `Basic ${process.env.NODE_AUTH_TOKEN_MAINNET}`,
-        [HEADER_APPCHECK]: headers[HEADER_APPCHECK],
         [HEADER_PHONE]: headers[HEADER_PHONE]
       }
     })).json();

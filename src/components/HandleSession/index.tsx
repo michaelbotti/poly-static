@@ -2,8 +2,7 @@ import React, { useContext, useEffect, useRef, useState } from "react";
 import Countdown from "react-countdown";
 import { PaymentData, PaymentResponseBody } from "../../../netlify/functions/payment";
 import { HandleMintContext } from "../../context/mint";
-import { HEADER_APPCHECK, HEADER_JWT_ACCESS_TOKEN, HEADER_JWT_SESSION_TOKEN } from "../../lib/constants";
-import { requestToken } from "../../lib/firebase";
+import { HEADER_JWT_ACCESS_TOKEN, HEADER_JWT_SESSION_TOKEN } from "../../lib/constants";
 import { getRarityCost, getRarityHex } from "../../lib/helpers/nfts";
 import { getAccessTokenFromCookie, getSessionTokenFromCookie } from "../../lib/helpers/session";
 import { Loader } from "../Loader";
@@ -27,7 +26,6 @@ export const HandleSession = ({
         return;
       }
 
-      const appCheck = await requestToken();
       const accessToken = getAccessTokenFromCookie();
       const sessionToken = sessionData.sessionResponse.token;
 
@@ -37,7 +35,6 @@ export const HandleSession = ({
 
       const res: PaymentResponseBody = await fetch(`/.netlify/functions/payment?addresses=${sessionData.sessionResponse.address}`, {
         headers: {
-          [HEADER_APPCHECK]: appCheck,
           [HEADER_JWT_ACCESS_TOKEN]: getAccessTokenFromCookie(),
           [HEADER_JWT_SESSION_TOKEN]: sessionToken
         }

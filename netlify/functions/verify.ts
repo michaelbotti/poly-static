@@ -6,8 +6,8 @@ import {
 } from "@netlify/functions";
 import { JwtPayload } from 'jsonwebtoken';
 
-import { HEADER_APPCHECK, HEADER_PHONE, HEADER_PHONE_AUTH } from "../../src/lib/constants";
-import { verifyAppCheck } from "../helpers";
+import { HEADER_PHONE, HEADER_PHONE_AUTH } from "../../src/lib/constants";
+import { initFirebase } from "../helpers/firebase";
 import { fetchNodeApp } from "../helpers/util";
 
 export interface VerifyResponseBody {
@@ -24,13 +24,6 @@ const handler: Handler = async (
 ): Promise<HandlerResponse> => {
   const { headers } = event;
 
-  if (!headers[HEADER_APPCHECK]) {
-    return {
-      statusCode: 401,
-      body: 'Unauthorized.'
-    }
-  }
-
   if (!headers[HEADER_PHONE]) {
     console.log(headers[HEADER_PHONE])
     return {
@@ -46,13 +39,7 @@ const handler: Handler = async (
     }
   }
 
-  // const verified = await verifyAppCheck(headers[HEADER_APPCHECK] as string);
-  // if (!verified) {
-  //   return {
-  //     statusCode: 401,
-  //     body: 'Unauthorized.'
-  //   }
-  // }
+  await initFirebase();
 
   try {
     const data = await fetchNodeApp(`/verify`, {

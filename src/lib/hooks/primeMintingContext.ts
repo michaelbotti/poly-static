@@ -1,5 +1,6 @@
+import { getApp } from 'firebase/app';
+import { get, onValue } from 'firebase/database'
 import { useContext, useEffect } from 'react';
-import { get, child, onValue } from 'firebase/database';
 
 import { HandleMintContext } from '../../context/mint';
 import { getReservedHandlesRef, getPendingSessionsRef } from '../firebase';
@@ -17,25 +18,25 @@ export const usePrimeMintingContext = async () => {
 
         // Retrieve reserved handle data store.
         const reservedHandlesRef = getReservedHandlesRef();
-        const reservedHandlesRes = await (await get(child(reservedHandlesRef, '/'))).val();
+        const reservedHandlesRes = await get(reservedHandlesRef).then(res => res.val());
         reservedHandlesRes && setReservedHandles(reservedHandlesRes);
 
         setPrimed(true);
-
-        // Stay in sync with active sessions.
-        const pendingSessionsRef = getPendingSessionsRef();
-        const unsubscribePending = onValue(pendingSessionsRef, (snapshot) => {
-          if (!snapshot) {
-            return;
-          }
-
-          setPendingSessions(snapshot.val());
-        });
-
-        return unsubscribePending;
       } catch (e) {
         console.log(e);
       }
     })();
+
+    // Stay in sync with active sessions.
+    const pendingSessionsRef = getPendingSessionsRef();
+    const unsubscribePending = onValue(pendingSessionsRef, (snapshot) => {
+      if (!snapshot) {
+        return;
+      }
+
+      setPendingSessions(snapshot.val());
+    });
+
+    return unsubscribePending;
   }, []);
 }

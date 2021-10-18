@@ -1,4 +1,4 @@
-import React, { useContext, useState } from "react";
+import React, { useContext, useMemo, useState } from "react";
 
 import { HandleMintContext } from "../context/mint";
 import { usePrimeMintingContext } from "../lib/hooks/primeMintingContext";
@@ -34,13 +34,18 @@ function MintPage() {
             <h4 className="text-lg p-4">Mint a Handle!</h4>
           </button>
           {paymentSessions.map((session, index) => {
+            const sessionData = getSessionDataCookie(index + 1);
+            if (!sessionData) {
+              return null;
+            }
+
             return (
               <button
                 key={index}
                 onClick={() => setCurrentIndex(index + 1)}
                 className={`${index + 1 !== currentIndex ? `bg-dark-100 opacity-60` : `bg-dark-200`} flex-inline items-center justify-center px-8 lg:px-4 py-2 rounded-t-lg mr-4`}
               >
-                <h4 className="hidden lg:block">${getSessionDataCookie(index + 1).data.handle}</h4>
+                <h4 className="hidden lg:block">${sessionData.data.handle}</h4>
                 <h4 className="lg:hidden font-bold">{index + 1}</h4>
               </button>
             )

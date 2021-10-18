@@ -12,11 +12,13 @@ export interface ReservedHandlesType {
 }
 
 export interface ActiveSessionType {
-  ip: string;
+  phoneNumber: string;
+  cost: number;
   handle: string;
-  address: string;
-  paid: boolean;
   start: number;
+  walletIndex: number;
+  paymentAddress: string;
+  txId?: string;
 }
 
 interface PaymentSession {

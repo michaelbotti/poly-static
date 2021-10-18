@@ -11,9 +11,7 @@ import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
 dayjs.extend(relativeTime);
 
-import { requestToken } from "../../lib/firebase";
 import {
-  HEADER_APPCHECK,
   HEADER_HANDLE,
   HEADER_IP_ADDRESS,
   HEADER_JWT_ACCESS_TOKEN,
@@ -28,7 +26,7 @@ import LogoMark from "../../images/logo-single.svg";
 import { HandleSearchConnectTwitter } from "./";
 import { Loader } from "../Loader";
 import { SessionResponseBody } from '../../../netlify/functions/session';
-import { getAccessTokenFromCookie, getAllCurrentSessionData, getIpAddress, setSessionTokenCookie } from "../../lib/helpers/session";
+import { getAccessTokenFromCookie, getAllCurrentSessionData, setSessionTokenCookie } from "../../lib/helpers/session";
 import { getActiveSessionUnavailable } from "../../lib/helpers/search";
 
 export const HandleSearchReserveFlow = ({ className = "", setActiveSession, ...rest }) => {
@@ -78,7 +76,6 @@ export const HandleSearchReserveFlow = ({ className = "", setActiveSession, ...r
   const handleOnSubmit = async (e: FormEvent) => {
     e.preventDefault();
 
-    const appCheckToken = await requestToken();
     const recaptchaToken: string = await window.grecaptcha.ready(() =>
       window.grecaptcha.execute(
         RECAPTCHA_SITE_KEY,
@@ -90,7 +87,6 @@ export const HandleSearchReserveFlow = ({ className = "", setActiveSession, ...r
     const headers = new Headers();
     headers.append(HEADER_HANDLE, handle);
     headers.append(HEADER_RECAPTCHA, recaptchaToken);
-    headers.append(HEADER_APPCHECK, appCheckToken);
     headers.append(HEADER_JWT_ACCESS_TOKEN, getAccessTokenFromCookie());
 
     /**
@@ -100,16 +96,6 @@ export const HandleSearchReserveFlow = ({ className = "", setActiveSession, ...r
      */
     if (twitterToken) {
       headers.append(HEADER_TWITTER_ACCESS_TOKEN, twitterToken);
-    }
-
-    /**
-     * We use basic IP filtering to restrict active sessions. This is
-     * more reliable since users are required to authenticate with a
-     * phone number before gaining an access token.
-     */
-    const ip = await getIpAddress();
-    if (ip) {
-      headers.append(HEADER_IP_ADDRESS, ip);
     }
 
     // Check pending sessions.

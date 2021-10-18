@@ -1,26 +1,21 @@
 import { useEffect, useContext } from "react";
 
 import {
-  getTwitterResponseUnvailable,
-  getDefaultResponseUnvailable,
+  getDefaultActiveSessionUnvailable,
   getBetaPhaseResponseUnavailable,
-  getReservedUnavailable,
-  getSPOUnavailable,
 } from "../helpers/search";
 import { HandleResponseBody } from "../helpers/search";
-import { requestToken } from "../firebase";
 import {
   BETA_PHASE_MATCH,
-  HEADER_APPCHECK,
   HEADER_HANDLE,
-  HEADER_IP_ADDRESS,
+  HEADER_JWT_ACCESS_TOKEN,
 } from "../constants";
 import { HandleMintContext } from "../../context/mint";
 import { normalizeNFTHandle } from "../helpers/nfts";
-import { getIpAddress } from "../helpers/session";
+import { getAccessTokenFromCookie } from "../helpers/session";
 
 export const useSyncAvailableStatus = async (unsanitizedHandle: string) => {
-  const { setFetching, setHandleResponse, activeSessions, reservedHandles } =
+  const { setFetching, setHandleResponse, pendingSessions, reservedHandles } =
     useContext(HandleMintContext);
 
   useEffect(() => {
@@ -39,13 +34,20 @@ export const useSyncAvailableStatus = async (unsanitizedHandle: string) => {
       return;
     }
 
+    if (
+      pendingSessions &&
+      pendingSessions.includes(handle)
+    ) {
+      setHandleResponse(getDefaultActiveSessionUnvailable());
+      return;
+    }
+
     (async () => {
       setFetching(true);
-      const token = await requestToken();
+      const accessToken = getAccessTokenFromCookie();
       const headers: HeadersInit = {
         [HEADER_HANDLE]: handle,
-        [HEADER_APPCHECK]: token,
-        [HEADER_IP_ADDRESS]: await getIpAddress(),
+        [HEADER_JWT_ACCESS_TOKEN]: accessToken
       };
 
       // Search on-chain.

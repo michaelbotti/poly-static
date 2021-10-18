@@ -6,8 +6,9 @@ import {
 } from "@netlify/functions";
 import jwt from 'jsonwebtoken';
 
-import { HEADER_APPCHECK, HEADER_JWT_ACCESS_TOKEN, HEADER_JWT_SESSION_TOKEN, HEADER_PHONE } from "../../src/lib/constants";
-import { getSecret, verifyAppCheck } from "../helpers";
+import { HEADER_JWT_ACCESS_TOKEN, HEADER_JWT_SESSION_TOKEN } from "../../src/lib/constants";
+import { getSecret } from "../helpers";
+import { initFirebase } from "../helpers/firebase";
 import { fetchNodeApp } from "../helpers/util";
 
 export interface PaymentAddressResponse {
@@ -46,11 +47,10 @@ const handler: Handler = async (
   const { headers, queryStringParameters } = event;
 
   const addresses = queryStringParameters?.addresses;
-  const appCheck = headers[HEADER_APPCHECK];
   const accessToken = headers[HEADER_JWT_ACCESS_TOKEN];
   const sessionToken = headers[HEADER_JWT_SESSION_TOKEN];
 
-  if (!accessToken || !sessionToken || !appCheck || !addresses) {
+  if (!accessToken || !sessionToken || !addresses) {
     return {
       statusCode: 400,
       body: JSON.stringify({
@@ -60,16 +60,7 @@ const handler: Handler = async (
     };
   }
 
-  // const verified = await verifyAppCheck(appCheck as string);
-  // if (!verified) {
-  //   return {
-  //     statusCode: 401,
-  //     body: JSON.stringify({
-  //       error: true,
-  //       message: `Unauthorized. Invalid AppCheck token: ${appCheck}.`
-  //     } as PaymentResponseBody)
-  //   }
-  // }
+  await initFirebase();
 
   const accessSecret = await getSecret('access');
   const sessionSecret = await getSecret('session');
@@ -110,7 +101,6 @@ const handler: Handler = async (
 
   const res: GraphqlPaymentAddressesResponse = await fetchNodeApp(`/payment?addresses=${addresses}`, {
     headers: {
-      [HEADER_APPCHECK]: appCheck,
       [HEADER_JWT_ACCESS_TOKEN]: accessToken,
       [HEADER_JWT_SESSION_TOKEN]: sessionToken
     }
