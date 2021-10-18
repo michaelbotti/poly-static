@@ -36,8 +36,9 @@
       @apply leading-loose;
   }
 
-  code {
-      @apply bg-dark-400 p-1 rounded-sm;
+  code,
+  pre {
+      @apply bg-dark-300 p-1 rounded-lg border border-dark-350 text-xs px-2 overflow-x-auto;
   }
 
   .svg-icon {

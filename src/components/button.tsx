@@ -7,6 +7,7 @@ interface ButtonProps {
   href?: string;
   className?: string;
   disabled?: boolean;
+  animate?: boolean;
   [key: string]: unknown;
 }
 
@@ -15,6 +16,7 @@ export const Button: FC<ButtonProps> = ({
   href,
   internal = true,
   buttonStyle = "secondary",
+  animate = false,
   children,
   disabled,
   ...rest
@@ -25,6 +27,10 @@ export const Button: FC<ButtonProps> = ({
 
   if (disabled) {
     classes.push("cursor-not-allowed bg-dark-300 hover:bg-dark-300 active:bg-dark-300 text-dark-350");
+  }
+
+  if (animate) {
+    classes.push("transform hover:translate-x-2")
   }
 
   switch (buttonStyle) {

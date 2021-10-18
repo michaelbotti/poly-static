@@ -2,147 +2,137 @@ import React from "react";
 
 import SEO from "../components/seo";
 import FAQ from "../components/faq";
+import { Link } from "gatsby";
 
 function FAQPage() {
   return (
     <>
       <SEO title="FAQ" />
-      <section id="faq" className="mt-16 max-w-xl mx-auto">
+      <section id="faq" className="my-16 max-w-3xl mx-auto">
         <h2 className="inline-block mb-4 text-4xl font-bold leading-none">
           FAQ
         </h2>
         <FAQ
           faqs={[
             {
-              title: "Why would I want to buy a @handle?",
+              title: 'What is this project?',
               description: () => (
-                <>
-                  <p>
-                    Cryptocurrencies are cryptographically guaranteed ledgers.
-                    That means that every time you want to receive crypto, you
-                    need to know your wallet address as well as the sender's.
-                  </p>
-                  <p>
-                    Normally this wouldn't be a big deal — except that in
-                    crypto, addresses are encrypted key pairs, and on Cardano
-                    they look like this:
-                  </p>
-                  <p>
-                    <code>addr1q9wt6pdnl3v4m29...qtmyxyqamvv22sv7pj7q</code>
-                  </p>
-                  <p>
-                    That's not very pretty, nor or easy to remember. Once you
-                    own an @ADA Handle NFT, you can use our platform to send and
-                    receive crypto purely by using your address.
-                  </p>
-                </>
-              ),
+                <p>It's a standardized NFT that developers and users can use to associate an address with a custom and human-readable address.</p>
+              )
             },
             {
-              title: "Is this platform decentralized?",
+              title: 'How does it work in simple terms?',
               description: () => (
-                <>
-                  <p>
-                    Yes and no. Currently, the NFT you receive after purchasing
-                    guarantees ownership of your @handle, lets you change the
-                    associated address trustlessly, and allows you to sell that
-                    ownership to anyone else.
-                  </p>
-                  <p>
-                    However, the interface to interpret this is a centralized
-                    one that we maintain. We have a financial incentive to
-                    interpret an accurate send addresses so that customers keep
-                    purchasing NFTs and using our platform.
-                  </p>
-                  <p>
-                    Furthermore, we maintain a centralized pay-to-use API
-                    service to allow wallet and web developers to integrate @ADA
-                    Handle into their app, further incentivizing operational
-                    integrity.
-                  </p>
-                  <p>
-                    That being said,{" "}
-                    <strong>
-                      the actual data we are providing is available on the
-                      Cardano blockchain
-                    </strong>
-                    , and can be verified or repurposed by anyone.
-                  </p>
-                </>
-              ),
+                <p>Each handle you purchase will be delivered to you as an NFT. Whatever wallet holds that NFT is where payments will be routed.</p>
+              )
             },
             {
-              title: "How can I be sure the send address is accurate?",
+              title: 'What does an example handle address look like compared to a standard wallet one.',
               description: () => (
                 <>
-                  <p>
-                    When building an actual transaction, we{" "}
-                    <strong>query the Cardano blockchain directly</strong> to
-                    guarantee an accurate send address.
-                  </p>
-                  <p>
-                    Additionally, and especially in the cases of sending large
-                    $ADA amounts, we show the interpreted address so that you
-                    can verify the send address yourself.
-                  </p>
-                  <p>
-                    Explicit confirmation of the send address will always be
-                    required before initiating a wallet transaction.
-                  </p>
+                  <p>Handle address: <code>$custom_name</code></p>
+                  <p>Cardano native address:</p>
+                  <pre>
+                    addr1qxx00r962ku8dl7wekn67kxxxjpcyfyul4dtgkkwzu3nqs5dsnkrcr6p03zvxn2k4vh5scr0hf9nc072lwr4fgs4k43qjswugd
+                  </pre>
                 </>
-              ),
+              )
             },
             {
-              title: "How much does a handle cost?",
+              title: 'Can I Still Reserve a Handle?',
               description: () => (
-                <>
-                  <p>
-                    There will be 3 NFT pre-sale phases, ending in permanent
-                    availability. This will allow us to adequately handle demand
-                    and scale our resources, and also catch any bugs along the
-                    way.
-                  </p>
-                  <p>The 3 phases are:</p>
-                  <ol>
-                    <li>
-                      <strong>Beta Phase</strong>: Each NFT address is{" "}
-                      <strong>10 $ADA</strong>, and limited to 500 addresses.
-                    </li>
-                    <li>
-                      <strong>Early Bird Phase</strong>: Each NFT address is{" "}
-                      <strong>30 $ADA</strong>, and limited to 5,000 addresses.
-                    </li>
-                    <li>
-                      <strong>Open Phase</strong>: Each NFT address is{" "}
-                      <strong>100 $ADA</strong>, and is only limited to @handle
-                      availability.
-                    </li>
-                  </ol>
-                </>
-              ),
+                <p>No, reservations have ended. You can still purchase a handle, though, during <Link to="/mint" className="text-primary-100">open sales</Link>.</p>
+              )
             },
             {
-              title: "Do both receiver and sender need a @handle?",
+              title: 'What kind of characters can I use?',
               description: () => (
                 <>
                   <p>
-                    No! Any @handle you purchase will be usable by anyone, even
-                    if they don't own one themselves.
+                    For beta launch, you are limited to the following UTF-8 characters:
                   </p>
+                  <ul>
+                    <li>Alphanumeric: <code>[a-z][A-Z][0-9]</code></li>
+                    <li>Dash: <code>-</code></li>
+                    <li>Underscore: <code>_</code></li>
+                    <li>Period: <code>.</code></li>
+                  </ul>
                 </>
-              ),
+              )
             },
             {
-              title: "Can I get a refund?",
+              title: 'Are handles case-sensitive?',
+              description: () => <p>No, every handle is converted to lowercase.</p>
+            },
+            {
+              title: 'How much does a Handle cost?',
               description: () => (
                 <>
+                  <p>While we are continuing to fine-tune our rarity attributes to better help the secondary market accurately value their handles, we settled on 5 tiers of pricing and rarity, determined simply by character length:</p>
+                  <ul>
+                    <li>Legendary (1 character): <strong>Auction Only</strong></li>
+                    <li>Ultra Rare (2 characters): <strong>500 $ADA</strong></li>
+                    <li>Rare (3 characters): <strong>100 $ADA</strong></li>
+                    <li>Common (4–7): <strong>50 $ADA</strong></li>
+                    <li>Basic (8–15): <strong>10 $ADA</strong></li>
+                  </ul>
+                </>
+              )
+            },
+            {
+              title: 'What is the max supply?',
+              description: () => (
+                <>
+                  <p>For now, the UTF-8 series is maxed at 15 characters in length. Taking into consideration the previously mentioned tiers:</p>
+                  <ul>
+                    <li>Legendary: <strong>39</strong></li>
+                    <li>Ultra Rare: <strong>1,521</strong></li>
+                    <li>Rare: <strong>59,319</strong></li>
+                    <li>Common: <strong>140,842,288,080</strong></li>
+                    <li>Basic: <strong>753,789,555,901,817,000,000,000</strong></li>
+                  </ul>
+                </>
+              )
+            },
+            {
+              title: 'Once purchased, do I have to pay renewal fees?',
+              description: () => <p>No! Each Handle is a one-time sale. You buy it, you own it — forever.</p>
+            },
+            {
+              title: 'Can I sell it?',
+              description: () => <p>Yes! You can sell your Handle on any Cardano NFT marketplace.</p>
+            },
+            {
+              title: 'Can I use or buy them from an exchange?',
+              description: () => (
+                <p>
+                  NO. If you try to use a handle from an exchange it might be lost forever! Only use it with light wallets and full nodes, such as Daedalus, Nami, and Yoroi.
+                </p>
+              )
+            },
+            {
+              title: 'How long before we can start using the handle?',
+              description: () => (
+                <>
+                  <p>On launch day, you can search for an address at <a href="https://handle.me" target="_blank" rel="noreferrer noopen">https://handle.me"</a>, or
+                  share your custom link that corresponds to your Handle, like this: <code>https://handle.me/<strong>$my_new_handle</strong></code></p>
                   <p>
-                    No, we do not offer refunds. However, we do offer 1-3 day
-                    support.
+                    dApps will integrate the Handle Standard as they choose. You can already see a list of <Link to="/#partners" className="text-primary-100">our current Partners here</Link>!
                   </p>
                 </>
-              ),
+              )
             },
+            {
+              title: 'What are the future plans of ADA Handle?',
+              description: () => (
+                <ul>
+                  <li>Moving to smart contract minting.</li>
+                  <li>Burner/recycling pot for privacy and/or temporary handle usage.</li>
+                  <li>An official handle marketplace.</li>
+                  <li>DAO governance.</li>
+                </ul>
+              )
+            }
           ]}
         />
       </section>

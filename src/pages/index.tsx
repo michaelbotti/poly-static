@@ -11,6 +11,8 @@ import Ecosystem from '../images/ecosystem.svg';
 import NonCustodial from '../images/non-custodial.svg';
 
 import Maladex from '../images/maladex-logo-small.png';
+import SundaeSwap from '../images/sundae.png';
+import Nami from '../images/nami.svg';
 
 function IndexPage() {
   return (
@@ -40,43 +42,52 @@ function IndexPage() {
         </div>
         <img className="absolute hidden md:block top-0 right-0 -mt-8 -mr-32 z-0" src={Wallet} />
       </section>
-      <section id="more" className="bg-dark-100 px-16 md:px-0">
-        <section className="z-10 relative w-full max-w-4xl px-4 pt-4 pb-8 mx-auto md:px-8 md:pt-16">
-          <h2 className="text-white text-4xl font-bold leading-tight text-center">Partners</h2>
-          <div className="flex mt-8 justify-center align-center">
-            <a href="https://maladex.com" className="block w-48" rel="nofollow" target="_blank">
-              <img className="w-full" src={Maladex} alt="Maladex" />
-            </a>
-          </div>
-        </section>
+      <section id="partners" className="mb-48 z-10 relative w-full max-w-5xl px-4 pt-4 pb-8 mx-auto md:px-8 md:pt-16">
+        <h2 className="text-white text-4xl font-bold leading-tight text-center">Partners</h2>
+        <div className="grid grid-cols-12 mt-8 place-content-center gap-8">
+          <a href="https://maladex.com" className="block col-span-4 shadow-lg rounded-lg bg-dark-200 p-8 lg:p-16 flex items-center justify-center transform hover:-translate-y-2" rel="nofollow" target="_blank">
+            <img className="w-48" src={Maladex} alt="Maladex" />
+          </a>
+          <a href="https://namiwallet.io" className="block col-span-4 shadow-lg rounded-lg bg-dark-200 p-8 lg:p-16 flex items-center justify-center transform hover:-translate-y-2" rel="nofollow" target="_blank">
+            <img className="w-28" src={Nami} alt="Nami Wallet" />
+          </a>
+          <a href="https://sundaeswap.finance" className="block col-span-4 shadow-lg rounded-lg bg-dark-200 p-8 lg:p-16 flex items-center justify-center transform hover:-translate-y-2" rel="nofollow" target="_blank">
+            <img className="w-32" src={SundaeSwap} alt="SundaeSwap" />
+          </a>
+        </div>
+      </section>
+      <section id="how-it-works" className="bg-dark-100 px-16 md:px-0">
+        <h2 className="text-white text-4xl font-bold leading-tight text-center">How it Works</h2>
         <div className="z-10 relative w-full max-w-5xl px-4 pt-4 pb-8 mx-auto md:px-8 md:pt-16 md:pb-32">
           <div className="grid grid-cols-12 py-16 gap-4 place-items-center">
             <div className="hidden md:block md:col-span-5 px-16 md:px-0">
               <img className="w-full xl:-ml-24" src={Payment} />
             </div>
             <div className="col-span-12 md:col-span-7 p-16 shadow-lg bg-dark-200 rounded-lg" id="simple">
-              <h2 className="inline-block text-white mb-4 text-4xl font-bold leading-tight"><em>Cardano addresses made simple.</em></h2>
+              <h2 className="inline-block text-white mb-4 text-4xl font-bold leading-tight"><em>Simple &amp; Flexible NFT's on Cardano.</em></h2>
               <div className="text-white">
-                <p>Sending and receiving cryptocurrency is a pretty lame experience. You get the most security by sending directly to a cryptographic hash, but you give up <strong>readability, predictability, and memorization.</strong></p>
-                <p>$handle ensures that your custom address will always <strong>resolve to your current wallet address</strong>, every time.</p>
-                <Button buttonStyle="secondary" internal link="/mint">Purchase a Handle!</Button>
+                <p>Each Handle is a unique NFT, minted and issued on the Cardano blockchain. These NFTs act as unique identifiers for the UTXO that they reside in.</p>
+                <p>With a predictable standard, dApp developers can query the Cardano blockchain at any time to determine the current residing address of a Handle.</p>
+                <Button animate buttonStyle="secondary" internal link="/mint">Get Your Handle Now! &rarr;</Button>
               </div>
             </div>
           </div>
 
           <hr className="mx-auto my-16 w-8 h-1 bg-dark-300 block" />
 
-          <div className="grid grid-cols-12 py-16 gap-4 content-center">
-            <div className="col-span-12 md:col-span-5" id="secure">
-              <h2 className="inline-block text-white mb-4 text-4xl font-bold leading-tight"><em>Secured by the blockchain.</em></h2>
+          <div className="grid grid-cols-12 py-16 gap-4 place-items-center">
+            <div className="col-span-12 md:col-span-7 p-16 shadow-lg bg-dark-200 rounded-lg" id="simple">
+              <h2 className="inline-block text-white mb-4 text-4xl font-bold leading-tight"><em>Secured Entirely on Cardano Layer 1</em></h2>
               <div className="text-white">
-                <p>It wouldn't be very interesting to own a custom wallet address, but be forced into relying on a central entity to resolve it.</p>
-                <p>Thankfully, $handle doesn't own the data associated with your address. <strong>You do, and it's secured on the Cardano blockchain.</strong></p>
-                <p>You can think of it like a domain service, but where you own the address perpetually, and the chain (instead of a DNS) takes care of the routing details.</p>
+                <p>Unlike many other routing services on Ethereum, Handles are secured entirely as native assets on the Cardano blockchain, on the Layer 1 ledger.</p>
+                <p>This means we don't require smart contracts for address routing, ensuring that even in the event of an unlikely smart contract bug, routing
+                  will always be accurate — 100% of the time.
+                </p>
+                <p><strong>Now that's reliable.</strong></p>
                 <Button buttonStyle="secondary" internal link="/mint">Purchase a Handle!</Button>
               </div>
             </div>
-            <div className="hidden md:block md:col-span-7 px-16 md:px-0">
+            <div className="hidden md:block md:col-span-5 px-16 md:px-0">
               <img className="w-full xl:ml-24" src={Cardano} />
             </div>
           </div>

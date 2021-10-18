@@ -3,6 +3,8 @@ import React from "react";
 import SEO from "../components/seo";
 
 import Calvin from '../images/calvin.jpeg';
+import Goose from '../images/goose.jpeg';
+import Conrad from '../images/conrad.jpeg';
 
 const Twitter = () => (
   <svg className="mt-4 w-8 h-8 block opacity-60 hover:opacity-100" viewBox="0 0 20 20">
@@ -29,13 +31,13 @@ function TeamPage() {
           <div className="col-12 lg:col-span-4 p-4 lg:p-8 bg-dark-200 rounded-lg shadow-lg">
             <div className="flex align-center justify-between">
               <div>
-                <h3 className="text-5xl font-bold">Calvin</h3>
+                <h3 className="text-3xl font-bold">Calvin</h3>
                 <h4 className="uppercase">Cofounder</h4>
                 <a href="https://twitter.com/calvinsbrew">
                 <Twitter />
                 </a>
               </div>
-              <img src={Calvin} className="w-24 h-24 rounded-full" />
+              <img src={Calvin} className="w-20 h-20 rounded-full" />
             </div>
             <hr className="w-12 border-dark-300 border-2 block my-8" />
             <p>Calvin has nearly 15 years of web software experience ranging from small side-projects to fortune 500 companies, to Facebook.</p>
@@ -46,34 +48,34 @@ function TeamPage() {
           <div className="col-12 lg:col-span-4 p-4 lg:p-8 bg-dark-200 rounded-lg shadow-lg">
             <div className="flex align-center justify-between">
               <div>
-                <h3 className="text-5xl font-bold">Conrad</h3>
+                <h3 className="text-3xl font-bold">Conrad</h3>
                 <h4 className="uppercase">Cofounder</h4>
                 <a href="https://twitter.com/calvinsbrew">
                 <Twitter />
                 </a>
               </div>
-              <img src={Calvin} className="w-24 h-24 rounded-full" />
-            </div>
-            <hr className="w-12 border-dark-300 border-2 block my-8" />
-            <p>Mr. Goose comes from the competitive suit-and-tie world of commercial lending in Silicon Valley.</p>
-            <p>After years of stringent professionalism working with some of the largest tech companies in the world, Mr. Goose decided it was time for an about face.</p>
-            <p>Finding Cardano was a perfect fit for his ethos as he brings a light-hearted yet severely professional approach to negotiation, management and business trategy.</p>
-          </div>
-          <div className="col-12 lg:col-span-4 p-4 lg:p-8 bg-dark-200 rounded-lg shadow-lg">
-            <div className="flex align-center justify-between">
-              <div>
-                <h3 className="text-5xl font-bold">Mr. Goose</h3>
-                <h4 className="uppercase">Cofounder</h4>
-                <a href="https://twitter.com/calvinsbrew">
-                <Twitter />
-                </a>
-              </div>
-              <img src={Calvin} className="w-24 h-24 rounded-full" />
+              <img src={Conrad} className="w-20 h-20 rounded-full" />
             </div>
             <hr className="w-12 border-dark-300 border-2 block my-8" />
             <p>Conrad is an InfoSec and  IT infrastructure engineer, with 20 years of corporate experience, 10 of those in New York City.</p>
             <p>Conrad is a sports aficionado. When he's not working, you'll catch him on the West Side Highway cycling or skateboarding.</p>
             <p>Originally from São Paulo, Conrad moved to New York in 2011. Conrad is married to Caroline.</p>
+          </div>
+          <div className="col-12 lg:col-span-4 p-4 lg:p-8 bg-dark-200 rounded-lg shadow-lg">
+            <div className="flex align-center justify-between">
+              <div>
+                <h3 className="text-3xl font-bold">Mr. Goose</h3>
+                <h4 className="uppercase">Cofounder</h4>
+                <a href="https://twitter.com/GooseOfCrypto">
+                <Twitter />
+                </a>
+              </div>
+              <img src={Goose} className="w-20 h-20 rounded-full" />
+            </div>
+            <hr className="w-12 border-dark-300 border-2 block my-8" />
+            <p>Mr. Goose comes from the competitive suit-and-tie world of commercial lending in Silicon Valley.</p>
+            <p>After years of stringent professionalism working with some of the largest tech companies in the world, Mr. Goose decided it was time for an about face.</p>
+            <p>Finding Cardano was a perfect fit for his ethos as he brings a light-hearted yet severely professional approach to negotiation, management, and business trategy.</p>
           </div>
         </div>
       </section>
