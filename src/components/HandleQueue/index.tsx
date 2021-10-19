@@ -126,7 +126,6 @@ export const HandleQueue = (): JSX.Element => {
       .catch(e => console.log(e));
 
       const { error, verified, message, token, data } = res;
-      console.log(res);
       if (!error && verified && token && data) {
         setAccessTokenCookie(token, data.exp);
         setAccessOpen(true);
