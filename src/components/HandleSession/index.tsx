@@ -1,8 +1,9 @@
+import Cookies from "js-cookie";
 import React, { useContext, useEffect, useRef, useState } from "react";
 import Countdown from "react-countdown";
 import { PaymentData, PaymentResponseBody } from "../../../netlify/functions/payment";
 import { HandleMintContext } from "../../context/mint";
-import { HEADER_JWT_ACCESS_TOKEN, HEADER_JWT_SESSION_TOKEN } from "../../lib/constants";
+import { COOKIE_SESSION_PREFIX, HEADER_JWT_ACCESS_TOKEN, HEADER_JWT_SESSION_TOKEN } from "../../lib/constants";
 import { getRarityCost, getRarityHex } from "../../lib/helpers/nfts";
 import { getAccessTokenFromCookie, getSessionTokenFromCookie } from "../../lib/helpers/session";
 import { Loader } from "../Loader";
@@ -15,8 +16,9 @@ export const HandleSession = ({
   const [paymentStatus, setPaymentStatus] = useState<PaymentData[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [copying, setCopying] = useState<boolean>(false);
+  const [overpaid, setOverpaid] = useState<boolean>(false);
 
-  const sessionData = paymentSessions[currentIndex];
+  const sessionData = paymentSessions[currentIndex - 1];
   const validPayment = paymentStatus.length >= 1 && paymentStatus[0].amount !== 0 && paymentStatus[0].amount === sessionData.sessionResponse.data.cost * 1000000;
 
   useEffect(() => {
@@ -45,7 +47,12 @@ export const HandleSession = ({
       }
 
       const payments = res.data.addresses;
-      console.log(payments);
+
+      // Terminate if overpaid.
+      if (payments[0].amount > sessionData.sessionResponse.data.cost * 1000000) {
+        setOverpaid(true);
+      }
+
       if (payments) {
         setPaymentStatus(payments)
       }
@@ -54,18 +61,18 @@ export const HandleSession = ({
     checkPayments();
     const checkPaymentsInt = setInterval(checkPayments, 10000);
 
-    if (validPayment) {
+    if (validPayment || overpaid) {
       clearInterval(checkPaymentsInt);
     }
 
     return () => clearInterval(checkPaymentsInt);
-  }, [currentIndex, validPayment]);
+  }, [currentIndex, validPayment, sessionData, overpaid]);
 
   useEffect(() => {
     if (paymentStatus.length > 0) {
       setLoading(false);
     }
-  }, [paymentStatus]);
+  }, [paymentStatus, overpaid]);
 
   const handleCopy = async () => {
     navigator.clipboard.writeText(sessionData.sessionResponse.address);
@@ -73,6 +80,21 @@ export const HandleSession = ({
     setTimeout(() => {
       setCopying(false);
     }, 1000);
+  }
+
+  if (overpaid) {
+    console.log(currentIndex);
+    // Delete session token.
+    Cookies.remove(`${COOKIE_SESSION_PREFIX}_${currentIndex}`);
+    return (
+      <div className="col-span-6 p-8">
+        <h2 className="font-bold text-3xl mb-2">
+          Overpaid!
+        </h2>
+        <p className="text-lg">Sorry, but you overpaid for your handle. We will refund you as soon as possible. In the meantime, you can refresh this page to regain another session.</p>
+        <hr className="w-12 border-dark-300 border-2 block my-8" />
+      </div>
+    )
   }
 
   return loading ? (
@@ -90,7 +112,7 @@ export const HandleSession = ({
         </h2>
         <p className="text-lg">Submit your payment <u>exactly</u> in the amount shown. Invalid payments will be refunded, but your session will remain till it expires!</p>
         <hr className="w-12 border-dark-300 border-2 block my-8" />
-        {!validPayment && paymentStatus[0].amount === 0 && (
+        {!validPayment && (
           <>
             <h4 className="text-xl mb-8">
               Send exaclty <strong className="border-2 border-primary-100 px-2 inline-block text-base rounded-lg">{getRarityCost(sessionData.sessionResponse.data.handle)} $ADA</strong> to the following address:
@@ -146,7 +168,7 @@ export const HandleSession = ({
                 )}
                 {!validPayment && paymentStatus[0].amount !== 0 && (
                   <div className="mt-4">
-                    <p className="text-lg">Whoops! That amount wasn't right. We'll refund you as soon as possible.</p>
+                    <p className="text-lg">Whoops! That amount wasn't right. <strong><u>Please send exactly {((sessionData.sessionResponse.data.cost * 1000000) - paymentStatus[0].amount) / 1000000} more $ADA</u></strong></p>
                     <p className="text-lg">This session will automatically close in <strong>{formatted.minutes}:{formatted.seconds}</strong></p>
                   </div>
                 )}

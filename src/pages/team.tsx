@@ -50,7 +50,7 @@ function TeamPage() {
               <div>
                 <h3 className="text-3xl font-bold">Conrad</h3>
                 <h4 className="uppercase">Cofounder</h4>
-                <a href="https://twitter.com/calvinsbrew">
+                <a href="https://twitter.com/conraddit">
                 <Twitter />
                 </a>
               </div>

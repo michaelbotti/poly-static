@@ -14,10 +14,12 @@ import { HandleSession } from "../components/HandleSession";
 
 function MintPage() {
   const { primed, handle, paymentSessions } = useContext(HandleMintContext);
-  const [currentIndex, setCurrentIndex] = useState<number>(-1);
+  const [currentIndex, setCurrentIndex] = useState<number>(0);
   const [accessOpen] = useAccessOpen();
 
   usePrimeMintingContext();
+
+  const currentHandle = useMemo(() => getSessionDataCookie(currentIndex)?.data?.handle, [currentIndex]);
 
   return (
     <>
@@ -28,8 +30,8 @@ function MintPage() {
             {3 - paymentSessions.length}
           </div>
           <button
-            onClick={() => setCurrentIndex(-1)}
-            className={`${currentIndex !== -1 ? 'opacity-40' : ''} bg-dark-200 flex-inline items-center justify-center px-4 py-2 rounded-t-lg mr-4 relative`}
+            onClick={() => setCurrentIndex(0)}
+            className={`${currentIndex !== 0 ? 'opacity-40' : ''} bg-dark-200 flex-inline items-center justify-center px-4 py-2 rounded-t-lg mr-4 relative`}
           >
             <h4 className="text-lg p-4">Mint a Handle!</h4>
           </button>
@@ -46,7 +48,7 @@ function MintPage() {
                 className={`${index + 1 !== currentIndex ? `bg-dark-100 opacity-60` : `bg-dark-200`} flex-inline items-center justify-center px-8 lg:px-4 py-2 rounded-t-lg mr-4`}
               >
                 <h4 className="hidden lg:block">${sessionData.data.handle}</h4>
-                <h4 className="lg:hidden font-bold">{index + 1}</h4>
+                <h4 className="lg:hidden font-bold">{index}</h4>
               </button>
             )
           })}
@@ -85,7 +87,7 @@ function MintPage() {
             {accessOpen && (
               <>
                 <div className="col-span-12 lg:col-span-6 relative z-10">
-                  {currentIndex === -1 && (
+                  {currentIndex === 0 && (
                     primed ? (
                       <div className="p-8">
                         <HandleSearchReserveFlow setActiveSession={setCurrentIndex} />
@@ -98,12 +100,12 @@ function MintPage() {
                     )
                   )}
 
-                  {currentIndex !== -1 && (
-                    <HandleSession currentIndex={currentIndex - 1} />
+                  {currentIndex !== 0 && (
+                    <HandleSession currentIndex={currentIndex } />
                   )}
                 </div>
                 <div className="col-span-12 lg:col-span-6 py-8">
-                  <NFTPreview handle={currentIndex === -1 ? handle : getSessionDataCookie(currentIndex).data.handle} />
+                  <NFTPreview handle={currentHandle || handle} />
                 </div>
               </>
             )}
