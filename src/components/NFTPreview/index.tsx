@@ -19,6 +19,7 @@ const NFTPreview: FC<NFTPreviewProps> = ({
   showHeader = true,
 }) => {
   const { isPurchasing, reservedHandles, primed } = useContext(HandleMintContext);
+
   const textSize = () => {
     if (handle.length < 3) {
       return "text-jumbo";

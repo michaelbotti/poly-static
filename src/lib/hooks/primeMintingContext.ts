@@ -10,24 +10,18 @@ export const usePrimeMintingContext = async () => {
 
   useEffect(() => {
     (async () => {
-      try {
-        Promise.all([
-          fetch('/.netlify/functions/search').catch(),
-          fetch('/.netlify/functions/session').catch(),
-        ]).catch(e => console.log(e));
+      fetch('/.netlify/functions/queue').catch();
+      fetch('/.netlify/functions/verify').catch();
 
-        // Retrieve reserved handle data store.
-        const reservedHandlesRef = getReservedHandlesRef();
-        const reservedHandlesRes = await get(reservedHandlesRef).then(res => res.val());
-        reservedHandlesRes && setReservedHandles(reservedHandlesRes);
+      // Retrieve reserved handle data store.
+      const reservedHandlesRef = getReservedHandlesRef();
+      const reservedHandlesRes = await get(reservedHandlesRef).then(res => res.val());
+      reservedHandlesRes && setReservedHandles(reservedHandlesRes);
 
-        setPrimed(true);
-      } catch (e) {
-        console.log(e);
-      }
+      setPrimed(true);
     })();
 
-    // Stay in sync with active sessions.
+    // Stay in sync with active sessions by subscribing.
     const pendingSessionsRef = getPendingSessionsRef();
     const unsubscribePending = onValue(pendingSessionsRef, (snapshot) => {
       if (!snapshot) {
@@ -37,6 +31,6 @@ export const usePrimeMintingContext = async () => {
       setPendingSessions(snapshot.val());
     });
 
-    return unsubscribePending;
+    return () => unsubscribePending();
   }, []);
 }

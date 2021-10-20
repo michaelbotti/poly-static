@@ -1,93 +1,101 @@
 import Cookies from "js-cookie";
-import React, { useContext, useEffect, useRef, useState } from "react";
+import React, { useContext, useEffect, useMemo, useState } from "react";
 import Countdown from "react-countdown";
 import { PaymentData, PaymentResponseBody } from "../../../netlify/functions/payment";
 import { HandleMintContext } from "../../context/mint";
 import { COOKIE_SESSION_PREFIX, HEADER_JWT_ACCESS_TOKEN, HEADER_JWT_SESSION_TOKEN } from "../../lib/constants";
-import { getRarityCost, getRarityHex } from "../../lib/helpers/nfts";
+import { getRarityCost } from "../../lib/helpers/nfts";
 import { getAccessTokenFromCookie, getSessionTokenFromCookie } from "../../lib/helpers/session";
 import { Loader } from "../Loader";
-import { LogoMark } from "../logo";
+import Button from "../button";
+import { SessionResponseBody } from "../../../netlify/functions/session";
 
 export const HandleSession = ({
-  currentIndex
-}: { currentIndex: number }) => {
-  const { paymentSessions } = useContext(HandleMintContext);
-  const [paymentStatus, setPaymentStatus] = useState<PaymentData[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
+  sessionData
+}:{
+  sessionData: SessionResponseBody
+}) => {
+  const { currentIndex, setCurrentIndex } = useContext(HandleMintContext);
+  const [paymentStatus, setPaymentStatus] = useState<PaymentData>(null);
+  const [fetchingPayment, setFetchingPayment] = useState<boolean>(true);
   const [copying, setCopying] = useState<boolean>(false);
-  const [overpaid, setOverpaid] = useState<boolean>(false);
-
-  const sessionData = paymentSessions[currentIndex - 1];
-  const validPayment = paymentStatus.length >= 1 && paymentStatus[0].amount !== 0 && paymentStatus[0].amount === sessionData.sessionResponse.data.cost * 1000000;
-
-  useEffect(() => {
-    setLoading(true);
-    const checkPayments = async () => {
-      if (validPayment) {
-        return;
-      }
-
-      const accessToken = getAccessTokenFromCookie();
-      const sessionToken = sessionData.sessionResponse.token;
-
-      if (!accessToken || !sessionToken) {
-        return;
-      }
-
-      const res: PaymentResponseBody = await fetch(`/.netlify/functions/payment?addresses=${sessionData.sessionResponse.address}`, {
-        headers: {
-          [HEADER_JWT_ACCESS_TOKEN]: getAccessTokenFromCookie(),
-          [HEADER_JWT_SESSION_TOKEN]: sessionToken
-        }
-      }).then(res => res.json())
-
-      if (!res || res.error) {
-        return;
-      }
-
-      const payments = res.data.addresses;
-
-      // Terminate if overpaid.
-      if (payments[0].amount > sessionData.sessionResponse.data.cost * 1000000) {
-        setOverpaid(true);
-      }
-
-      if (payments) {
-        setPaymentStatus(payments)
-      }
-    };
-
-    checkPayments();
-    const checkPaymentsInt = setInterval(checkPayments, 10000);
-
-    if (validPayment || overpaid) {
-      clearInterval(checkPaymentsInt);
-    }
-
-    return () => clearInterval(checkPaymentsInt);
-  }, [currentIndex, validPayment, sessionData, overpaid]);
-
-  useEffect(() => {
-    if (paymentStatus.length > 0) {
-      setLoading(false);
-    }
-  }, [paymentStatus, overpaid]);
+  const [retry, setRetry] = useState<boolean>(true);
+  const [sessionExpired, setSessionExpired] = useState<boolean>(false);
 
   const handleCopy = async () => {
-    navigator.clipboard.writeText(sessionData.sessionResponse.address);
+    navigator.clipboard.writeText(sessionData.address);
     setCopying(true);
     setTimeout(() => {
       setCopying(false);
     }, 1000);
   }
 
-  if (overpaid) {
-    console.log(currentIndex);
-    // Delete session token.
+  // Check current session payment status.
+  useEffect(() => {
+    if (!sessionData) {
+      return;
+    }
+
+    const updatePaymentStatus = async () => {
+      await fetch(
+        `/.netlify/functions/payment?addresses=${sessionData.address}`,
+        {
+          headers: {
+            [HEADER_JWT_ACCESS_TOKEN]: getAccessTokenFromCookie(),
+            [HEADER_JWT_SESSION_TOKEN]: sessionData.token
+          }
+        }
+      )
+      .then(res => res.json())
+      .then((res: PaymentResponseBody) => {
+        if (res.data.addresses) {
+          setPaymentStatus(res.data.addresses[0]);
+        }
+
+        setFetchingPayment(false);
+      });
+    };
+
+    updatePaymentStatus();
+    const interval = setInterval(updatePaymentStatus, 5000);
+
+    if (!retry) {
+      clearInterval(interval);
+    }
+
+    return () => clearInterval(interval);
+  }, [retry, sessionData, currentIndex]);
+
+  // Reset on index change.
+  useEffect(() => {
+    const activeSession = getSessionTokenFromCookie(currentIndex);
+    if (activeSession) {
+      setRetry(true);
+      setFetchingPayment(true);
+    } else {
+      setCurrentIndex(0);
+    }
+  }, [currentIndex]);
+
+  const validPayment = useMemo(() => paymentStatus && paymentStatus.amount !== 0 && paymentStatus.amount === sessionData.data.cost * 1000000, [currentIndex, paymentStatus]);
+  const overPayment = useMemo(() => paymentStatus && paymentStatus.amount !== 0 && paymentStatus.amount > sessionData.data.cost * 1000000, [currentIndex, paymentStatus]);
+  const incompletePayment = useMemo(() => paymentStatus && paymentStatus.amount !== 0 && paymentStatus.amount < sessionData.data.cost * 1000000, [currentIndex, paymentStatus]);
+
+  if (!sessionData) {
+    return (
+      <div className="col-span-12 md:col-span-6 relative z-10">
+        <div className="grid justify-center content-center h-full w-full p-8 flex-wrap">
+          <p className="w-full text-center">Fetching details...</p>
+          <Loader />
+        </div>
+      </div>
+    )
+  }
+
+  if (overPayment) {
     Cookies.remove(`${COOKIE_SESSION_PREFIX}_${currentIndex}`);
     return (
-      <div className="col-span-6 p-8">
+      <div className="col-span-6">
         <h2 className="font-bold text-3xl mb-2">
           Overpaid!
         </h2>
@@ -97,29 +105,28 @@ export const HandleSession = ({
     )
   }
 
-  return loading ? (
-    <div className="col-span-12 lg:col-span-6 relative z-10">
-      <div className="grid justify-center content-center h-full w-full p-8 flex-wrap">
-        <p className="w-full text-center">Fetching details...</p>
-        <Loader />
-      </div>
-    </div>
-  ) : (
-    <>
-      <div className="col-span-6 p-8">
-        <h2 className="font-bold text-3xl mb-2">
-          Session Active
-        </h2>
-        <p className="text-lg">Submit your payment <u>exactly</u> in the amount shown. Invalid payments will be refunded, but your session will remain till it expires!</p>
-        <hr className="w-12 border-dark-300 border-2 block my-8" />
+  return (
+    <div className="col-span-6">
+      <h2 className="font-bold text-3xl mb-2">
+        Session Active
+      </h2>
+      <p className="text-lg">Submit your payment <u>exactly</u> in the amount shown. Invalid payments will be refunded, but your session will remain till it expires!</p>
+      <hr className="w-12 border-dark-300 border-2 block my-8" />
+      {fetchingPayment ? (
+        <div className="flex flex-col items-center justify-center">
+          <Loader />
+          <h2 className="text-xl font-bold my-2">Checking details...</h2>
+        </div>
+      ) : (
+        <>
         {!validPayment && (
           <>
             <h4 className="text-xl mb-8">
-              Send exaclty <strong className="border-2 border-primary-100 px-2 inline-block text-base rounded-lg">{getRarityCost(sessionData.sessionResponse.data.handle)} $ADA</strong> to the following address:
+              Send exaclty <strong className="border-2 border-primary-100 px-2 inline-block text-base rounded-lg">{getRarityCost(sessionData.data.handle)} $ADA</strong> to the following address:
             </h4>
             <div className="relative">
               <pre className="p-4 rounded-t-lg shadow-inner shadow-lg bg-dark-300 overflow-hidden overflow-scroll pr-24 border-2 border-b-0 border-primary-100">
-                {sessionData.sessionResponse.address}
+                {sessionData.address}
               </pre>
               <button onClick={handleCopy} className="absolute top-0 right-0 h-full w-16 bg-primary-100 rounded-tr-lg">
                 <svg className={`w-full height-full p-5 ${copying ? 'hidden' : 'block'}`} viewBox="0 0 20 20">
@@ -145,9 +152,10 @@ export const HandleSession = ({
         )}
         <Countdown
           onComplete={() => {
+            // Update expired cookies.
             window.location.reload();
           }}
-          date={sessionData.sessionResponse.data.exp}
+          date={sessionData.data.exp}
           renderer={({ formatted, total }) => {
             const isWarning = !validPayment && total < 120 * 1000;
             return (
@@ -157,26 +165,28 @@ export const HandleSession = ({
                   borderColor: isWarning ? 'red' : ''
                 }}
               >
-                {validPayment && paymentStatus[0].amount !== 0 && (
+                {validPayment && (
                   <>
                     <div>
-                      <h2 className="text-xl font-bold mb-2"><strong>Yay!</strong> Your payment was successful!</h2>
-                      <p className="text-lg">We're minting your handle right now, but we do it in batches. Please allow 1-2 hours for your handle to arrive in your wallet.</p>
-                      <p className="text-lg">This session will automatically close in <strong>{formatted.minutes}:{formatted.seconds}</strong></p>
+                      <h2 className="text-2xl font-bold mb-2"><strong>Yay!</strong> Your payment was successful!</h2>
+                      <p className="text-lg">We're minting your handle <strong>right now.</strong> You should receive it within 30 seconds, but please allow up to 2 hours during high blockchain activity.</p>
+                      {sessionExpired && <Button buttonStyle="secondary" onClick={() => setCurrentIndex(0)}>Close This Session</Button>}
                     </div>
                   </>
                 )}
-                {!validPayment && paymentStatus[0].amount !== 0 && (
+                {incompletePayment && (
                   <div className="mt-4">
-                    <p className="text-lg">Whoops! That amount wasn't right. <strong><u>Please send exactly {((sessionData.sessionResponse.data.cost * 1000000) - paymentStatus[0].amount) / 1000000} more $ADA</u></strong></p>
+                    <p className="text-lg">Whoops! That amount wasn't right. <strong><u>Please send exactly {((sessionData.data.cost * 1000000) - paymentStatus.amount) / 1000000} more $ADA</u></strong></p>
                     <p className="text-lg">This session will automatically close in <strong>{formatted.minutes}:{formatted.seconds}</strong></p>
                   </div>
                 )}
-                {!validPayment && paymentStatus[0].amount === 0 && (
+                {!validPayment && !incompletePayment && !overPayment && (
                   <>
                     <div>
                       {isWarning && <h6 className="text-lg font-bold" style={{ color: 'red' }}>Hurry Up!</h6>}
-                      <h2 className="text-xl font-bold mb-2">Waiting for payment...</h2>
+                      {paymentStatus && paymentStatus.amount === 0 && !fetchingPayment && (
+                        <h2 className="text-xl font-bold mb-2">Waiting for payment...</h2>
+                      )}
                       <h4 className="text-xl">
                         Time Left: <strong>{formatted.minutes}:{formatted.seconds}</strong>
                       </h4>
@@ -188,7 +198,8 @@ export const HandleSession = ({
             )
           }}
         />
-      </div>
-    </>
+        </>
+      )}
+    </div>
   )
 }

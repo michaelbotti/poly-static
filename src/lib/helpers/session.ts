@@ -1,33 +1,17 @@
 import Cookie from 'js-cookie';
 
 import { SessionResponseBody } from "../../../netlify/functions/session";
-import { COOKIE_ACCESS_KEY, COOKIE_SESSION_PREFIX, IP_ADDRESS_KEY, RECAPTCHA_SITE_KEY } from '../constants';
+import { COOKIE_ACCESS_KEY, COOKIE_SESSION_PREFIX, RECAPTCHA_SITE_KEY } from '../constants';
 
-export const getAllCurrentSessionData = (): SessionResponseBody[] => {
-  return [1,2,3].reduce((count, session, index) => {
-    const data = getSessionDataCookie(index);
+export const getAllCurrentSessionData = (): (SessionResponseBody | false)[] => {
+  return [1,2,3].reduce((sessions, index) => {
+    const data = getSessionTokenFromCookie(index);
     if (null !== data) {
-      return [...count, data];
+      sessions.push(data);
     }
 
-    return count;
+    return sessions;
   }, []);
-}
-
-export const getSessionDataCookie = (index: number): SessionResponseBody | null => {
-  const session = Cookie.get(`${COOKIE_SESSION_PREFIX}_${index}`);
-  return session ? JSON.parse(session) : null;
-}
-
-export const getSessionDataFromState = (state: SessionResponseBody | null): false | SessionResponseBody => {
-  if (
-    !state?.data ||
-    !state?.address
-  ) {
-    return false;
-  }
-
-  return state;
 }
 
 export const getAccessTokenFromCookie = () => Cookie.get(COOKIE_ACCESS_KEY);

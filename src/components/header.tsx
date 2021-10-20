@@ -1,7 +1,8 @@
 import { Link } from "gatsby";
 import React, { useState, FC, useEffect } from "react";
-import { getAccessTokenFromCookie, getSessionDataCookie } from "../lib/helpers/session";
+import { getAccessTokenFromCookie, getSessionTokenFromCookie } from "../lib/helpers/session";
 import { useAccessOpen } from "../lib/hooks/access";
+import Button from "./button";
 
 import Logo from './logo';
 
@@ -36,7 +37,7 @@ const Header: FC<HeaderProps> = ({ className, showMint = true }) => {
 
   return (
     <>
-      <header className={`flex flex-wrap items-center justify-between p-4 mx-auto md:p-8 ${className}`} style={{ minHeight: 108 }}>
+      <header className={`flex flex-wrap items-center justify-between p-4 mx-auto md:p-8 ${className}`} style={{ minHeight: 120 }}>
         <Link to="/">
           <h1 className="flex items-center no-underline">
             <span className="sr-only">$handle</span>
@@ -79,12 +80,13 @@ const Header: FC<HeaderProps> = ({ className, showMint = true }) => {
           </nav>
         </div>
         {showMint && (
-          <Link
-            className={'block mt-4 text-dark-300 border-2 border-primary-200 px-4 py-2 rounded-lg font-bold no-underline md:inline-block md:mt-0 md:ml-6 text-dark-400'}
-            to={'/mint'}
+          <Button
+            animate
+            buttonStyle="primary"
+            href={'/mint'}
           >
             Beta Sale Open! &rarr;
-          </Link>
+          </Button>
         )}
       </header>
     </>

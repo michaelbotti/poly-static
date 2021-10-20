@@ -9,50 +9,24 @@ import { HandleSearchReserveFlow } from "../components/HandleSearch";
 import { Loader } from "../components/Loader";
 import NFTPreview from "../components/NFTPreview";
 import { HandleQueue } from "../components/HandleQueue";
-import { getSessionDataCookie } from "../lib/helpers/session";
+import { getSessionTokenFromCookie } from "../lib/helpers/session";
 import { HandleSession } from "../components/HandleSession";
+import { HandleNavigation } from "../components/HandleNavigation";
+import { SessionResponseBody } from "../../netlify/functions/session";
 
 function MintPage() {
-  const { primed, handle, paymentSessions } = useContext(HandleMintContext);
-  const [currentIndex, setCurrentIndex] = useState<number>(0);
+  const { primed, handle, currentIndex } = useContext(HandleMintContext);
   const [accessOpen] = useAccessOpen();
 
   usePrimeMintingContext();
 
-  const currentHandle = useMemo(() => getSessionDataCookie(currentIndex)?.data?.handle, [currentIndex]);
+  const currentSession = useMemo(() => currentIndex > 0 ? getSessionTokenFromCookie(currentIndex) as SessionResponseBody : null, [currentIndex]);
 
   return (
     <>
       <SEO title="Mint" />
       <section id="top" className="max-w-5xl mx-auto">
-        <div className="flex justify-start place-content-center relative">
-          <div className={`absolute bg-primary-100 w-8 h-8 flex items-center justify-center rounded-full -top-2 -left-2 z-10`}>
-            {3 - paymentSessions.length}
-          </div>
-          <button
-            onClick={() => setCurrentIndex(0)}
-            className={`${currentIndex !== 0 ? 'opacity-40' : ''} bg-dark-200 flex-inline items-center justify-center px-4 py-2 rounded-t-lg mr-4 relative`}
-          >
-            <h4 className="text-lg p-4">Mint a Handle!</h4>
-          </button>
-          {paymentSessions.map((session, index) => {
-            const sessionData = getSessionDataCookie(index + 1);
-            if (!sessionData) {
-              return null;
-            }
-
-            return (
-              <button
-                key={index}
-                onClick={() => setCurrentIndex(index + 1)}
-                className={`${index + 1 !== currentIndex ? `bg-dark-100 opacity-60` : `bg-dark-200`} flex-inline items-center justify-center px-8 lg:px-4 py-2 rounded-t-lg mr-4`}
-              >
-                <h4 className="hidden lg:block">${sessionData.data.handle}</h4>
-                <h4 className="lg:hidden font-bold">{index}</h4>
-              </button>
-            )
-          })}
-        </div>
+        <HandleNavigation />
         <div
           className="grid grid-cols-12 gap-4 bg-dark-200 rounded-lg rounded-tl-none place-content-start p2 lg:p-8 mb-16"
           style={{ minHeight: "60vh" }}
@@ -87,25 +61,23 @@ function MintPage() {
             {accessOpen && (
               <>
                 <div className="col-span-12 lg:col-span-6 relative z-10">
-                  {currentIndex === 0 && (
-                    primed ? (
-                      <div className="p-8">
-                        <HandleSearchReserveFlow setActiveSession={setCurrentIndex} />
-                      </div>
-                    ) : (
-                      <div className="grid justify-center content-center h-full w-full p-8 flex-wrap">
-                        <p className="w-full text-center">Fetching bytes...</p>
-                        <Loader />
-                      </div>
-                    )
+                  {primed && (
+                    <div className="p-8">
+                      {currentIndex === 0
+                        ? <HandleSearchReserveFlow />
+                        : <HandleSession sessionData={currentSession} />}
+                    </div>
                   )}
 
-                  {currentIndex !== 0 && (
-                    <HandleSession currentIndex={currentIndex } />
+                  {!primed && (
+                    <div className="grid justify-center content-center h-full w-full p-8 flex-wrap">
+                      <p className="w-full text-center">Setting up...</p>
+                      <Loader />
+                    </div>
                   )}
                 </div>
                 <div className="col-span-12 lg:col-span-6 py-8">
-                  <NFTPreview handle={currentHandle || handle} />
+                  <NFTPreview handle={currentIndex === 0 ? handle : currentSession.data.handle} />
                 </div>
               </>
             )}

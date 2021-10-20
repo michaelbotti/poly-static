@@ -1,8 +1,9 @@
 import React, { createContext, Dispatch, SetStateAction, useEffect, useState } from "react";
+import { useLocation } from '@reach/router';
+import { parse } from 'query-string';
 import { SessionResponseBody } from "../../netlify/functions/session";
 
 import { HandleResponseBody } from "../lib/helpers/search";
-import { getAllCurrentSessionData } from "../lib/helpers/session";
 
 export interface ReservedHandlesType {
   blacklist: string[],
@@ -35,6 +36,7 @@ export interface HandleMintContextType {
   reservedHandles: ReservedHandlesType;
   pendingSessions: string[];
   paymentSessions: PaymentSession[];
+  currentIndex: number;
   primed: boolean;
   isPurchasing: boolean;
   setPrimed: Dispatch<SetStateAction<boolean>>;
@@ -44,6 +46,7 @@ export interface HandleMintContextType {
   setIsPurchasing: Dispatch<SetStateAction<boolean>>;
   setPendingSessions: Dispatch<SetStateAction<string[]>>;
   setPaymentSessions: Dispatch<SetStateAction<PaymentSession[]>>;
+  setCurrentIndex: Dispatch<SetStateAction<number>>;
 }
 
 export const defaultState: HandleMintContextType = {
@@ -56,6 +59,7 @@ export const defaultState: HandleMintContextType = {
   paymentSessions: [],
   twitterToken: null,
   primed: false,
+  currentIndex: 0,
   setHandleResponse: () => {},
   setFetching: () => {},
   setHandle: () => {},
@@ -64,7 +68,8 @@ export const defaultState: HandleMintContextType = {
   setTwitterToken: () => {},
   setPrimed: () => {},
   setPendingSessions: () => {},
-  setPaymentSessions: () => {}
+  setPaymentSessions: () => {},
+  setCurrentIndex: () => {}
 };
 
 export const HandleMintContext =
@@ -80,13 +85,7 @@ export const HandleMintContextProvider = ({ children, ...rest }) => {
   const [pendingSessions, setPendingSessions] = useState<string[]>(null);
   const [paymentSessions, setPaymentSessions] = useState<PaymentSession[]>([]);
   const [primed, setPrimed] = useState<boolean>(false);
-
-  useEffect(() => {
-    const paymentSessions = getAllCurrentSessionData();
-    setPaymentSessions(paymentSessions.map(session => ({
-      sessionResponse: session
-    })));
-  }, []);
+  const [currentIndex, setCurrentIndex] = useState<number>(0);
 
   return (
     <HandleMintContext.Provider value={{
@@ -99,6 +98,7 @@ export const HandleMintContextProvider = ({ children, ...rest }) => {
       reservedHandles,
       pendingSessions,
       paymentSessions,
+      currentIndex,
       primed,
       setFetching,
       setHandle,
@@ -108,7 +108,8 @@ export const HandleMintContextProvider = ({ children, ...rest }) => {
       setReservedHandles,
       setPrimed,
       setPendingSessions,
-      setPaymentSessions
+      setPaymentSessions,
+      setCurrentIndex
     }}>
       {children}
     </HandleMintContext.Provider>

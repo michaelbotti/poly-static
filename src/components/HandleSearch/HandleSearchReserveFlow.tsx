@@ -6,18 +6,13 @@ import React, {
   useState
 } from "react";
 import { useDebounce } from "use-debounce";
-import { Link, navigate } from "gatsby";
-import dayjs from 'dayjs';
-import relativeTime from 'dayjs/plugin/relativeTime';
-dayjs.extend(relativeTime);
+import { Link } from "gatsby";
 
 import {
   HEADER_HANDLE,
-  HEADER_IP_ADDRESS,
   HEADER_JWT_ACCESS_TOKEN,
   HEADER_RECAPTCHA,
-  HEADER_TWITTER_ACCESS_TOKEN,
-  RECAPTCHA_SITE_KEY,
+  HEADER_TWITTER_ACCESS_TOKEN
 } from "../../../src/lib/constants";
 import { HandleMintContext } from "../../context/mint";
 import { isValid } from "../../lib/helpers/nfts";
@@ -26,10 +21,10 @@ import LogoMark from "../../images/logo-single.svg";
 import { HandleSearchConnectTwitter } from "./";
 import { Loader } from "../Loader";
 import { SessionResponseBody } from '../../../netlify/functions/session';
-import { getAccessTokenFromCookie, getAllCurrentSessionData, setSessionTokenCookie } from "../../lib/helpers/session";
+import { getAccessTokenFromCookie, getAllCurrentSessionData, getRecaptchaToken, setSessionTokenCookie } from "../../lib/helpers/session";
 import { getActiveSessionUnavailable } from "../../lib/helpers/search";
 
-export const HandleSearchReserveFlow = ({ className = "", setActiveSession, ...rest }) => {
+export const HandleSearchReserveFlow = ({ className = "", ...rest }) => {
   const {
     fetching,
     handleResponse,
@@ -38,21 +33,20 @@ export const HandleSearchReserveFlow = ({ className = "", setActiveSession, ...r
     setHandle,
     twitterToken
   } = useContext(HandleMintContext);
-  const { pendingSessions, paymentSessions, setPaymentSessions } = useContext(HandleMintContext);
+  const { pendingSessions, setCurrentIndex } = useContext(HandleMintContext);
   const [fetchingSession, setFetchingSession] = useState<boolean>(false);
   const [debouncedHandle] = useDebounce(handle, 600);
   const handleInputRef = useRef(null);
 
-  const currentSessions = getAllCurrentSessionData();
+  const currentSessions = getAllCurrentSessionData().filter(session => session !== false);
   const nextIndex = currentSessions.length + 1;
 
   useSyncAvailableStatus(debouncedHandle);
 
   // Warm server.
   useEffect(() => {
-    try {
-      fetch('/.netlify/functions/session')
-    } catch (e) {}
+    fetch('/.netlify/functions/search').catch();
+    fetch('/.netlify/functions/session').catch();
   }, []);
 
   // Handles the input validation and updates.
@@ -76,13 +70,7 @@ export const HandleSearchReserveFlow = ({ className = "", setActiveSession, ...r
   const handleOnSubmit = async (e: FormEvent) => {
     e.preventDefault();
 
-    const recaptchaToken: string = await window.grecaptcha.ready(() =>
-      window.grecaptcha.execute(
-        RECAPTCHA_SITE_KEY,
-        { action: "submit" },
-        (token: string) => token
-      )
-    );
+    const recaptchaToken: string = await getRecaptchaToken();
 
     const headers = new Headers();
     headers.append(HEADER_HANDLE, handle);
@@ -108,6 +96,7 @@ export const HandleSearchReserveFlow = ({ className = "", setActiveSession, ...r
       setFetchingSession(true);
       const session = await fetch("/.netlify/functions/session", { headers });
       const sessionResponse: SessionResponseBody = await session.json();
+      console.log(sessionResponse);
       if (!sessionResponse.error) {
         setHandle("");
         setSessionTokenCookie(
@@ -116,14 +105,7 @@ export const HandleSearchReserveFlow = ({ className = "", setActiveSession, ...r
           nextIndex
         );
 
-        setPaymentSessions([
-          ...paymentSessions,
-          {
-            sessionResponse
-          }
-        ]);
-
-        setActiveSession(nextIndex);
+        setCurrentIndex(nextIndex);
         return;
       }
 
@@ -168,11 +150,7 @@ export const HandleSearchReserveFlow = ({ className = "", setActiveSession, ...r
         ? (
           <>
             <p className="text-lg">
-              You have{" "}
-              <Link to="/sessions" className="text-primary-100">
-                active sessions
-              </Link>{" "}
-              in progress! In order to make distributing handles as fair as possible, we're limiting{" "}
+              You have {currentSessions.length} active sessions in progress! In order to make distributing handles as fair as possible, we're limiting{" "}
               how many you can purchase at a time. Don't worry, it goes fast.
             </p>
           </>
@@ -199,17 +177,8 @@ export const HandleSearchReserveFlow = ({ className = "", setActiveSession, ...r
         <>
           <p className="text-lg">
             <strong>Wow, you got speed!</strong> You're clearly a pro,{" "}
-            but let's slow down. Try again in about {
-              // Get the soonest expiring session.
-              dayjs(
-                currentSessions
-                  .sort((a, b) => a.data.exp < b.data.exp ? -1 : 1)
-                  [0]
-                  .data.exp * 1000
-              ).fromNow(true)
-            }.
+            but let's slow down. Try again when one of your open sessions expire!
           </p>
-          <p className="text-lg"><Link className="text-primary-100" to="/sessions">See Active Sessions &rarr;</Link></p>
         </>
       ) : (
         <>

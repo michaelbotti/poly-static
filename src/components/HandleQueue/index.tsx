@@ -11,43 +11,25 @@ import { setAccessTokenCookie } from '../../lib/helpers/session';
 import 'react-phone-number-input/style.css'
 import { Link } from 'gatsby';
 
-interface IntroTextProps {
-  count: number;
-}
-
-const IntroText = ({ count }: IntroTextProps) => {
-  if (null === count) {
-    return (
-      <span className="text-primary-100 font-bold">Checking your place in line...</span>
-    );
-  }
-
+const getResponseMessage = (count: number): string => {
   if (count < 50) {
-    return (
-      <span className="text-primary-100 font-bold">Don't go anywhere, you are {count === 0 ? 'first' : `#${count}`} in line and part of the next batch!</span>
-    );
+    return `Don't go anywhere, you are ${count === 0 ? 'first' : `#${count}`} in line and part of the next batch!`;
   }
 
   if (count > 50 && count < 200) {
-    return (
-      <span className="text-primary-100 font-bold">You are #{count} in line. Estimated wait time is between 30 minutes and 2 hours.</span>
-    )
+    return `You are #${count} in line. Estimated wait time is between 30 minutes and 2 hours.`;
   }
 
-  return (
-    <span className="text-primary-100 font-bold">You are #{count} in line. Estimated wait time is more than 2 hours.</span>
-  )
+  return `You are #${count} in line. Estimated wait time is more than 2 hours.`;
 }
 
 export const HandleQueue = (): JSX.Element => {
   const [savingSpot, setSavingSpot] = useState<boolean>(false);
   const [authenticating, setAuthenticating] = useState<boolean>(false);
-  const [queue, setQueue] = useState<number>(null);
   const [action, setAction] = useState<'save'|'auth'>('save');
   const [responseMessage, setResponseMessage] = useState<string>(null);
   const [phoneInput, setPhoneInput] = useState<string>('');
   const [authInput, setAuthInput] = useState<string>('');
-  const [showPlacement, setShowPlacement] = useState<boolean>(false);
   const [touChecked, setTouChecked] = useState<boolean>(false);
 
   const form = useRef(null);
@@ -60,6 +42,12 @@ export const HandleQueue = (): JSX.Element => {
     }, 4000);
   }
 
+  /**
+   * Send the user's phone number to a queue.
+   * We set a cron on the backend to allow users
+   * in via batches of 50, depending on current
+   * chain load.
+   */
   const handleSaving = async (e: Event) => {
     e.preventDefault();
 
@@ -69,41 +57,37 @@ export const HandleQueue = (): JSX.Element => {
     }
 
     setSavingSpot(true);
-    try {
-      const res: QueueResponseBody = await fetch(
-        `/.netlify/functions/queue`,
-        {
-          method: 'POST',
-          headers: {
-            [HEADER_PHONE]: phoneInput
-          }
+    setResponseMessage('Checking your place in line...');
+    const res: QueueResponseBody = await fetch(
+      `/.netlify/functions/queue`,
+      {
+        method: 'POST',
+        headers: {
+          [HEADER_PHONE]: phoneInput
         }
-      )
-      .then(res => res.json())
-      .catch(e => console.log(e));
-
-      setQueue(res?.position);
-      if (res.updated) {
-        if (res?.position < 50) {
-          setShowPlacement(true);
-          setAction('auth');
-          setResponseMessage(`Successfully saved! We send out auth codes in batches, every five minutes.`);
-        } else {
-          setResponseMessage(`Successfully saved! You are currently #${res.position} in line. Please allow some time to receive your authentication code. ${res.chainLoad && (`
-            Current chain load is ${(res.chainLoad * 100).toString().substring(0, 5)}%
-          `)}`)
-        }
-      } else {
-        setTimeoutResponseMessage(res?.message || 'That didn\'t work. Try again.');
       }
-    } catch(e) {
-      console.log(e);
-      setTimeoutResponseMessage(e?.message || 'Something went wrong. Try again.');
+    )
+    .then(res => res.json())
+    .catch(e => console.log(e));
+
+    if (res.updated) {
+      const message = getResponseMessage(res.position);
+      res.position < 50 && setAction('auth');
+      setResponseMessage(message);
+    } else {
+      setTimeoutResponseMessage(res?.message || 'That didn\'t work. Try again.');
     }
 
     setSavingSpot(false);
   }
 
+  /**
+   * Sends the authentication code along with the user's
+   * phone number to the backend, where we verify and
+   * sign an access JWT token in the case that they pass.
+   * The JWT token expires automatically in 30 minutes
+   * after generating.
+   */
   const handleAuthenticating = async (e: Event) => {
     e.preventDefault();
 
@@ -133,7 +117,6 @@ export const HandleQueue = (): JSX.Element => {
       }
 
       if (!verified && error && message) {
-        setShowPlacement(false);
         setResponseMessage(message);
       }
     } catch (e) {
@@ -176,13 +159,13 @@ export const HandleQueue = (): JSX.Element => {
       <form onSubmit={(e) => e.preventDefault()} ref={form}>
         <PhoneInput
           name="phone"
-          data-lpignore="true"
           disabled={savingSpot}
           placeholder={"Your mobile number..."}
           className={`${
             "auth" === action ? "rounded-none border-b-0" : ""
           } focus:ring-0 focus:ring-opacity-0 border-2 outline-none form-input bg-dark-100 border-dark-300 px-6 py-4 text-xl w-full appearance-none`}
           defaultCountry="US"
+          useNationalFormatForDefaultCountryValue={false}
           value={phoneInput}
           onChange={setPhoneInput}
         />
@@ -227,7 +210,7 @@ export const HandleQueue = (): JSX.Element => {
       </div>
       {responseMessage && (
         <p className="my-2">
-          {responseMessage} {showPlacement && <IntroText count={queue} />}
+          {responseMessage}
         </p>
       )}
     </>
