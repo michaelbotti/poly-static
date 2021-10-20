@@ -1,4 +1,4 @@
-import React, { useContext } from 'react';
+import React, { useContext, useMemo } from 'react';
 import { HandleMintContext } from '../../context/mint';
 import { getAllCurrentSessionData } from '../../lib/helpers/session';
 import { useAccessOpen } from '../../lib/hooks/access';
@@ -7,7 +7,7 @@ export const HandleNavigation = () => {
   const { setCurrentIndex, currentIndex } = useContext(HandleMintContext);
   const [accessOpen] = useAccessOpen();
 
-  const paymentSessions = getAllCurrentSessionData();
+  const paymentSessions = useMemo(() => getAllCurrentSessionData(), [currentIndex]);
   if (!accessOpen) {
     return null;
   }

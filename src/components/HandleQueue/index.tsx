@@ -13,7 +13,7 @@ import { Link } from 'gatsby';
 
 const getResponseMessage = (count: number): string => {
   if (count < 50) {
-    return `Don't go anywhere, you are ${count === 0 ? 'first' : `#${count}`} in line and part of the next batch!`;
+    return `Don't go anywhere, you are ${count === 0 ? 'first' : `#${count}`} in line and part of the next batch! Auth codes can take up to 5 minutes to arrive.`;
   }
 
   if (count > 50 && count < 200) {
