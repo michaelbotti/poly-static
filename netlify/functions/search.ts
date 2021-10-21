@@ -54,15 +54,15 @@ const handler: Handler = async (
       .then(s => s.val())
 
   const { phoneNumber } = decode(headerAccess);
-  // if (activeSessions?.filter(session => session.phoneNumber === phoneNumber).length >= 3) {
-  //   return {
-  //     statusCode: 403,
-  //     body: JSON.stringify({
-  //       message: "Too many sessions open! Try again after one expires.",
-  //       available: false,
-  //     } as HandleResponseBody),
-  //   };
-  // }
+  if (activeSessions?.filter(session => session.phoneNumber === phoneNumber).length >= 3) {
+    return {
+      statusCode: 403,
+      body: JSON.stringify({
+        message: "Too many sessions open! Try again after one expires.",
+        available: false,
+      } as HandleResponseBody),
+    };
+  }
 
   if (
     activeSessions?.filter(
