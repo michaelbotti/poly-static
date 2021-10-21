@@ -1,4 +1,4 @@
-import React, { useContext, useMemo, useState } from "react";
+import React, { useContext } from "react";
 
 import { HandleMintContext } from "../context/mint";
 import { usePrimeMintingContext } from "../lib/hooks/primeMintingContext";
@@ -9,7 +9,7 @@ import { HandleSearchReserveFlow } from "../components/HandleSearch";
 import { Loader } from "../components/Loader";
 import NFTPreview from "../components/NFTPreview";
 import { HandleQueue } from "../components/HandleQueue";
-import { getSessionTokenFromCookie } from "../lib/helpers/session";
+import { getAllCurrentSessionData, getSessionTokenFromCookie } from "../lib/helpers/session";
 import { HandleSession } from "../components/HandleSession";
 import { HandleNavigation } from "../components/HandleNavigation";
 import { SessionResponseBody } from "../../netlify/functions/session";
@@ -20,13 +20,14 @@ function MintPage() {
 
   usePrimeMintingContext();
 
-  const currentSession = useMemo(() => currentIndex > 0 ? getSessionTokenFromCookie(currentIndex) as SessionResponseBody : null, [currentIndex]);
+  const currentSession = currentIndex > 0 ? getSessionTokenFromCookie(currentIndex) as SessionResponseBody : null;
+  const paymentSessions = getAllCurrentSessionData();
 
   return (
     <>
       <SEO title="Mint" />
       <section id="top" className="max-w-5xl mx-auto">
-        <HandleNavigation />
+        <HandleNavigation paymentSessions={paymentSessions} />
         <div
           className="grid grid-cols-12 gap-4 bg-dark-200 rounded-lg rounded-tl-none place-content-start p2 lg:p-8 mb-16"
           style={{ minHeight: "60vh" }}

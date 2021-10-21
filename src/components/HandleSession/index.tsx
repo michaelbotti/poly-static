@@ -4,7 +4,7 @@ import Countdown from "react-countdown";
 import { PaymentData, PaymentResponseBody } from "../../../netlify/functions/payment";
 import { HandleMintContext } from "../../context/mint";
 import { COOKIE_SESSION_PREFIX, HEADER_JWT_ACCESS_TOKEN, HEADER_JWT_SESSION_TOKEN } from "../../lib/constants";
-import { getRarityCost } from "../../lib/helpers/nfts";
+import { getRarityColor, getRarityCost } from "../../lib/helpers/nfts";
 import { getAccessTokenFromCookie, getSessionTokenFromCookie } from "../../lib/helpers/session";
 import { Loader } from "../Loader";
 import Button from "../button";
@@ -20,7 +20,19 @@ export const HandleSession = ({
   const [fetchingPayment, setFetchingPayment] = useState<boolean>(true);
   const [copying, setCopying] = useState<boolean>(false);
   const [retry, setRetry] = useState<boolean>(true);
-  const [sessionExpired, setSessionExpired] = useState<boolean>(false);
+  const [currentController, setCurrentController] = useState<AbortController>(null);
+
+  // Reset on index change.
+  useEffect(() => {
+    setFetchingPayment(true);
+    setPaymentStatus(null);
+    setRetry(true);
+
+    const activeSession = getSessionTokenFromCookie(currentIndex);
+    if (!activeSession) {
+      setCurrentIndex(0);
+    }
+  }, [currentIndex]);
 
   const handleCopy = async () => {
     navigator.clipboard.writeText(sessionData.address);
@@ -32,14 +44,12 @@ export const HandleSession = ({
 
   // Check current session payment status.
   useEffect(() => {
-    if (!sessionData) {
-      return;
-    }
-
+    const controller = new AbortController();
     const updatePaymentStatus = async () => {
       await fetch(
         `/.netlify/functions/payment?addresses=${sessionData.address}`,
         {
+          signal: controller.signal,
           headers: {
             [HEADER_JWT_ACCESS_TOKEN]: getAccessTokenFromCookie(),
             [HEADER_JWT_SESSION_TOKEN]: sessionData.token
@@ -50,10 +60,10 @@ export const HandleSession = ({
       .then((res: PaymentResponseBody) => {
         if (res.data.addresses) {
           setPaymentStatus(res.data.addresses[0]);
+          setFetchingPayment(false)
         }
-
-        setFetchingPayment(false);
-      });
+      })
+      .catch(e => {})
     };
 
     updatePaymentStatus();
@@ -63,23 +73,15 @@ export const HandleSession = ({
       clearInterval(interval);
     }
 
-    return () => clearInterval(interval);
+    return () => {
+      controller.abort();
+      clearInterval(interval)
+    };
   }, [retry, sessionData, currentIndex]);
 
-  // Reset on index change.
-  useEffect(() => {
-    const activeSession = getSessionTokenFromCookie(currentIndex);
-    if (activeSession) {
-      setRetry(true);
-      setFetchingPayment(true);
-    } else {
-      setCurrentIndex(0);
-    }
-  }, [currentIndex]);
-
-  const validPayment = useMemo(() => paymentStatus && paymentStatus.amount !== 0 && paymentStatus.amount === sessionData.data.cost * 1000000, [currentIndex, paymentStatus]);
-  const overPayment = useMemo(() => paymentStatus && paymentStatus.amount !== 0 && paymentStatus.amount > sessionData.data.cost * 1000000, [currentIndex, paymentStatus]);
-  const incompletePayment = useMemo(() => paymentStatus && paymentStatus.amount !== 0 && paymentStatus.amount < sessionData.data.cost * 1000000, [currentIndex, paymentStatus]);
+  const validPayment = paymentStatus && paymentStatus.amount !== 0 && paymentStatus.amount === sessionData.data.cost * 1000000;
+  const overPayment = paymentStatus && paymentStatus.amount !== 0 && paymentStatus.amount > sessionData.data.cost * 1000000;
+  const incompletePayment = paymentStatus && paymentStatus.amount !== 0 && paymentStatus.amount < sessionData.data.cost * 1000000;
 
   if (!sessionData) {
     return (
@@ -92,15 +94,20 @@ export const HandleSession = ({
     )
   }
 
-  if (overPayment) {
-    Cookies.remove(`${COOKIE_SESSION_PREFIX}_${currentIndex}`);
+  if (overPayment && !fetchingPayment) {
     return (
       <div className="col-span-6">
         <h2 className="font-bold text-3xl mb-2">
           Overpaid!
         </h2>
-        <p className="text-lg">Sorry, but you overpaid for your handle. We will refund you as soon as possible. In the meantime, you can refresh this page to regain another session.</p>
+        <p className="text-lg">Sorry, but you overpaid for your handle. We will refund you as soon as possible.</p>
         <hr className="w-12 border-dark-300 border-2 block my-8" />
+        <Button onClick={() => {
+          Cookies.remove(`${COOKIE_SESSION_PREFIX}_${currentIndex}`)
+          setCurrentIndex(0);
+        }}>
+          Clear This Session Now!
+        </Button>
       </div>
     )
   }
@@ -122,7 +129,8 @@ export const HandleSession = ({
         {!validPayment && (
           <>
             <h4 className="text-xl mb-8">
-              Send exaclty <strong className="border-2 border-primary-100 px-2 inline-block text-base rounded-lg">{getRarityCost(sessionData.data.handle)} $ADA</strong> to the following address:
+              Send <u>exaclty the amount shown</u>:<br/>
+              <strong className="text-4xl mt-4 inline-block font-bold" style={{ color: getRarityColor(sessionData.data.handle)}}>{getRarityCost(sessionData.data.handle)} $ADA</strong>
             </h4>
             <div className="relative">
               <pre className="p-4 rounded-t-lg shadow-inner shadow-lg bg-dark-300 overflow-hidden overflow-scroll pr-24 border-2 border-b-0 border-primary-100">
@@ -150,54 +158,52 @@ export const HandleSession = ({
             </div>
           </>
         )}
-        <Countdown
-          onComplete={() => {
-            // Update expired cookies.
-            window.location.reload();
-          }}
-          date={sessionData.data.exp}
-          renderer={({ formatted, total }) => {
-            const isWarning = !validPayment && total < 120 * 1000;
-            return (
-              <div
-                className={`${(validPayment) ? 'bg-dark-100 border-primary-200' : 'rounded-t-none bg-dark-100 border-primary-100'} border-t-4 flex items-center justify-between p-8 rounded-b-lg shadow-lg`}
-                style={{
-                  borderColor: isWarning ? 'red' : ''
-                }}
-              >
-                {validPayment && (
-                  <>
-                    <div>
-                      <h2 className="text-2xl font-bold mb-2"><strong>Yay!</strong> Your payment was successful!</h2>
-                      <p className="text-lg">We're minting your handle <strong>right now.</strong> You should receive it within 30 seconds, but please allow up to 2 hours during high blockchain activity.</p>
-                      {sessionExpired && <Button buttonStyle="secondary" onClick={() => setCurrentIndex(0)}>Close This Session</Button>}
+        {paymentStatus && (
+          <Countdown
+            onComplete={() => setCurrentIndex(0)}
+            date={sessionData.data.exp}
+            renderer={({ formatted, total }) => {
+              const isWarning = !validPayment && total < 120 * 1000;
+              return (
+                <div
+                  className={`${(validPayment) ? 'bg-dark-100 border-primary-200' : 'rounded-t-none bg-dark-100 border-primary-100'} border-t-4 flex items-center justify-between p-8 rounded-b-lg shadow-lg`}
+                  style={{
+                    borderColor: isWarning ? 'red' : ''
+                  }}
+                >
+                  {validPayment && (
+                    <>
+                      <div>
+                        <h2 className="text-2xl font-bold mb-2"><strong>Yay!</strong> Your payment was successful!</h2>
+                        <p className="text-lg">We're minting your handle <strong>right now.</strong> You should receive it within 30 seconds, but please allow up to 2 hours during high blockchain activity.</p>
+                      </div>
+                    </>
+                  )}
+                  {incompletePayment && (
+                    <div className="mt-4">
+                      <p className="text-lg">Whoops! That amount wasn't right. <strong><u>Please send exactly {((sessionData.data.cost * 1000000) - paymentStatus.amount) / 1000000} more $ADA</u></strong></p>
+                      <p className="text-lg">This session will automatically close in <strong>{formatted.minutes}:{formatted.seconds}</strong></p>
                     </div>
-                  </>
-                )}
-                {incompletePayment && (
-                  <div className="mt-4">
-                    <p className="text-lg">Whoops! That amount wasn't right. <strong><u>Please send exactly {((sessionData.data.cost * 1000000) - paymentStatus.amount) / 1000000} more $ADA</u></strong></p>
-                    <p className="text-lg">This session will automatically close in <strong>{formatted.minutes}:{formatted.seconds}</strong></p>
-                  </div>
-                )}
-                {!validPayment && !incompletePayment && !overPayment && (
-                  <>
-                    <div>
-                      {isWarning && <h6 className="text-lg font-bold" style={{ color: 'red' }}>Hurry Up!</h6>}
-                      {paymentStatus && paymentStatus.amount === 0 && !fetchingPayment && (
-                        <h2 className="text-xl font-bold mb-2">Waiting for payment...</h2>
-                      )}
-                      <h4 className="text-xl">
-                        Time Left: <strong>{formatted.minutes}:{formatted.seconds}</strong>
-                      </h4>
-                    </div>
-                    <Loader className="mx-0" />
-                  </>
-                )}
-              </div>
-            )
-          }}
-        />
+                  )}
+                  {!validPayment && !incompletePayment && !overPayment && (
+                    <>
+                      <div>
+                        {isWarning && <h6 className="text-lg font-bold" style={{ color: 'red' }}>Hurry Up!</h6>}
+                        {paymentStatus && paymentStatus.amount === 0 && !fetchingPayment && (
+                          <h2 className="text-xl font-bold mb-2">Waiting for payment...</h2>
+                        )}
+                        <h4 className="text-xl">
+                          Time Left: <strong>{formatted.minutes}:{formatted.seconds}</strong>
+                        </h4>
+                      </div>
+                      <Loader className="mx-0" />
+                    </>
+                  )}
+                </div>
+              )
+            }}
+          />
+        )}
         </>
       )}
     </div>

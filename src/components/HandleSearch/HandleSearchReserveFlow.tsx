@@ -38,8 +38,9 @@ export const HandleSearchReserveFlow = ({ className = "", ...rest }) => {
   const [debouncedHandle] = useDebounce(handle, 600);
   const handleInputRef = useRef(null);
 
-  const currentSessions = getAllCurrentSessionData().filter(session => session !== false);
-  const nextIndex = currentSessions.length + 1;
+  const currentSessions = getAllCurrentSessionData();
+  const currentActiveSessions = currentSessions.filter(session => session !== false);
+  const nextIndex = currentSessions.findIndex(session => session === false) + 1;
 
   useSyncAvailableStatus(debouncedHandle);
 
@@ -146,11 +147,11 @@ export const HandleSearchReserveFlow = ({ className = "", ...rest }) => {
       <h2 className="font-bold text-3xl text-primary-100 mb-2">
         Securing Your Handle
       </h2>
-      {currentSessions.length > 0
+      {currentActiveSessions.length > 0
         ? (
           <>
             <p className="text-lg">
-              You have {currentSessions.length} active sessions in progress! In order to make distributing handles as fair as possible, we're limiting{" "}
+              You have {currentActiveSessions.length} active sessions in progress! In order to make distributing handles as fair as possible, we're limiting{" "}
               how many you can purchase at a time. Don't worry, it goes fast.
             </p>
           </>
@@ -162,7 +163,7 @@ export const HandleSearchReserveFlow = ({ className = "", ...rest }) => {
             </p>
             <p className="text-lg">
               For more information, see{" "}
-              <Link className="text-primary-100" to={"/how-it-works"}>
+              <Link className="text-primary-100" to={"/#how-it-works"}>
                 How it Works
               </Link>
               .
@@ -173,7 +174,7 @@ export const HandleSearchReserveFlow = ({ className = "", ...rest }) => {
 
       <hr className="w-12 border-dark-300 border-2 block my-8" />
 
-      {currentSessions.length === 3 ? (
+      {currentActiveSessions.length === 3 ? (
         <>
           <p className="text-lg">
             <strong>Wow, you got speed!</strong> You're clearly a pro,{" "}
@@ -183,9 +184,9 @@ export const HandleSearchReserveFlow = ({ className = "", ...rest }) => {
       ) : (
         <>
           <form {...rest} onSubmit={handleOnSubmit}>
-            {currentSessions.length !== 3 && (
+            {currentActiveSessions.length !== 3 && (
               <p className="text-lg">
-                <strong>You have {3 - currentSessions.length} session{2 === currentSessions.length ? '' : 's'} left.</strong>
+                <strong>You have {3 - currentActiveSessions.length} session{2 === currentActiveSessions.length ? '' : 's'} left.</strong>
               </p>
             )}
             <div className="relative mb-2">

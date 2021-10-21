@@ -25,7 +25,6 @@ const handler: Handler = async (
   const { headers } = event;
 
   if (!headers[HEADER_PHONE]) {
-    console.log(headers[HEADER_PHONE])
     return {
       statusCode: 400,
       body: 'Missing phone number.'

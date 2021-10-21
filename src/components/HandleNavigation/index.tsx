@@ -3,11 +3,12 @@ import { HandleMintContext } from '../../context/mint';
 import { getAllCurrentSessionData } from '../../lib/helpers/session';
 import { useAccessOpen } from '../../lib/hooks/access';
 
-export const HandleNavigation = () => {
+export const HandleNavigation = ({
+  paymentSessions
+}) => {
   const { setCurrentIndex, currentIndex } = useContext(HandleMintContext);
   const [accessOpen] = useAccessOpen();
 
-  const paymentSessions = useMemo(() => getAllCurrentSessionData(), [currentIndex]);
   if (!accessOpen) {
     return null;
   }
@@ -23,7 +24,7 @@ export const HandleNavigation = () => {
       >
         <h4 className="text-lg p-4">Mint a Handle!</h4>
       </button>
-      {paymentSessions.map((session, index) => {
+      {paymentSessions && paymentSessions.map((session, index) => {
         if (!session) {
           return null;
         }
