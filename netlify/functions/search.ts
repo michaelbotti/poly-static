@@ -54,7 +54,7 @@ const handler: Handler = async (
       .then(s => s.val())
 
   const { phoneNumber } = decode(headerAccess);
-  if (activeSessions?.filter(session => session.phoneNumber === phoneNumber).length >= 3) {
+  if (activeSessions?.filter(session => session.phoneNumber === phoneNumber).length > 3) {
     return {
       statusCode: 403,
       body: JSON.stringify({
