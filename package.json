@@ -75,9 +75,9 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/cjkoepke/adahandlestatic"
+    "url": "https://github.com/adahandle/adahandle-static"
   },
   "bugs": {
-    "url": "https://github.com/taylorbryant/gatsby-starter-tailwind/issues"
+    "url": "https://github.com/adahandle/adahandle-app/issues"
   }
 }

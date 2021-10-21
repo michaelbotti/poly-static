@@ -117,19 +117,19 @@ const handler: Handler = async (
   ).val());
 
   const { phoneNumber } = decode(accessToken) as AccessTokenPayload;
-  const tooManySessions = activeSessions?.filter(
-    ({ phoneNumber: existingPhoneNumber }) => existingPhoneNumber === phoneNumber
-  ).length > 3;
+  // const tooManySessions = activeSessions?.filter(
+  //   ({ phoneNumber: existingPhoneNumber }) => existingPhoneNumber === phoneNumber
+  // ).length > 3;
 
-  if (tooManySessions) {
-    return {
-      statusCode: 403,
-      body: JSON.stringify({
-        error: true,
-        message: 'Sorry, too many open sessions!'
-      } as SessionResponseBody)
-    }
-  }
+  // if (tooManySessions) {
+  //   return {
+  //     statusCode: 403,
+  //     body: JSON.stringify({
+  //       error: true,
+  //       message: 'Sorry, too many open sessions!'
+  //     } as SessionResponseBody)
+  //   }
+  // }
 
   const handleBeingPurchased = activeSessions?.filter(({ handle }) =>
     handle === headerHandle
