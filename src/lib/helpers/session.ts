@@ -29,7 +29,7 @@ export const setAccessTokenCookie = (token: string, exp: number) => {
 
 export const getSessionTokenFromCookie = (index: number): SessionResponseBody | false => {
   const data = Cookie.get(`${COOKIE_SESSION_PREFIX}_${index}`);
-  if (!data) {
+  if (!data || data.length === 0) {
     return false;
   }
 
