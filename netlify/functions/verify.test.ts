@@ -32,7 +32,7 @@ describe('Verify tests', () => {
     })
   });
 
-  it('Should fail when phone number is not provided', async () => {
+  it('Should fail when phone auth code is not provided', async () => {
     const updatedEvent = { ...event, headers: { [HEADER_PHONE]: '+123456789' } };
     await lambdaTester(handler).event(updatedEvent).expectResolve(result => {
       expect(result.statusCode).toBe(400);
