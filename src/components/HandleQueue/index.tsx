@@ -1,20 +1,22 @@
-import React, { useRef, useState, useEffect } from 'react';
-import PhoneInput from 'react-phone-number-input';
+import React, { useRef, useState, useEffect } from "react";
+import PhoneInput from "react-phone-number-input";
 
-import { StateResponseBody } from '../../../netlify/functions/state'
-import { QueueResponseBody } from '../../../netlify/functions/queue'
-import { VerifyResponseBody } from '../../../netlify/functions/verify'
-import { HEADER_PHONE, HEADER_PHONE_AUTH } from '../../lib/constants';
-import { useAccessOpen } from '../../lib/hooks/access';
-import Button from '../button';
-import { setAccessTokenCookie } from '../../lib/helpers/session';
+import { StateResponseBody } from "../../../netlify/functions/state";
+import { QueueResponseBody } from "../../../netlify/functions/queue";
+import { VerifyResponseBody } from "../../../netlify/functions/verify";
+import { HEADER_PHONE, HEADER_PHONE_AUTH } from "../../lib/constants";
+import { useAccessOpen } from "../../lib/hooks/access";
+import Button from "../button";
+import { setAccessTokenCookie } from "../../lib/helpers/session";
 
-import 'react-phone-number-input/style.css'
-import { Link } from 'gatsby';
+import "react-phone-number-input/style.css";
+import { Link } from "gatsby";
 
 const getResponseMessage = (count: number): string => {
   if (count < 50) {
-    return `Don't go anywhere, you are ${count === 0 ? 'first' : `#${count}`} in line and part of the next batch! Auth codes can take up to 5 minutes to arrive.`;
+    return `Don't go anywhere, you are ${
+      count === 0 ? "first" : `#${count}`
+    } in line and part of the next batch! Auth codes can take up to 5 minutes to arrive.`;
   }
 
   if (count > 50 && count < 200) {
@@ -22,15 +24,15 @@ const getResponseMessage = (count: number): string => {
   }
 
   return `You are #${count} in line. Estimated wait time is more than 2 hours.`;
-}
+};
 
 export const HandleQueue = (): JSX.Element => {
   const [savingSpot, setSavingSpot] = useState<boolean>(false);
   const [authenticating, setAuthenticating] = useState<boolean>(false);
-  const [action, setAction] = useState<'save'|'auth'>('save');
+  const [action, setAction] = useState<"save" | "auth">("save");
   const [responseMessage, setResponseMessage] = useState<string>(null);
-  const [phoneInput, setPhoneInput] = useState<string>('');
-  const [authInput, setAuthInput] = useState<string>('');
+  const [phoneInput, setPhoneInput] = useState<string>("");
+  const [authInput, setAuthInput] = useState<string>("");
   const [touChecked, setTouChecked] = useState<boolean>(false);
   const [stateData, setStateData] = useState<StateResponseBody>(null);
 
@@ -39,24 +41,24 @@ export const HandleQueue = (): JSX.Element => {
 
   useEffect(() => {
     (async () => {
-      console.log('checked')
-      const data = await fetch('/.netlify/functions/state')
-        .then(res => res.json())
-        .catch(e => {
+      await fetch("/.netlify/functions/state")
+        .then(async (res) => {
+          const data: StateResponseBody = await res.json();
+          setStateData(data);
+        })
+        .catch((e) => {
           setStateData(null);
           console.log(e);
         });
-
-      console.log(data);
     })();
   }, []);
 
   const setTimeoutResponseMessage = (message: string) => {
     setResponseMessage(message);
     setTimeout(() => {
-      setResponseMessage('');
+      setResponseMessage("");
     }, 4000);
-  }
+  };
 
   /**
    * Send the user's phone number to a queue.
@@ -68,34 +70,31 @@ export const HandleQueue = (): JSX.Element => {
     e.preventDefault();
 
     if (0 === phoneInput.length) {
-      setTimeoutResponseMessage('Phone number cannot be blank.');
+      setTimeoutResponseMessage("Phone number cannot be blank.");
       return;
     }
 
     setSavingSpot(true);
-    setResponseMessage('Checking your place in line...');
-    const res: QueueResponseBody = await fetch(
-      `/.netlify/functions/queue`,
-      {
-        method: 'POST',
-        headers: {
-          [HEADER_PHONE]: phoneInput
-        }
-      }
-    )
-    .then(res => res.json())
-    .catch(e => console.log(e));
+    setResponseMessage("Checking your place in line...");
+    const res: QueueResponseBody = await fetch(`/.netlify/functions/queue`, {
+      method: "POST",
+      headers: {
+        [HEADER_PHONE]: phoneInput,
+      },
+    })
+      .then((res) => res.json())
+      .catch((e) => console.log(e));
 
     if (res.updated) {
       const message = getResponseMessage(res.position);
-      res.position < 50 && setAction('auth');
+      res.position < 50 && setAction("auth");
       setResponseMessage(message);
     } else {
-      setTimeoutResponseMessage(res?.message || 'That didn\'t work. Try again.');
+      setTimeoutResponseMessage(res?.message || "That didn't work. Try again.");
     }
 
     setSavingSpot(false);
-  }
+  };
 
   /**
    * Sends the authentication code along with the user's
@@ -108,22 +107,23 @@ export const HandleQueue = (): JSX.Element => {
     e.preventDefault();
 
     if (authInput.length === 0 || phoneInput.length === 0) {
-      setResponseMessage('Inputs must not be empty...');
+      setResponseMessage("Inputs must not be empty...");
       return;
     }
 
     setAuthenticating(true);
     try {
       const res: VerifyResponseBody = await fetch(
-        '/.netlify/functions/verify', {
+        "/.netlify/functions/verify",
+        {
           headers: {
             [HEADER_PHONE]: phoneInput,
-            [HEADER_PHONE_AUTH]: authInput
-          }
+            [HEADER_PHONE_AUTH]: authInput,
+          },
         }
       )
-      .then(res => res.json())
-      .catch(e => console.log(e));
+        .then((res) => res.json())
+        .catch((e) => console.log(e));
 
       const { error, verified, message, token, data } = res;
       if (!error && verified && token && data) {
@@ -136,15 +136,45 @@ export const HandleQueue = (): JSX.Element => {
         setResponseMessage(message);
       }
     } catch (e) {
-      setTimeoutResponseMessage('Hmm, try that again. Something went wrong.');
+      setTimeoutResponseMessage("Hmm, try that again. Something went wrong.");
       console.log(e);
     }
 
     setAuthenticating(false);
-  }
+  };
+
+  console.log(stateData);
 
   return (
     <>
+      <div className="flex items-center justify-between mb-8 lg:mb-12">
+        <div className="w-1/2 text-center">
+          <h4 className="text-lg text-dark-350 mb-4">Blockchain Load</h4>
+          <span
+            className={`font-bold text-4xl ${
+              stateData.chainLoad > 0.8 ? "" : "text-primary-100"
+            }`}
+            style={{
+              color: stateData.chainLoad > 0.8 ? "red" : "",
+            }}
+          >
+            {null === stateData && "Loading..."}
+            {null !== stateData && !stateData.error && `${stateData.chainLoad.toFixed(3)}%`}
+            {null !== stateData && stateData.error && "N/A"}
+          </span>
+        </div>
+        <div className="w-1/2 text-center">
+          <h4 className="text-lg text-dark-350 mb-4">Waitlist Size</h4>
+          <span className={`font-bold text-4xl text-primary-100`}>
+            {null === stateData && "Loading..."}
+            {null !== stateData && !stateData.error && stateData.position.toLocaleString('en-US')}
+            {null !== stateData && stateData.error && "N/A"}
+          </span>
+        </div>
+      </div>
+      <h3 className="text-2xl text-white text-center mb-4">
+        Register Your Spot
+      </h3>
       <div className="flex align-center justify-stretch bg-dark-200 rounded-t-lg border-2 border-b-0 border-dark-300">
         <button
           onClick={() => {
@@ -203,7 +233,11 @@ export const HandleQueue = (): JSX.Element => {
           buttonStyle={"primary"}
           type="submit"
           disabled={authenticating || savingSpot || !touChecked}
-          onClick={touChecked && "auth" === action ? handleAuthenticating : handleSaving}
+          onClick={
+            touChecked && "auth" === action
+              ? handleAuthenticating
+              : handleSaving
+          }
         >
           {authenticating && "Authenticating..."}
           {savingSpot && "Entering queue..."}
@@ -220,14 +254,13 @@ export const HandleQueue = (): JSX.Element => {
           onChange={() => setTouChecked(!touChecked)}
         />
         <label className="ml-2 text-white" htmlFor="tou">
-          I agree to the <Link to="/tou" className="text-primary-100">Terms of Use</Link>
+          I agree to the{" "}
+          <Link to="/tou" className="text-primary-100">
+            Terms of Use
+          </Link>
         </label>
       </div>
-      {responseMessage && (
-        <p className="my-2">
-          {responseMessage}
-        </p>
-      )}
+      {responseMessage && <p className="my-2">{responseMessage}</p>}
     </>
   );
 };

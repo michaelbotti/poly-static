@@ -23,11 +23,8 @@ const handler: Handler = async (
   event: HandlerEvent,
   context: HandlerContext
 ): Promise<HandlerResponse> => {
-  const { headers } = event;
-
   try {
     const data: QueueResponseBody = await fetchNodeApp(`/state`).then(res => res.json());
-    console.log(data);
     return {
       statusCode: 200,
       body: JSON.stringify(data),
