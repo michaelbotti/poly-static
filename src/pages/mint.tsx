@@ -29,7 +29,7 @@ function MintPage() {
       <section id="top" className="max-w-5xl mx-auto">
         <HandleNavigation paymentSessions={paymentSessions} />
         <div
-          className="grid grid-cols-12 gap-4 bg-dark-200 rounded-lg rounded-tl-none place-content-start p2 lg:p-8 mb-16"
+          className="grid grid-cols-12 gap-4 lg:gap-8 bg-dark-200 rounded-lg rounded-tl-none place-content-start p2 lg:p-8 mb-16"
           style={{ minHeight: "60vh" }}
           >
             {null === accessOpen && (
@@ -50,11 +50,10 @@ function MintPage() {
                     <hr className="w-12 border-dark-300 border-2 block my-8" />
                   </div>
                   <p>After entering the queue: when it's your turn, you'll get a one-time 6 digit passcode.</p>
-                  <p><strong>This passcode is good for 30 minutes!</strong> After that, it will expire and you'll need to enter the queue again.</p>
+                  <p><strong>This passcode is good for 10 minutes!</strong> After that, it will expire and you'll need to enter the queue again.</p>
                   <p>If you want more information explaining the process, read our <a href="#" className="text-primary-100">detailed Medium post &rarr;</a>.</p>
                 </div>
                 <div className="col-span-6">
-                  <h3 className="text-2xl text-white text-center mb-4">Get Started</h3>
                   <HandleQueue />
                 </div>
               </>
