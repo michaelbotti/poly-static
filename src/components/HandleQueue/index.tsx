@@ -1,6 +1,7 @@
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import PhoneInput from 'react-phone-number-input';
 
+import { StateResponseBody } from '../../../netlify/functions/state'
 import { QueueResponseBody } from '../../../netlify/functions/queue'
 import { VerifyResponseBody } from '../../../netlify/functions/verify'
 import { HEADER_PHONE, HEADER_PHONE_AUTH } from '../../lib/constants';
@@ -31,9 +32,24 @@ export const HandleQueue = (): JSX.Element => {
   const [phoneInput, setPhoneInput] = useState<string>('');
   const [authInput, setAuthInput] = useState<string>('');
   const [touChecked, setTouChecked] = useState<boolean>(false);
+  const [stateData, setStateData] = useState<StateResponseBody>(null);
 
   const form = useRef(null);
   const [, setAccessOpen] = useAccessOpen();
+
+  useEffect(() => {
+    (async () => {
+      console.log('checked')
+      const data = await fetch('/.netlify/functions/state')
+        .then(res => res.json())
+        .catch(e => {
+          setStateData(null);
+          console.log(e);
+        });
+
+      console.log(data);
+    })();
+  }, []);
 
   const setTimeoutResponseMessage = (message: string) => {
     setResponseMessage(message);
@@ -165,7 +181,6 @@ export const HandleQueue = (): JSX.Element => {
             "auth" === action ? "rounded-none border-b-0" : ""
           } focus:ring-0 focus:ring-opacity-0 border-2 outline-none form-input bg-dark-100 border-dark-300 px-6 py-4 text-xl w-full appearance-none`}
           defaultCountry="US"
-          useNationalFormatForDefaultCountryValue={false}
           value={phoneInput}
           onChange={setPhoneInput}
         />

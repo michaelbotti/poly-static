@@ -7,7 +7,6 @@ import {
 import { fetch } from 'cross-fetch';
 
 import { HEADER_PHONE } from "../../src/lib/constants";
-import { initFirebase } from "../helpers/firebase";
 import { getNodeEndpointUrl } from "../helpers/util";
 
 
@@ -37,8 +36,6 @@ const handler: Handler = async (
       } as QueueResponseBody)
     }
   }
-
-  await initFirebase();
 
   try {
     const data: QueueResponseBody = await (await fetch(`${getNodeEndpointUrl()}/queue`, {
