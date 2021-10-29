@@ -1,8 +1,7 @@
 import React, { createContext, Dispatch, SetStateAction, useEffect, useState } from "react";
-import { useLocation } from '@reach/router';
-import { parse } from 'query-string';
-import { SessionResponseBody } from "../../netlify/functions/session";
 
+import { SessionResponseBody } from "../../netlify/functions/session";
+import { StateResponseBody } from "../../netlify/functions/state";
 import { HandleResponseBody } from "../lib/helpers/search";
 
 export interface ReservedHandlesType {
@@ -37,6 +36,7 @@ export interface HandleMintContextType {
   pendingSessions: string[];
   paymentSessions: PaymentSession[];
   currentIndex: number;
+  betaState: StateResponseBody;
   primed: boolean;
   isPurchasing: boolean;
   setPrimed: Dispatch<SetStateAction<boolean>>;
@@ -47,6 +47,7 @@ export interface HandleMintContextType {
   setPendingSessions: Dispatch<SetStateAction<string[]>>;
   setPaymentSessions: Dispatch<SetStateAction<PaymentSession[]>>;
   setCurrentIndex: Dispatch<SetStateAction<number>>;
+  setBetaState: Dispatch<SetStateAction<StateResponseBody>>;
 }
 
 export const defaultState: HandleMintContextType = {
@@ -60,6 +61,7 @@ export const defaultState: HandleMintContextType = {
   twitterToken: null,
   primed: false,
   currentIndex: 0,
+  betaState: null,
   setHandleResponse: () => {},
   setFetching: () => {},
   setHandle: () => {},
@@ -69,7 +71,8 @@ export const defaultState: HandleMintContextType = {
   setPrimed: () => {},
   setPendingSessions: () => {},
   setPaymentSessions: () => {},
-  setCurrentIndex: () => {}
+  setCurrentIndex: () => {},
+  setBetaState: () => {}
 };
 
 export const HandleMintContext =
@@ -86,6 +89,21 @@ export const HandleMintContextProvider = ({ children, ...rest }) => {
   const [paymentSessions, setPaymentSessions] = useState<PaymentSession[]>([]);
   const [primed, setPrimed] = useState<boolean>(false);
   const [currentIndex, setCurrentIndex] = useState<number>(0);
+  const [betaState, setBetaState] = useState<StateResponseBody>(null);
+
+  useEffect(() => {
+    (async () => {
+      await fetch("/.netlify/functions/state")
+        .then(async (res) => {
+          const data: StateResponseBody = await res.json();
+          setBetaState(data);
+        })
+        .catch((e) => {
+          setBetaState(null);
+          console.log(e);
+        });
+    })();
+  }, []);
 
   return (
     <HandleMintContext.Provider value={{
@@ -99,6 +117,7 @@ export const HandleMintContextProvider = ({ children, ...rest }) => {
       pendingSessions,
       paymentSessions,
       currentIndex,
+      betaState,
       primed,
       setFetching,
       setHandle,
@@ -109,7 +128,8 @@ export const HandleMintContextProvider = ({ children, ...rest }) => {
       setPrimed,
       setPendingSessions,
       setPaymentSessions,
-      setCurrentIndex
+      setCurrentIndex,
+      setBetaState
     }}>
       {children}
     </HandleMintContext.Provider>

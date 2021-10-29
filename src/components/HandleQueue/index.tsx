@@ -1,7 +1,6 @@
-import React, { useRef, useState, useEffect } from "react";
+import React, { useRef, useState, useEffect, useContext } from "react";
 import PhoneInput from "react-phone-number-input";
 
-import { StateResponseBody } from "../../../netlify/functions/state";
 import { QueueResponseBody } from "../../../netlify/functions/queue";
 import { VerifyResponseBody } from "../../../netlify/functions/verify";
 import { HEADER_PHONE, HEADER_PHONE_AUTH } from "../../lib/constants";
@@ -11,6 +10,7 @@ import { setAccessTokenCookie } from "../../lib/helpers/session";
 
 import "react-phone-number-input/style.css";
 import { Link } from "gatsby";
+import { HandleMintContext } from "../../context/mint";
 
 const getResponseMessage = (count: number): string => {
   if (count < 50) {
@@ -27,6 +27,7 @@ const getResponseMessage = (count: number): string => {
 };
 
 export const HandleQueue = (): JSX.Element => {
+  const { betaState } = useContext(HandleMintContext);
   const [savingSpot, setSavingSpot] = useState<boolean>(false);
   const [authenticating, setAuthenticating] = useState<boolean>(false);
   const [action, setAction] = useState<"save" | "auth">("save");
@@ -34,24 +35,9 @@ export const HandleQueue = (): JSX.Element => {
   const [phoneInput, setPhoneInput] = useState<string>("");
   const [authInput, setAuthInput] = useState<string>("");
   const [touChecked, setTouChecked] = useState<boolean>(false);
-  const [stateData, setStateData] = useState<StateResponseBody>(null);
 
   const form = useRef(null);
   const [, setAccessOpen] = useAccessOpen();
-
-  useEffect(() => {
-    (async () => {
-      await fetch("/.netlify/functions/state")
-        .then(async (res) => {
-          const data: StateResponseBody = await res.json();
-          setStateData(data);
-        })
-        .catch((e) => {
-          setStateData(null);
-          console.log(e);
-        });
-    })();
-  }, []);
 
   const setTimeoutResponseMessage = (message: string) => {
     setResponseMessage(message);
@@ -143,8 +129,6 @@ export const HandleQueue = (): JSX.Element => {
     setAuthenticating(false);
   };
 
-  console.log(stateData);
-
   return (
     <>
       <div className="flex items-center justify-between mb-8 lg:mb-12">
@@ -152,23 +136,23 @@ export const HandleQueue = (): JSX.Element => {
           <h4 className="text-lg text-dark-350 mb-4">Blockchain Load</h4>
           <span
             className={`font-bold text-4xl ${
-              stateData.chainLoad > 0.8 ? "" : "text-primary-100"
+              betaState?.chainLoad > 0.8 ? "" : "text-primary-100"
             }`}
             style={{
-              color: stateData.chainLoad > 0.8 ? "red" : "",
+              color: betaState?.chainLoad > 0.8 ? "red" : "",
             }}
           >
-            {null === stateData && "Loading..."}
-            {null !== stateData && !stateData.error && `${stateData.chainLoad.toFixed(3)}%`}
-            {null !== stateData && stateData.error && "N/A"}
+            {null === betaState && "Loading..."}
+            {null !== betaState && !betaState.error && `${betaState.chainLoad.toFixed(3)}%`}
+            {null !== betaState && betaState.error && "N/A"}
           </span>
         </div>
         <div className="w-1/2 text-center">
           <h4 className="text-lg text-dark-350 mb-4">Waitlist Size</h4>
           <span className={`font-bold text-4xl text-primary-100`}>
-            {null === stateData && "Loading..."}
-            {null !== stateData && !stateData.error && stateData.position.toLocaleString('en-US')}
-            {null !== stateData && stateData.error && "N/A"}
+            {null === betaState && "Loading..."}
+            {null !== betaState && !betaState.error && betaState.position.toLocaleString('en-US')}
+            {null !== betaState && betaState.error && "N/A"}
           </span>
         </div>
       </div>

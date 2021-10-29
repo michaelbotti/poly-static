@@ -1,5 +1,6 @@
 import { Link } from "gatsby";
-import React, { useState, FC, useEffect } from "react";
+import React, { useState, FC, useEffect, useContext } from "react";
+import { HandleMintContext } from "../context/mint";
 import { getAccessTokenFromCookie, getSessionTokenFromCookie } from "../lib/helpers/session";
 import { useAccessOpen } from "../lib/hooks/access";
 import Button from "./button";
@@ -33,6 +34,7 @@ const navItems: NavItem[] = [
 ];
 
 const Header: FC<HeaderProps> = ({ className, showMint = true }) => {
+  const { betaState } = useContext(HandleMintContext);
   const [isExpanded, toggleExpansion] = useState<boolean>(false);
 
   return (
@@ -87,6 +89,11 @@ const Header: FC<HeaderProps> = ({ className, showMint = true }) => {
           >
             Beta Sale Open! &rarr;
           </Button>
+        )}
+        {!showMint && betaState && (
+          <p className="text-lg">
+            <span className="font-bold">Handles Minted:</span> {betaState.totalHandles.toLocaleString('en-US')}/15,000
+          </p>
         )}
       </header>
     </>
