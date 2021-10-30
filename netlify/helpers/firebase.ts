@@ -1,4 +1,5 @@
 import admin from "firebase-admin";
+import { ActiveSessionType, ReservedHandlesType } from "../../src/context/mint";
 import { getS3 } from "./aws";
 
 let firebase: admin.app.App;
@@ -40,6 +41,51 @@ export const verifyTwitterUser = async (token: string): Promise<number | false> 
   }
 }
 
-export const getDatabase = async (): Promise<admin.database.Database> => {
-  return admin.database(firebase);
+export const getReservedHandles = async (): Promise<ReservedHandlesType | false> => {
+  return firebase
+    .firestore()
+    .collection("/reservedHandles")
+    .get()
+    .then(snapshot => {
+      if (snapshot.empty) {
+        return false;
+      }
+
+      const handles = snapshot?.docs?.map(doc => doc?.data() as ReservedHandlesType);
+      if (handles.length === 0) {
+        return false;
+      }
+
+      return handles[0];
+    });
+}
+
+export const getActiveSessions = async (): Promise<ActiveSessionType[] | false> => {
+  return firebase
+    .firestore()
+    .collection("/activeSessions")
+    .get()
+    .then(snapshot => {
+      if (snapshot.empty) {
+        return false;
+      }
+
+      const sessions = snapshot?.docs?.map(doc => doc?.data() as ActiveSessionType);
+      return sessions;
+    });
+}
+
+export const getPaidSessions = async (): Promise<ActiveSessionType[] | false> => {
+  return firebase
+    .firestore()
+    .collection("/paidSessions")
+    .get()
+    .then(snapshot => {
+      if (snapshot.empty) {
+        return false;
+      }
+
+      const sessions = snapshot?.docs?.map(doc => doc?.data() as ActiveSessionType);
+      return sessions;
+    });
 }

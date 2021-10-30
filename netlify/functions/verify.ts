@@ -44,7 +44,6 @@ const handler: Handler = async (
     const data = await fetchNodeApp(`/verify`, {
       method: 'GET',
       headers: {
-        'Authorization': `Basic ${process.env.NODE_AUTH_TOKEN_MAINNET}`,
         [HEADER_PHONE]: headers[HEADER_PHONE],
         [HEADER_PHONE_AUTH]: headers[HEADER_PHONE_AUTH]
       }

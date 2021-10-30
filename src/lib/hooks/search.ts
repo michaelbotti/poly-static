@@ -34,14 +34,6 @@ export const useSyncAvailableStatus = async (unsanitizedHandle: string) => {
       return;
     }
 
-    if (
-      pendingSessions &&
-      pendingSessions.includes(handle)
-    ) {
-      setHandleResponse(getDefaultActiveSessionUnvailable());
-      return;
-    }
-
     (async () => {
       setFetching(true);
       const accessToken = getAccessTokenFromCookie();

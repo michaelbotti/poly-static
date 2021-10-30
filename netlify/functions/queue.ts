@@ -4,10 +4,9 @@ import {
   HandlerContext,
   HandlerResponse,
 } from "@netlify/functions";
-import { fetch } from 'cross-fetch';
 
 import { HEADER_PHONE } from "../../src/lib/constants";
-import { getNodeEndpointUrl } from "../helpers/util";
+import { fetchNodeApp } from "../helpers/util";
 
 
 interface AppendAccessResponse {
@@ -38,13 +37,16 @@ const handler: Handler = async (
   }
 
   try {
-    const data: QueueResponseBody = await (await fetch(`${getNodeEndpointUrl()}/queue`, {
+    const data: QueueResponseBody = await fetchNodeApp(`queue`, {
       method: 'POST',
       headers: {
-        'Authorization': `Basic ${process.env.NODE_AUTH_TOKEN_MAINNET}`,
         [HEADER_PHONE]: headers[HEADER_PHONE]
       }
-    })).json();
+    }).then(res => {
+      console.log(res);
+      return res.json()
+    })
+    .catch(e => console.log(e));
 
     return {
       statusCode: 200,

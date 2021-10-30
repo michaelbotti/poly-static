@@ -17,10 +17,10 @@ import {
 import { normalizeNFTHandle } from "../../src/lib/helpers/nfts";
 import {
   HEADER_HANDLE,
-  HEADER_JWT_ACCESS_TOKEN
+  HEADER_JWT_ACCESS_TOKEN,
 } from "../../src/lib/constants";
 import { ReservedHandlesType } from "../../src/context/mint";
-import { initFirebase } from "../helpers/firebase";
+import { getActiveSessions, getPaidSessions, getReservedHandles, initFirebase } from "../helpers/firebase";
 import { fetchNodeApp } from "../helpers/util";
 import { decode } from "querystring";
 
@@ -48,13 +48,13 @@ const handler: Handler = async (
   const firebase = await initFirebase();
 
   const handle = normalizeNFTHandle(headerHandle);
-  const activeSessions = await firebase.database()
-      .ref("/activeSessions")
-      .get()
-      .then(s => s.val())
+  const activeSessions = await getActiveSessions();
 
   const { phoneNumber } = decode(headerAccess);
-  if (activeSessions?.filter(session => session.phoneNumber === phoneNumber).length > 3) {
+  if (
+    activeSessions &&
+    activeSessions.filter((data) => data?.phoneNumber === phoneNumber).length > 3
+  ) {
     return {
       statusCode: 403,
       body: JSON.stringify({
@@ -65,8 +65,9 @@ const handler: Handler = async (
   }
 
   if (
-    activeSessions?.filter(
-      ({ handle: sessionHandle }) => sessionHandle === handle
+    activeSessions &&
+    activeSessions.filter(
+      (data) => data?.handle === handle
     ).length > 0
   ) {
     return {
@@ -75,28 +76,28 @@ const handler: Handler = async (
     };
   }
 
-  const paidSessions = await firebase.database()
-      .ref("/paidSessions")
-      .get()
-      .then(s => s.val())
+  const paidSessions = await getPaidSessions();
 
   if (
-    paidSessions?.find(s => s.handle === handle)
-  ) {
+    paidSessions &&
+    paidSessions.find((data) => data?.handle === handle)) {
     return {
       statusCode: 403,
       body: JSON.stringify(getDefaultActiveSessionUnvailable()),
-    }
+    };
   }
 
-  const { exists, policyID, assetName } = await fetchNodeApp('/exists', {
+  const { exists, policyID, assetName } = await fetchNodeApp("/exists", {
     headers: {
-      [HEADER_HANDLE]: handle
-    }
-  }).then(res => res.json());
+      [HEADER_HANDLE]: handle,
+    },
+  }).then((res) => res.json());
 
   if (exists) {
-    const domain = process.env.NODE_ENV === 'development' ? 'testnet.cardanoscan.io' : 'cardanoscan.io';
+    const domain =
+      process.env.NODE_ENV === "development"
+        ? "testnet.cardanoscan.io"
+        : "cardanoscan.io";
     return {
       statusCode: 200,
       body: JSON.stringify({
@@ -108,38 +109,33 @@ const handler: Handler = async (
     };
   }
 
-  const reservedHandles = (await (
-    await firebase.database()
-      .ref("/reservedHandles")
-      .once("value", (snapshot) => snapshot.val())
-  ).val()) as ReservedHandlesType;
-
-  if (reservedHandles?.manual?.includes(handle)) {
+  const reservedHandles = await getReservedHandles();
+  if (reservedHandles && reservedHandles?.manual?.includes(handle)) {
     return {
       statusCode: 403,
       body: JSON.stringify(getReservedUnavailable()),
-    }
+    };
   }
 
-  if (reservedHandles?.spos?.includes(handle)) {
+  if (reservedHandles && reservedHandles?.spos?.includes(handle)) {
     return {
       statusCode: 403,
       body: JSON.stringify(getSPOUnavailable()),
-    }
+    };
   }
 
-  if (reservedHandles?.twitter?.includes(handle)) {
+  if (reservedHandles && reservedHandles?.twitter?.includes(handle)) {
     return {
       statusCode: 403,
       body: JSON.stringify(getTwitterResponseUnvailable()),
-    }
+    };
   }
 
-  if (reservedHandles?.blacklist?.includes(handle)) {
+  if (reservedHandles && reservedHandles?.blacklist?.includes(handle)) {
     return {
       statusCode: 403,
       body: JSON.stringify(getDefaultResponseUnvailable()),
-    }
+    };
   }
 
   return {

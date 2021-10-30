@@ -87,17 +87,16 @@ export const HandleSearchReserveFlow = ({ className = "", ...rest }) => {
       headers.append(HEADER_TWITTER_ACCESS_TOKEN, twitterToken);
     }
 
-    // Check pending sessions.
-    if (pendingSessions && pendingSessions.includes(handle)) {
-      setHandleResponse(getActiveSessionUnavailable());
-      return;
-    }
+    // // Check pending sessions.
+    // if (pendingSessions && pendingSessions.includes(handle)) {
+    //   setHandleResponse(getActiveSessionUnavailable());
+    //   return;
+    // }
 
     try {
       setFetchingSession(true);
       const session = await fetch("/.netlify/functions/session", { headers });
       const sessionResponse: SessionResponseBody = await session.json();
-      console.log(sessionResponse);
       if (!sessionResponse.error) {
         setHandle("");
         setSessionTokenCookie(

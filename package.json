@@ -12,7 +12,7 @@
     "cross-fetch": "^3.1.4",
     "dayjs": "^1.10.7",
     "firebase": "^9.0.1",
-    "firebase-admin": "^9.11.1",
+    "firebase-admin": "^10",
     "gatsby": "^4.0.0-next",
     "gatsby-plugin-google-gtag": "^3.13.0",
     "gatsby-plugin-layout": "^2.14.0",

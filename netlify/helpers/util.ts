@@ -13,15 +13,16 @@ export const fetchNodeApp = async (
   ).toString('base64');
 
   const { headers, ...rest } = params;
+  const baseUrl = getNodeEndpointUrl();
 
   return fetch(
-    `${getNodeEndpointUrl()}/${endpoint}`,
+    `${baseUrl}/${endpoint}`,
     {
       headers: {
         'Authorization': `Basic ${token}`,
-        ...headers || {},
-        ...rest || {}
-      }
+        ...headers,
+      },
+      ...rest
     }
   )
 }
