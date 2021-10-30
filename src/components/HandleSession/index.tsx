@@ -9,6 +9,7 @@ import { getAccessTokenFromCookie, getSessionTokenFromCookie } from "../../lib/h
 import { Loader } from "../Loader";
 import Button from "../button";
 import { SessionResponseBody } from "../../../netlify/functions/session";
+import { Link } from "gatsby";
 
 export const HandleSession = ({
   sessionData
@@ -20,7 +21,6 @@ export const HandleSession = ({
   const [fetchingPayment, setFetchingPayment] = useState<boolean>(true);
   const [copying, setCopying] = useState<boolean>(false);
   const [retry, setRetry] = useState<boolean>(true);
-  const [currentController, setCurrentController] = useState<AbortController>(null);
 
   // Reset on index change.
   useEffect(() => {
@@ -80,8 +80,7 @@ export const HandleSession = ({
   }, [retry, sessionData, currentIndex]);
 
   const validPayment = paymentStatus && paymentStatus.amount !== 0 && paymentStatus.amount === sessionData.data.cost * 1000000;
-  const overPayment = paymentStatus && paymentStatus.amount !== 0 && paymentStatus.amount > sessionData.data.cost * 1000000;
-  const incompletePayment = paymentStatus && paymentStatus.amount !== 0 && paymentStatus.amount < sessionData.data.cost * 1000000;
+  const invalidPayment = paymentStatus && paymentStatus.amount !== 0 && paymentStatus.amount !== sessionData.data.cost * 1000000;
 
   if (!sessionData) {
     return (
@@ -94,13 +93,13 @@ export const HandleSession = ({
     )
   }
 
-  if (overPayment && !fetchingPayment) {
+  if (invalidPayment && !fetchingPayment) {
     return (
       <div className="col-span-6">
         <h2 className="font-bold text-3xl mb-2">
           Overpaid!
         </h2>
-        <p className="text-lg">Sorry, but you overpaid for your handle. We will refund you as soon as possible.</p>
+        <p className="text-lg">Sorry, but you sent and incorrect amount for your Handle. Refunds will be issued within 30 days. <Link className="text-primary-100" to="/faq">See our FAQ.</Link></p>
         <hr className="w-12 border-dark-300 border-2 block my-8" />
         <Button onClick={() => {
           Cookies.remove(`${COOKIE_SESSION_PREFIX}_${currentIndex}`)
@@ -179,13 +178,7 @@ export const HandleSession = ({
                       </div>
                     </>
                   )}
-                  {incompletePayment && (
-                    <div className="mt-4">
-                      <p className="text-lg">Whoops! That amount wasn't right. <strong><u>Please send exactly {((sessionData.data.cost * 1000000) - paymentStatus.amount) / 1000000} more $ADA</u></strong></p>
-                      <p className="text-lg">This session will automatically close in <strong>{formatted.minutes}:{formatted.seconds}</strong></p>
-                    </div>
-                  )}
-                  {!validPayment && !incompletePayment && !overPayment && (
+                  {!validPayment && !invalidPayment && (
                     <>
                       <div>
                         {isWarning && <h6 className="text-lg font-bold" style={{ color: 'red' }}>Hurry Up!</h6>}
