@@ -24,8 +24,8 @@ import { getRarityCost, isValid, normalizeNFTHandle } from "../../src/lib/helper
 import { getSecret } from "../helpers";
 import { verifyTwitterUser } from "../helpers";
 import { getActiveSessionUnavailable, HandleResponseBody } from "../../src/lib/helpers/search";
-import { getDatabase, initFirebase } from "../helpers/firebase";
-// import { firebase } from "../../src/lib/firebase";
+import { getActiveSessions, getReservedHandles, initFirebase } from "../helpers/firebase";
+
 export interface NodeSessionResponseBody {
   error: boolean,
   message?: string;
@@ -103,35 +103,25 @@ const handler: Handler = async (
     }
   }
 
-  const database = await getDatabase();
-  const reservedhandles: ReservedHandlesType = (await (
-    await database
-      .ref("/reservedHandles")
-      .once("value", (snapshot) => snapshot.val())
-  ).val());
-
-  const activeSessions: ActiveSessionType[] = (await (
-    await database
-      .ref("/activeSessions")
-      .once("value", (snapshot) => snapshot.val())
-  ).val());
+  const reservedhandles = await getReservedHandles();
+  const activeSessions = await getActiveSessions();
 
   const { phoneNumber } = decode(accessToken) as AccessTokenPayload;
-  // const tooManySessions = activeSessions?.filter(
-  //   ({ phoneNumber: existingPhoneNumber }) => existingPhoneNumber === phoneNumber
-  // ).length > 3;
+  const tooManySessions = activeSessions && activeSessions?.filter(
+    ({ phoneNumber: existingPhoneNumber }) => existingPhoneNumber === phoneNumber
+  ).length > 3;
 
-  // if (tooManySessions) {
-  //   return {
-  //     statusCode: 403,
-  //     body: JSON.stringify({
-  //       error: true,
-  //       message: 'Sorry, too many open sessions!'
-  //     } as SessionResponseBody)
-  //   }
-  // }
+  if (tooManySessions) {
+    return {
+      statusCode: 403,
+      body: JSON.stringify({
+        error: true,
+        message: 'Sorry, too many open sessions!'
+      } as SessionResponseBody)
+    }
+  }
 
-  const handleBeingPurchased = activeSessions?.filter(({ handle }) =>
+  const handleBeingPurchased = activeSessions && activeSessions?.filter(({ handle }) =>
     handle === headerHandle
   ).length > 0;
 
@@ -145,57 +135,58 @@ const handler: Handler = async (
     }
   }
 
-  const { manual, spos, blacklist } = reservedhandles;
+  if (reservedhandles) {
+    const { manual, spos, blacklist } = reservedhandles;
+    if (blacklist?.includes(handle)) {
+      return {
+        statusCode: 403,
+        body: JSON.stringify({
+          error: true,
+          message: 'Sorry, that handle is not allowed.'
+        } as SessionResponseBody)
+      };
+    }
 
-  if (blacklist?.includes(handle)) {
-    return {
-      statusCode: 403,
-      body: JSON.stringify({
-        error: true,
-        message: 'Sorry, that handle is not allowed.'
-      } as SessionResponseBody)
-    };
-  }
-
-  if (
-    manual?.includes(handle) ||
-    spos?.includes(handle)
-  ) {
-    return {
-      statusCode: 403,
-      body: JSON.stringify({
-        error: true,
-        message: 'This handle is reserved. Contact private@adahandle.com to claim.'
-      } as SessionResponseBody)
-    };
-  }
-
-  // Ping pending sessions.
-  let pendingSessionCutLine = false;
-  await database
-    .ref("/pendingSessions")
-      .transaction((snapshot: string[] | null) => {
-        if (!snapshot) {
-          return [handle];
-        }
-
-        if (snapshot.includes(handle)) {
-          pendingSessionCutLine = true;
-          return snapshot;
-        }
-
-        return [
-          ...snapshot,
-          handle
-        ];
-    });
-
-  if (pendingSessionCutLine) {
-    return {
-      statusCode: 403,
-      body: JSON.stringify(getActiveSessionUnavailable())
+    if (
+      manual?.includes(handle) ||
+      spos?.includes(handle)
+    ) {
+      return {
+        statusCode: 403,
+        body: JSON.stringify({
+          error: true,
+          message: 'This handle is reserved. Contact private@adahandle.com to claim.'
+        } as SessionResponseBody)
+      };
     }
   }
+
+  // // Ping pending sessions.
+  // let pendingSessionCutLine = false;
+  // await database
+  //   .ref("/pendingSessions")
+  //     .transaction((snapshot: string[] | null) => {
+  //       if (!snapshot) {
+  //         return [handle];
+  //       }
+
+  //       if (snapshot.includes(handle)) {
+  //         pendingSessionCutLine = true;
+  //         return snapshot;
+  //       }
+
+  //       return [
+  //         ...snapshot,
+  //         handle
+  //       ];
+  //   });
+
+  // if (pendingSessionCutLine) {
+  //   return {
+  //     statusCode: 403,
+  //     body: JSON.stringify(getActiveSessionUnavailable())
+  //   }
+  // }
 
 
   /**
