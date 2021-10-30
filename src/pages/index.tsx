@@ -9,7 +9,9 @@ import Cardano from '../images/cardano.svg';
 import Payment from '../images/payment-simple.svg';
 import Ecosystem from '../images/ecosystem.svg';
 import NonCustodial from '../images/non-custodial.svg';
+import App from '../images/app-bg.jpeg';
 
+import b58 from '../images/logo_b58_wallet_flat.png';
 import Maladex from '../images/maladex-logo-small.png';
 import SundaeSwap from '../images/sundae.png';
 import Nami from '../images/nami.svg';
@@ -21,17 +23,17 @@ function IndexPage() {
         title="Home"
       />
 
-      <section id="top" className="z-0 max-w-5xl mx-auto relative">
-        <div className="grid grid-cols-12 content-center mb-48">
-          <div className="col-span-12 lg:col-span-4 relative z-10">
+      <section id="top" className="z-0 relative mb-24">
+        <div className="grid grid-cols-12 content-center overflow-hidden max-w-5xl mx-auto">
+          <div className="col-span-12 lg:col-span-8 lg:col-start-3 relative z-10 text-center">
             <h2 className="inline-block mt-8 mb-4 text-5xl font-bold leading-none">
-              Cardano addresses made <em>easy.</em>
+              <em>Custom</em> Cardano addresses for everyone.
             </h2>
-            <div className="md:w-2/3 mt-4">
-              <p className="text-xl mb-8 md:pr-8">
-                Introducing <strong>custom wallet addresses</strong> for the Cardano blockchain. <strong>Secured on-chain</strong>.
+            <div className="mt-4">
+              <p className="text-xl mb-8 md:pr-8 text-dark-350">
+                An <strong className="underline">NFT-powered</strong> naming solution for your Cardano wallet address, secured entirely on-chain via the Handle Standard<sup>&trade;</sup>.
               </p>
-              <a href="#more" className="text-dark-300 text-lg mt-8 inline-block inline-flex items-center">
+              <a href="#integrations" className="text-primary-100 text-lg inline-block inline-flex items-center">
                 Learn More
                 <svg className="svg-icon ml-2" viewBox="0 0 20 20">
                   <path d="M13.962,8.885l-3.736,3.739c-0.086,0.086-0.201,0.13-0.314,0.13S9.686,12.71,9.6,12.624l-3.562-3.56C5.863,8.892,5.863,8.611,6.036,8.438c0.175-0.173,0.454-0.173,0.626,0l3.25,3.247l3.426-3.424c0.173-0.172,0.451-0.172,0.624,0C14.137,8.434,14.137,8.712,13.962,8.885 M18.406,10c0,4.644-3.763,8.406-8.406,8.406S1.594,14.644,1.594,10S5.356,1.594,10,1.594S18.406,5.356,18.406,10 M17.521,10c0-4.148-3.373-7.521-7.521-7.521c-4.148,0-7.521,3.374-7.521,7.521c0,4.147,3.374,7.521,7.521,7.521C14.148,17.521,17.521,14.147,17.521,10"></path>
@@ -40,22 +42,36 @@ function IndexPage() {
             </div>
           </div>
         </div>
-        <img className="absolute hidden md:block top-0 right-0 -mt-8 -mr-32 z-0" src={Wallet} />
-      </section>
-      <section id="partners" className="mb-48 z-10 relative w-full max-w-5xl px-4 pt-4 pb-8 mx-auto md:px-8 md:pt-16">
-        <h2 className="text-white text-4xl font-bold leading-tight text-center">Partners</h2>
-        <div className="grid grid-cols-12 mt-8 place-content-center gap-8">
-          <a href="https://maladex.com" className="block col-span-4 shadow-lg rounded-lg bg-dark-200 p-8 lg:p-16 flex items-center justify-center transform hover:-translate-y-2" rel="nofollow" target="_blank">
-            <img className="w-48" src={Maladex} alt="Maladex" />
-          </a>
-          <a href="https://namiwallet.io" className="block col-span-4 shadow-lg rounded-lg bg-dark-200 p-8 lg:p-16 flex items-center justify-center transform hover:-translate-y-2" rel="nofollow" target="_blank">
-            <img className="w-28" src={Nami} alt="Nami Wallet" />
-          </a>
-          <a href="https://sundaeswap.finance" className="block col-span-4 shadow-lg rounded-lg bg-dark-200 p-8 lg:p-16 flex items-center justify-center transform hover:-translate-y-2" rel="nofollow" target="_blank">
-            <img className="w-32" src={SundaeSwap} alt="SundaeSwap" />
-          </a>
+        <div className="relative max-w-6xl mx-auto">
+          <div className="absolute w-full bottom-0 left-0 z-10 bg-gradient-to-t from-dark-100 h-1/2"></div>
+          <img src={App} className="w-full right-0 left-0 bottom-0" />
         </div>
       </section>
+      <div className="bg-dark-200 -mx-8">
+        <section id="integrations" className="mb-48 z-10 relative w-full max-w-5xl px-4 pt-4 pb-8 mx-auto md:px-8 md:pt-16">
+          <h2 className="text-white text-4xl font-bold leading-tight text-center">Partners</h2>
+          <div className="grid grid-cols-12 mt-8 place-content-center gap-8">
+            <a href="https://maladex.com" className="block col-span-4 shadow-lg rounded-lg bg-dark-100 p-8 lg:p-16 flex items-center justify-center transform hover:-translate-y-2" rel="nofollow" target="_blank">
+              <img className="w-48" src={Maladex} alt="Maladex" />
+            </a>
+            <a href="https://namiwallet.io" className="block col-span-4 shadow-lg rounded-lg bg-dark-100 p-8 lg:p-16 flex items-center justify-center transform hover:-translate-y-2" rel="nofollow" target="_blank">
+              <img className="w-28" src={Nami} alt="Nami Wallet" />
+            </a>
+            <a href="https://sundaeswap.finance" className="block col-span-4 shadow-lg rounded-lg bg-dark-100 p-8 lg:p-16 flex items-center justify-center transform hover:-translate-y-2" rel="nofollow" target="_blank">
+              <img className="w-32" src={SundaeSwap} alt="SundaeSwap" />
+            </a>
+            <a href="https://b58.finance/" className="block col-span-4 shadow-lg rounded-lg bg-dark-100 p-8 lg:p-16 flex items-center justify-center transform hover:-translate-y-2" rel="nofollow" target="_blank">
+              <img className="w-32" src={b58} alt="b58 Finance" />
+            </a>
+            <a href="https://namiwallet.io" className="block col-span-4 shadow-lg rounded-lg bg-dark-100 p-8 lg:p-16 flex items-center justify-center transform hover:-translate-y-2" rel="nofollow" target="_blank">
+              <img className="w-28" src={Nami} alt="Nami Wallet" />
+            </a>
+            <a href="https://sundaeswap.finance" className="block col-span-4 shadow-lg rounded-lg bg-dark-100 p-8 lg:p-16 flex items-center justify-center transform hover:-translate-y-2" rel="nofollow" target="_blank">
+              <img className="w-32" src={SundaeSwap} alt="SundaeSwap" />
+            </a>
+          </div>
+        </section>
+      </div>
       <section id="how-it-works" className="bg-dark-100 px-16 md:px-0">
         <h2 className="text-white text-4xl font-bold leading-tight text-center">How it Works</h2>
         <div className="z-10 relative w-full max-w-5xl px-4 pt-4 pb-8 mx-auto md:px-8 md:pt-16 md:pb-32">
@@ -73,7 +89,7 @@ function IndexPage() {
             </div>
           </div>
 
-          <hr className="mx-auto my-16 w-8 h-1 bg-dark-300 block" />
+          <hr className="w-12 border-dark-300 border-2 block my-8 mx-auto" />
 
           <div className="grid grid-cols-12 py-16 gap-4 place-items-center">
             <div className="col-span-12 md:col-span-7 p-16 shadow-lg bg-dark-200 rounded-lg" id="simple">

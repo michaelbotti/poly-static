@@ -43,15 +43,15 @@ function MintPage() {
             {false === accessOpen && (
               <>
                 <div className="col-span-12 md:col-span-6 relative z-10">
-                  <h2 className="w-full text-4xl font-bold text-primary-100 mb-4">🎉 Beta Launch! 🎉</h2>
-                  <div className="text-lg">
-                    <p>To achieve the fairest launch possible, we are <strong>requiring one-time phone authentication</strong> during the beta phase ONLY.</p>
-                    <p>We <strong>do not keep any data</strong>, your details are <strong>completely private</strong>, and our code <strong>is completely <a href="https://github.com/adahandle" target="_blank" className="text-primary-100">open-source</a> and viewable by the public</strong>.</p>
-                    <hr className="w-12 border-dark-300 border-2 block my-8" />
-                  </div>
-                  <p>After entering the queue: when it's your turn, you'll get a one-time 6 digit passcode.</p>
-                  <p><strong>This passcode is good for 10 minutes!</strong> After that, it will expire and you'll need to enter the queue again.</p>
-                  <p>If you want more information explaining the process, read our <a href="#" className="text-primary-100">detailed Medium post &rarr;</a>.</p>
+                  <h2 className="w-full text-4xl font-bold text-primary-100 mb-2">Beta Launch 🎉</h2>
+                  <hr className="w-12 border-dark-300 border-2 block my-8" />
+                  <h3 className="text-lg uppercase mb-4">How it Works</h3>
+                  <ul className="text-lg">
+                    <li className="leading-normal"><p><strong><u>Enter your phone number.</u></strong> This is required for Beta launch to achieve the fairest launch possible. We DO NOT keep this data beyond your session.</p></li>
+                    <li className="leading-normal"><p>20 participants will receive an access code every five minutes, good for one <span className="font-bold underline">30 minute access window</span>.</p></li>
+                    <li className="leading-normal"><p>Access codes <span className="font-bold underline">will be paused if the blockchain load is above 80%</span>, ensuring timely transaction times.</p></li>
+                    <li className="leading-normal"><p>Within that window, you can mint up to <span className="font-bold underline">3 individual Handles at a time (9 total)</span> before having to re-enter the queue.</p></li>
+                  </ul>
                 </div>
                 <div className="col-span-6">
                   <HandleQueue />

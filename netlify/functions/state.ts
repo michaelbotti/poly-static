@@ -12,6 +12,7 @@ export interface StateResponseBody {
   message?: string;
   chainLoad?: number | null;
   position?: number;
+  totalHandles?: number;
 }
 
 export interface QueueResponseBody extends StateResponseBody {
