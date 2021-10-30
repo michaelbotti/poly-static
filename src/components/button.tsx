@@ -3,6 +3,7 @@ import { Link } from "gatsby";
 
 interface ButtonProps {
   buttonStyle?: "primary" | "secondary" | "link";
+  size?: "normal" | "small";
   internal?: boolean;
   href?: string;
   className?: string;
@@ -16,14 +17,21 @@ export const Button: FC<ButtonProps> = ({
   href,
   internal = true,
   buttonStyle = "secondary",
+  size = "normal",
   animate = false,
   children,
   disabled,
   ...rest
 }): JSX.Element => {
   const classes = [
-    "cursor-pointer hover:shadow-lg m-0 py-4 px-6 text-center rounded-lg inline-block font-bold",
+    "cursor-pointer hover:shadow-lg m-0 text-center rounded-lg inline-block font-bold",
   ];
+
+  if ('small' === size) {
+    classes.push('py-4 px-6');
+  } else {
+    classes.push('py-2 px-4');
+  }
 
   if (disabled) {
     classes.push("cursor-not-allowed bg-dark-300 hover:bg-dark-300 active:bg-dark-300 text-dark-350");

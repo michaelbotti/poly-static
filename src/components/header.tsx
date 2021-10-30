@@ -15,6 +15,7 @@ interface HeaderProps {
 interface NavItem {
   route: string;
   title: string;
+  external?: boolean;
   highlight?: boolean;
 }
 
@@ -28,6 +29,11 @@ const navItems: NavItem[] = [
     title: 'Team'
   },
   {
+    route: 'https://medium.com/ada-handle',
+    title: 'Blog',
+    external: true
+  },
+  {
     route: '/tou',
     title: 'Terms of Use'
   }
@@ -39,62 +45,73 @@ const Header: FC<HeaderProps> = ({ className, showMint = true }) => {
 
   return (
     <>
-      <header className={`flex flex-wrap items-center justify-between p-4 mx-auto md:p-8 ${className}`} style={{ minHeight: 120 }}>
-        <Link to="/">
-          <h1 className="flex items-center no-underline">
-            <span className="sr-only">$handle</span>
-            <Logo />
-          </h1>
-        </Link>
+      <header className={`bg-dark-100 p-4 md:p-8 ${className}`} style={{ minHeight: 120 }}>
+        <div className="max-w-5xl bg-dark-100 mx-auto flex flex-wrap items-center justify-between">
+          <Link to="/">
+            <h1 className="flex items-center no-underline">
+              <span className="sr-only">$handle</span>
+              <Logo />
+            </h1>
+          </Link>
 
-        <div className="flex items-center justify-center mr-auto relative">
-          <button
-            className="items-center block px-3 py-2 border-dark-100 text-white border border-white rounded md:hidden"
-            onClick={() => toggleExpansion(!isExpanded)}
-          >
-            <svg
-              className="w-3 h-3 fill-current"
-              viewBox="0 0 20 20"
-              xmlns="http://www.w3.org/2000/svg"
+          <div className="flex items-center justify-center mr-auto relative">
+            <button
+              className="items-center block px-3 py-2 border-dark-100 text-white border border-white rounded md:hidden"
+              onClick={() => toggleExpansion(!isExpanded)}
             >
-              <title>Menu</title>
-              <path d="M0 3h20v2H0V3zm0 6h20v2H0V9zm0 6h20v2H0v-2z" />
-            </svg>
-          </button>
+              <svg
+                className="w-3 h-3 fill-current"
+                viewBox="0 0 20 20"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <title>Menu</title>
+                <path d="M0 3h20v2H0V3zm0 6h20v2H0V9zm0 6h20v2H0v-2z" />
+              </svg>
+            </button>
 
-          <nav
-            className={`${
-              isExpanded ? `block absolute top-full left-0 bg-dark-100 p-8 z-50 shadow-lg w-48` : `hidden w-full`
-            } md:block md:items-center md:w-auto`}
-          >
-            {navItems.map((link) => {
-              return (
-                <Link
-                  className={'block mt-4 text-dark-300 hover:text-primary-200 no-underline md:inline-block md:mt-0 md:ml-6 text-dark-400'}
-                  activeClassName="border-primary-200"
-                  key={link.title}
-                  to={link.route}
-                >
-                  {link.title}
-                </Link>
-              )
-            })}
-          </nav>
+            <nav
+              className={`${
+                isExpanded ? `block absolute top-full left-0 p-8 z-50 shadow-lg w-48` : `hidden w-full`
+              } md:block md:items-center md:w-auto`}
+            >
+              {navItems.map((link) => {
+                return link.external ? (
+                  <a
+                    className={'block mt-4 text-dark-300 hover:text-primary-200 no-underline md:inline-block md:mt-0 md:ml-6 text-dark-400'}
+                    key={link.title}
+                    href={link.route}
+                    target="_blank"
+                    rel="noopener nofollow"
+                  >
+                    {link.title}
+                  </a>
+                ) : (
+                  <Link
+                    className={'block mt-4 text-dark-300 hover:text-primary-200 no-underline md:inline-block md:mt-0 md:ml-6 text-dark-400'}
+                    activeClassName="border-primary-200"
+                    key={link.title}
+                    to={link.route}
+                  >
+                    {link.title}
+                  </Link>
+                )
+              })}
+            </nav>
+          </div>
+          {showMint && (
+            <Button
+              animate
+              href={'/mint'}
+            >
+              Beta Sale Open! &rarr;
+            </Button>
+          )}
+          {!showMint && betaState && (
+            <p className="text-lg m-0">
+              <span className="font-bold">Handles Minted:</span> {betaState.totalHandles.toLocaleString('en-US')}/15,000
+            </p>
+          )}
         </div>
-        {showMint && (
-          <Button
-            animate
-            buttonStyle="primary"
-            href={'/mint'}
-          >
-            Beta Sale Open! &rarr;
-          </Button>
-        )}
-        {!showMint && betaState && (
-          <p className="text-lg">
-            <span className="font-bold">Handles Minted:</span> {betaState.totalHandles.toLocaleString('en-US')}/15,000
-          </p>
-        )}
       </header>
     </>
   );
