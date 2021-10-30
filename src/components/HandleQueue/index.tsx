@@ -143,8 +143,6 @@ export const HandleQueue = (): JSX.Element => {
     setAuthenticating(false);
   };
 
-  console.log(stateData);
-
   return (
     <>
       <div className="flex items-center justify-between mb-8 lg:mb-12">
@@ -152,23 +150,23 @@ export const HandleQueue = (): JSX.Element => {
           <h4 className="text-lg text-dark-350 mb-4">Blockchain Load</h4>
           <span
             className={`font-bold text-4xl ${
-              stateData.chainLoad > 0.8 ? "" : "text-primary-100"
+              stateData?.chainLoad > 0.8 ? "" : "text-primary-100"
             }`}
             style={{
-              color: stateData.chainLoad > 0.8 ? "red" : "",
+              color: stateData?.chainLoad > 0.8 ? "red" : "",
             }}
           >
             {null === stateData && "Loading..."}
-            {null !== stateData && !stateData.error && `${stateData.chainLoad.toFixed(3)}%`}
-            {null !== stateData && stateData.error && "N/A"}
+            {null !== stateData && !stateData?.error && `${stateData?.chainLoad.toFixed(3)}%`}
+            {null !== stateData && stateData?.error && "N/A"}
           </span>
         </div>
         <div className="w-1/2 text-center">
           <h4 className="text-lg text-dark-350 mb-4">Waitlist Size</h4>
           <span className={`font-bold text-4xl text-primary-100`}>
             {null === stateData && "Loading..."}
-            {null !== stateData && !stateData.error && stateData.position.toLocaleString('en-US')}
-            {null !== stateData && stateData.error && "N/A"}
+            {null !== stateData && !stateData?.error && stateData?.position.toLocaleString('en-US')}
+            {null !== stateData && stateData?.error && "N/A"}
           </span>
         </div>
       </div>
