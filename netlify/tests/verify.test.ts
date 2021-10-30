@@ -2,7 +2,7 @@ import { mocked } from 'ts-jest/utils'
 import { HandlerEvent } from '@netlify/functions';
 import lambdaTester from 'lambda-tester';
 import { HEADER_PHONE, HEADER_PHONE_AUTH } from '../../src/lib/constants';
-import { handler } from './verify';
+import { handler } from '../functions/verify';
 import { fetchNodeApp } from "../helpers/util";
 
 jest.mock('../helpers/firebase');
