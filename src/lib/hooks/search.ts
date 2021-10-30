@@ -3,6 +3,10 @@ import { useEffect, useContext } from "react";
 import {
   getDefaultActiveSessionUnvailable,
   getBetaPhaseResponseUnavailable,
+  getTwitterResponseUnvailable,
+  getDefaultResponseUnvailable,
+  getDefaultResponseAvailable,
+  getReservedUnavailable,
 } from "../helpers/search";
 import { HandleResponseBody } from "../helpers/search";
 import {
@@ -15,7 +19,7 @@ import { normalizeNFTHandle } from "../helpers/nfts";
 import { getAccessTokenFromCookie } from "../helpers/session";
 
 export const useSyncAvailableStatus = async (unsanitizedHandle: string) => {
-  const { setFetching, setHandleResponse, pendingSessions, reservedHandles } =
+  const { setFetching, setHandleResponse, reservedHandles } =
     useContext(HandleMintContext);
 
   useEffect(() => {
@@ -26,11 +30,18 @@ export const useSyncAvailableStatus = async (unsanitizedHandle: string) => {
       return;
     }
 
-    if (
-      !handle.match(BETA_PHASE_MATCH) &&
-      !reservedHandles?.twitter?.includes(handle)
-    ) {
+    if (!handle.match(BETA_PHASE_MATCH)) {
       setHandleResponse(getBetaPhaseResponseUnavailable());
+      return;
+    }
+
+    if (reservedHandles?.manual.includes(handle) || reservedHandles?.spos.includes(handle)) {
+      setHandleResponse(getReservedUnavailable());
+      return;
+    }
+
+    if (reservedHandles?.blacklist.includes(handle)) {
+      setHandleResponse(getDefaultResponseUnvailable());
       return;
     }
 

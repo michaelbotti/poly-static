@@ -33,7 +33,7 @@ export const HandleSearchReserveFlow = ({ className = "", ...rest }) => {
     setHandle,
     twitterToken
   } = useContext(HandleMintContext);
-  const { pendingSessions, setCurrentIndex } = useContext(HandleMintContext);
+  const { setCurrentIndex } = useContext(HandleMintContext);
   const [fetchingSession, setFetchingSession] = useState<boolean>(false);
   const [debouncedHandle] = useDebounce(handle, 600);
   const handleInputRef = useRef(null);

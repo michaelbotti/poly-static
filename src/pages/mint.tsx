@@ -15,7 +15,7 @@ import { HandleNavigation } from "../components/HandleNavigation";
 import { SessionResponseBody } from "../../netlify/functions/session";
 
 function MintPage() {
-  const { primed, handle, currentIndex } = useContext(HandleMintContext);
+  const { primed, handle, currentIndex, betaState } = useContext(HandleMintContext);
   const [accessOpen] = useAccessOpen();
 
   usePrimeMintingContext();
@@ -54,7 +54,16 @@ function MintPage() {
                   </ul>
                 </div>
                 <div className="col-span-6">
-                  <HandleQueue />
+                  {betaState?.totalHandles < 15000 && <HandleQueue />}
+                  {betaState?.totalHandles >= 15000 && (
+                    <div className="flex items-center justify-between mb-8 lg:mb-12">
+                      <div className="w-1/2 text-center">
+                        <h4 className="text-white text-center font-bold">
+                          Sold Out!
+                        </h4>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </>
             )}

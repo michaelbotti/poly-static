@@ -99,7 +99,7 @@ export const HandleSession = ({
         <h2 className="font-bold text-3xl mb-2">
           Overpaid!
         </h2>
-        <p className="text-lg">Sorry, but you sent and incorrect amount for your Handle. Refunds will be issued within 30 days. <Link className="text-primary-100" to="/faq">See our FAQ.</Link></p>
+        <p className="text-lg">Sorry, but you sent an incorrect amount for your Handle. Refunds will be issued within 30 days. <Link className="text-primary-100" to="/faq">See our FAQ.</Link></p>
         <hr className="w-12 border-dark-300 border-2 block my-8" />
         <Button onClick={() => {
           Cookies.remove(`${COOKIE_SESSION_PREFIX}_${currentIndex}`)
