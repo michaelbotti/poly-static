@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect, useContext } from "react";
+import React, { useRef, useState, useContext } from "react";
 import PhoneInput from "react-phone-number-input";
 
 import { QueueResponseBody } from "../../../netlify/functions/queue";
