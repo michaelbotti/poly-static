@@ -1,10 +1,10 @@
 import Cookies from "js-cookie";
-import React, { useContext, useEffect, useMemo, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import Countdown from "react-countdown";
 import { PaymentData, PaymentResponseBody } from "../../../netlify/functions/payment";
 import { HandleMintContext } from "../../context/mint";
 import { COOKIE_SESSION_PREFIX, HEADER_JWT_ACCESS_TOKEN, HEADER_JWT_SESSION_TOKEN } from "../../lib/constants";
-import { getRarityColor, getRarityCost } from "../../lib/helpers/nfts";
+import { getRarityCost, getRarityHex } from "../../lib/helpers/nfts";
 import { getAccessTokenFromCookie, getSessionTokenFromCookie } from "../../lib/helpers/session";
 import { Loader } from "../Loader";
 import Button from "../button";
@@ -97,7 +97,7 @@ export const HandleSession = ({
     return (
       <div className="col-span-6">
         <h2 className="font-bold text-3xl mb-2">
-          Overpaid!
+          Invalid Payment!
         </h2>
         <p className="text-lg">Sorry, but you sent an incorrect amount for your Handle. Any invalid payments will be refunded within 14 days. <Link className="text-primary-100" to="/faq">See our FAQ.</Link></p>
         <hr className="w-12 border-dark-300 border-2 block my-8" />
@@ -129,7 +129,7 @@ export const HandleSession = ({
           <>
             <h4 className="text-xl mb-8">
               Send <u>exaclty the amount shown</u>:<br/>
-              <strong className="text-4xl mt-4 inline-block font-bold" style={{ color: getRarityColor(sessionData.data.handle)}}>{getRarityCost(sessionData.data.handle)} $ADA</strong>
+              <strong className="text-4xl mt-4 inline-block font-bold" style={{ color: getRarityHex(sessionData.data.handle)}}>{getRarityCost(sessionData.data.handle)} $ADA</strong>
             </h4>
             <div className="relative">
               <pre className="p-4 rounded-t-lg shadow-inner shadow-lg bg-dark-300 overflow-hidden overflow-scroll pr-24 border-2 border-b-0 border-primary-100">

@@ -1,4 +1,4 @@
-import React, { useContext } from "react";
+import React, { useContext, useEffect, useMemo, useState } from "react";
 
 import { HandleMintContext } from "../context/mint";
 import { usePrimeMintingContext } from "../lib/hooks/primeMintingContext";
@@ -16,18 +16,26 @@ import { SessionResponseBody } from "../../netlify/functions/session";
 
 function MintPage() {
   const { primed, handle, currentIndex, betaState } = useContext(HandleMintContext);
+  const [paymentSessions, setPaymentSessions] = useState<(false | SessionResponseBody)[]>();
   const [accessOpen] = useAccessOpen();
+
+  useEffect(() => {
+    setPaymentSessions(getAllCurrentSessionData());
+  }, [setPaymentSessions]);
 
   usePrimeMintingContext();
 
   const currentSession = currentIndex > 0 ? getSessionTokenFromCookie(currentIndex) as SessionResponseBody : null;
-  const paymentSessions = getAllCurrentSessionData();
+
+  const refreshPaymentSessions = () => {
+    setPaymentSessions(getAllCurrentSessionData());
+  }
 
   return (
     <>
       <SEO title="Mint" />
       <section id="top" className="max-w-5xl mx-auto">
-        <HandleNavigation paymentSessions={paymentSessions} />
+        <HandleNavigation paymentSessions={paymentSessions} updatePaymentSessions={refreshPaymentSessions} />
         <div
           className="grid grid-cols-12 gap-4 lg:gap-8 bg-dark-200 rounded-lg rounded-tl-none place-content-start p2 lg:p-8 mb-16"
           style={{ minHeight: "60vh" }}

@@ -1,10 +1,11 @@
-import React, { useContext, useMemo } from 'react';
+import React, { useContext } from 'react';
 import { HandleMintContext } from '../../context/mint';
-import { getAllCurrentSessionData, getSessionTokenFromCookie } from '../../lib/helpers/session';
+import { getSessionTokenFromCookie } from '../../lib/helpers/session';
 import { useAccessOpen } from '../../lib/hooks/access';
 
 export const HandleNavigation = ({
-  paymentSessions
+  paymentSessions,
+  updatePaymentSessions
 }) => {
   const { setCurrentIndex, currentIndex } = useContext(HandleMintContext);
   const [accessOpen] = useAccessOpen();
@@ -37,7 +38,7 @@ export const HandleNavigation = ({
               if (session) {
                 setCurrentIndex(index + 1);
               } else {
-                setCurrentIndex(0);
+                updatePaymentSessions();
               }
             }}
             className={`${index + 1 !== currentIndex ? `bg-dark-100 opacity-60` : `bg-dark-200`} flex-inline items-center justify-center px-8 lg:px-4 py-2 rounded-t-lg mr-4`}
