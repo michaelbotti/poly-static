@@ -21,7 +21,7 @@ function MintPage() {
 
   useEffect(() => {
     setPaymentSessions(getAllCurrentSessionData());
-  }, [setPaymentSessions]);
+  }, [currentIndex, setPaymentSessions]);
 
   usePrimeMintingContext();
 
