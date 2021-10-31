@@ -99,13 +99,13 @@ export const HandleSession = ({
         <h2 className="font-bold text-3xl mb-2">
           Overpaid!
         </h2>
-        <p className="text-lg">Sorry, but you sent an incorrect amount for your Handle. Refunds will be issued within 30 days. <Link className="text-primary-100" to="/faq">See our FAQ.</Link></p>
+        <p className="text-lg">Sorry, but you sent an incorrect amount for your Handle. Any invalid payments will be refunded within 14 days. <Link className="text-primary-100" to="/faq">See our FAQ.</Link></p>
         <hr className="w-12 border-dark-300 border-2 block my-8" />
         <Button onClick={() => {
           Cookies.remove(`${COOKIE_SESSION_PREFIX}_${currentIndex}`)
           setCurrentIndex(0);
         }}>
-          Clear This Session Now!
+          Clear Session &amp; Try Again!
         </Button>
       </div>
     )
@@ -174,7 +174,9 @@ export const HandleSession = ({
                     <>
                       <div>
                         <h2 className="text-2xl font-bold mb-2"><strong>Yay!</strong> Your payment was successful!</h2>
-                        <p className="text-lg">We're minting your handle <strong>right now.</strong> You should receive it within 30 seconds, but please allow up to 2 hours during high blockchain activity.</p>
+                        <p className="text-lg">We're minting your handle <strong>right now.</strong> Please allow up to a few hours to receive your NFT.</p>
+                        <p className="text-lg">Your unique URL: <a className="text-primary-100" href={`https://handle.me/${sessionData.data.handle}`} target="_blank">https://handle.me/{sessionData.data.handle}</a></p>
+                        <p className="text-lg">This session will close in: <strong>{formatted.minutes}:{formatted.seconds}</strong></p>
                       </div>
                     </>
                   )}

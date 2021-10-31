@@ -28,9 +28,9 @@ export const Button: FC<ButtonProps> = ({
   ];
 
   if ('small' === size) {
-    classes.push('py-4 px-6');
-  } else {
     classes.push('py-2 px-4');
+  } else {
+    classes.push('py-4 px-6');
   }
 
   if (disabled) {
