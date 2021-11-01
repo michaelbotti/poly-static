@@ -8,7 +8,8 @@ module.exports = {
     ],
     options: {
       safelist: [
-        "PhoneInputInput"
+        "PhoneInputInput",
+        '[class*="hover:"]'
       ],
     }
   },
