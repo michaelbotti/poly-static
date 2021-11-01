@@ -37,7 +37,7 @@ function MintPage() {
       <section id="top" className="max-w-5xl mx-auto">
         <HandleNavigation paymentSessions={paymentSessions} updatePaymentSessions={refreshPaymentSessions} />
         <div
-          className="grid grid-cols-12 gap-4 lg:gap-8 bg-dark-200 rounded-lg rounded-tl-none place-content-start p2 lg:p-8 mb-16"
+          className="grid grid-cols-12 gap-4 lg:gap-8 bg-dark-200 rounded-lg rounded-tl-none place-content-start p-4 lg:p-8 mb-16"
           style={{ minHeight: "60vh" }}
           >
             {null === accessOpen && (
@@ -61,7 +61,7 @@ function MintPage() {
                     <li className="leading-normal"><p>Within that window, you can mint up to <span className="font-bold underline">3 individual Handles at a time (9 total)</span> before having to re-enter the queue.</p></li>
                   </ul>
                 </div>
-                <div className="col-span-6">
+                <div className="col-span-12 md:col-span-6">
                   {betaState?.totalHandles < 15000 && <HandleQueue />}
                   {betaState?.totalHandles >= 15000 && (
                     <div className="flex items-center justify-between mb-8 lg:mb-12">
