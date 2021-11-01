@@ -175,7 +175,7 @@ export const HandleSession = ({
                       <div>
                         <h2 className="text-2xl font-bold mb-2"><strong>Yay!</strong> Your payment was successful!</h2>
                         <p className="text-lg">We're minting your handle <strong>right now.</strong> Please allow up to a few hours to receive your NFT.</p>
-                        <p className="text-lg">Your unique URL: <a className="text-primary-100" href={`https://handle.me/${sessionData.data.handle}`} target="_blank">https://handle.me/{sessionData.data.handle}</a></p>
+                        <p className="text-lg">Your unique URL: <a className="text-primary-100" href={`https://test.handle.me/${sessionData.data.handle}`} target="_blank">https://handle.me/{sessionData.data.handle}</a></p>
                         <p className="text-lg">This session will close in: <strong>{formatted.minutes}:{formatted.seconds}</strong></p>
                       </div>
                     </>
