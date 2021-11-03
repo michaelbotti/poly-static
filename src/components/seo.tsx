@@ -1,9 +1,8 @@
 import { useStaticQuery, graphql } from "gatsby";
-import PropTypes from "prop-types";
 import React from "react";
 import { Helmet } from "react-helmet";
 
-function SEO({ description, lang, meta, keywords, title }) {
+function SEO({ description = '', lang = 'en', meta = [], keywords = [], title }) {
   const { site } = useStaticQuery(graphql`
     query DefaultSEOQuery {
       site {
@@ -30,7 +29,11 @@ function SEO({ description, lang, meta, keywords, title }) {
         },
         {
           property: `og:title`,
-          content: title,
+          content: `${title} | ${site.siteMetadata.title}`,
+        },
+        {
+          name: `og:image`,
+          content: `https://adahandle.com/twitter-image.jpeg`
         },
         {
           property: `og:description`,
@@ -42,7 +45,11 @@ function SEO({ description, lang, meta, keywords, title }) {
         },
         {
           name: `twitter:card`,
-          content: `summary`,
+          content: `summary_large_image`,
+        },
+        {
+          name: `twitter:image`,
+          content: `https://adahandle.com/twitter-image.jpeg`
         },
         {
           name: `twitter:creator`,
@@ -71,19 +78,5 @@ function SEO({ description, lang, meta, keywords, title }) {
     />
   );
 }
-
-SEO.defaultProps = {
-  lang: `en`,
-  keywords: [],
-  meta: [],
-};
-
-SEO.propTypes = {
-  description: PropTypes.string,
-  keywords: PropTypes.arrayOf(PropTypes.string),
-  lang: PropTypes.string,
-  meta: PropTypes.array,
-  title: PropTypes.string.isRequired,
-};
 
 export default SEO;
