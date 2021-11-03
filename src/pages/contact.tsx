@@ -1,10 +1,76 @@
-import React from "react";
+import React, { useMemo, useState } from "react";
 
 import SEO from "../components/seo";
 import { Link } from "gatsby";
 import Button from "../components/button";
 
+interface FormState {
+  name: string;
+  email: string;
+  message: string;
+  type: 'general' | 'refund' | 'press' | 'claim';
+}
+
+function encode(data) {
+  return Object.keys(data)
+      .map(key => encodeURIComponent(key) + "=" + encodeURIComponent(data[key]))
+      .join("&")
+}
+
 function ContactPage() {
+  const [state, setState] = useState<FormState>({
+    name: '',
+    email: '',
+    message: '',
+    type: 'general'
+  })
+  const [success, setSuccess] = useState<boolean>(null);
+
+  const handleChange = (e) => {
+    setState({ ...state, [e.target.name]: e.target.value })
+  }
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+
+    fetch("/", {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: encode({
+        "form-name": e.target.getAttribute("name"),
+        ...state
+      })
+    })
+      .then(async (res) => {
+        console.log(await res.json());
+        if (res.status === 200) {
+          setSuccess(true)
+        } else {
+          setSuccess(false);
+        }
+      })
+      .catch(e => {
+        console.log(e);
+        setSuccess(false)
+      });
+  }
+
+  const isValid = useMemo(() => {
+    if (state.name.length === 0) {
+      return false;
+    }
+
+    if (state.email.length === 0) {
+      return false;
+    }
+
+    if (state.message.length === 0) {
+      return false;
+    }
+
+    return true;
+  }, [state])
+
   return (
     <>
       <SEO title="Contact" />
@@ -18,31 +84,36 @@ function ContactPage() {
         </section>
         <div className="my-16 max-w-3xl mx-auto">
           <div className="p-4 lg:p-8 bg-dark-200 rounded-lg shadow-lg">
-            <form name="contact" method="POST" data-netlify="true">
-              <p>
-                <label>Your Name: <input className={`mt-2 focus:ring-0 focus:ring-opacity-0 border-2 focus:border-white outline-none form-input bg-dark-100 border-dark-300 rounded-lg px-6 py-4 text-3xl w-full`} type="text" name="name" /></label>
-              </p>
-              <p>
-                <label>Your Email: <input className={`mt-2 focus:ring-0 focus:ring-opacity-0 border-2 focus:border-white outline-none form-input bg-dark-100 border-dark-300 rounded-lg px-6 py-4 text-3xl w-full`} type="email" name="email" /></label>
-              </p>
-              <p>
-                <label>
-                  How Can We Help You?
-                  <select name="type" className="mt-2 focus:ring-0 focus:ring-opacity-0 border-2 focus:border-white outline-none form-input bg-dark-100 border-dark-300 rounded-lg px-6 py-4 text-xl w-full">
-                    <option value="general" defaultChecked>General Inquery</option>
-                    <option value="refund">I Need a Refund</option>
-                    <option value="press">Press</option>
-                    <option value="claim">Claim Handle</option>
-                  </select>
-                </label>
-              </p>
-              <p>
-                <label>Your Message: <textarea className={`mt-2 focus:ring-0 focus:ring-opacity-0 border-2 focus:border-white outline-none form-input bg-dark-100 border-dark-300 rounded-lg px-6 py-4 text-3xl w-full`} name="message"></textarea></label>
-              </p>
-              <p>
-                <Button type="submit">Send</Button>
-              </p>
-            </form>
+            {true === success && <p className="text-2xl">Success! We received your inquery and will get back to you as soon as possible.</p>}
+            {false === success && <p className="text-2xl">Something went wrong. Please try emailing founder@adahandle.com for help.</p>}
+            {null === success && (
+              <form name="contact" method="POST" data-netlify="true" onSubmit={handleSubmit}>
+                <p>
+                  <label>Your Name: <input onChange={e => handleChange(e)} className={`mt-2 focus:ring-0 focus:ring-opacity-0 border-2 focus:border-white outline-none form-input bg-dark-100 border-dark-300 rounded-lg px-6 py-4 text-3xl w-full`} type="text" name="name" /></label>
+                </p>
+                <p>
+                  <label>Your Email: <input onChange={e => handleChange(e)} className={`mt-2 focus:ring-0 focus:ring-opacity-0 border-2 focus:border-white outline-none form-input bg-dark-100 border-dark-300 rounded-lg px-6 py-4 text-3xl w-full`} type="email" name="email" /></label>
+                </p>
+                <p>
+                  <label>
+                    How Can We Help You?
+                    <select name="type" onChange={e => handleChange(e)} className="mt-2 focus:ring-0 focus:ring-opacity-0 border-2 focus:border-white outline-none form-input bg-dark-100 border-dark-300 rounded-lg px-6 py-4 text-xl w-full">
+                      <option value="general" defaultChecked>General Inquery</option>
+                      <option value="refund">I Need a Refund</option>
+                      <option value="press">Press</option>
+                      <option value="claim">Claim Handle</option>
+                    </select>
+                  </label>
+                </p>
+                <p>
+                  <label>Your Message: <textarea onChange={e => handleChange(e)} className={`mt-2 focus:ring-0 focus:ring-opacity-0 border-2 focus:border-white outline-none form-input bg-dark-100 border-dark-300 rounded-lg px-6 py-4 text-lg w-full`} name="message"></textarea></label>
+                </p>
+                <input type="hidden" name="contact" value="contact" />
+                <p>
+                  <Button disabled={!isValid} type="submit">Send</Button>
+                </p>
+              </form>
+            )}
           </div>
         </div>
       </section>
