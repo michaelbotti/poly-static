@@ -33,7 +33,7 @@ function MintPage() {
               />
             </h2>
             <hr className="w-12 border-dark-300 border-2 block my-8 mx-auto" />
-            <h4 className="text-white text-center text-lg lg:text-2xl uppercase tracking-wider">November 7th, 4pm UTC</h4>
+            <h4 className="text-white text-center text-lg lg:text-2xl uppercase tracking-wider">November 7th, 2pm UTC</h4>
             <p className="text-center mt-4">
               <Button href="https://twitter.com/intent/tweet?url=https%3A%2F%2Fadahandle.com&text=@adahandle%20is%20launching%20on%20Saturday%20at%204pm%20UTC%21%20Can%27t%20wait%20to%20get%20my%20Handle%3A&hashtags=Cardano%20%24ADA" buttonStyle="primary">Share on Twitter!</Button>
             </p>
