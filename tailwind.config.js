@@ -1,6 +1,7 @@
 // See https://tailwindcss.com/docs/configuration
 module.exports = {
   purge: {
+    layers: ['components', 'utilities'],
     content: [
       "./src/**/*.js",
       "./src/**/*.ts",
