@@ -29,11 +29,11 @@ function FAQPage() {
                 {
                   title: 'How does it work in simple terms?',
                   description: () => (
-                    <p>Each handle you purchase will be delivered to you as an NFT. Whatever wallet holds that NFT is where payments will be routed.</p>
+                    <p>Each Handle you purchase will be delivered to you as an NFT. Whatever wallet holds that NFT is where payments will be routed.</p>
                   )
                 },
                 {
-                  title: 'What does an example handle address look like compared to a standard wallet one.',
+                  title: 'What does an example Handle address look like compared to a standard wallet one.',
                   description: () => (
                     <>
                       <p>Handle address: <code>$custom_name</code></p>
@@ -47,7 +47,7 @@ function FAQPage() {
                 {
                   title: 'Can I Still Reserve a Handle?',
                   description: () => (
-                    <p>No, reservations have ended. You can still purchase a handle, though, during <Link to="/mint" className="text-primary-100">open sales</Link>.</p>
+                    <p>No, reservations have ended. You can still purchase a Handle, though, during <Link to="/mint" className="text-primary-100">open sales</Link>.</p>
                   )
                 },
                 {
@@ -67,14 +67,14 @@ function FAQPage() {
                   )
                 },
                 {
-                  title: 'Are handles case-sensitive?',
-                  description: () => <p>No, every handle is converted to lowercase.</p>
+                  title: 'Are Handles case-sensitive?',
+                  description: () => <p>No, every Handle is converted to lowercase.</p>
                 },
                 {
                   title: 'How much does a Handle cost?',
                   description: () => (
                     <>
-                      <p>While we are continuing to fine-tune our rarity attributes to better help the secondary market accurately value their handles, we settled on 5 tiers of pricing and rarity, determined simply by character length:</p>
+                      <p>While we are continuing to fine-tune our rarity attributes to better help the secondary market accurately value their Handles, we settled on 5 tiers of pricing and rarity, determined simply by character length:</p>
                       <ul>
                         <li>Legendary (1 character): <strong>Auction Only</strong></li>
                         <li>Ultra Rare (2 characters): <strong>500 $ADA</strong></li>
@@ -102,26 +102,34 @@ function FAQPage() {
                 },
                 {
                   title: 'Once purchased, do I have to pay renewal fees?',
-                  description: () => <p>No! Each Handle is a one-time sale. You buy it, you own it — forever.</p>
+                  description: () => <p>No! Each Handle is a one-time sale. You buy it, you own it — forever.
+                  </p>
                 },
                 {
                   title: 'Can I sell it?',
                   description: () => <p>Yes! You can sell your Handle on any Cardano NFT marketplace.</p>
                 },
                 {
+                  title: 'Do you charge royalties on sales?',
+                  description: () => (
+                    <p>We do suggest a 2% royalty fee on secondary sales, according to
+                    <a href="https://github.com/cardano-foundation/CIPs/pull/116/files" className="text-primary-100">CIP-0027</a>, of which marketplaces have the option to honor.</p>
+                  )
+                },
+                {
                   title: 'Can I use or buy them from an exchange?',
                   description: () => (
                     <p>
-                      NO. If you try to use a handle from an exchange it might be lost forever! Only use it with light wallets and full nodes, such as Daedalus, Nami, and Yoroi.
+                      NO. If you try to use a Handle from an exchange it might be lost forever! Only use it with light wallets and full nodes, such as Daedalus, Nami, and Yoroi.
                     </p>
                   )
                 },
                 {
-                  title: 'How long before we can start using the handle?',
+                  title: 'How long before we can start using the Handle?',
                   description: () => (
                     <>
-                      <p>On launch day, you can search for an address at <a href="https://handle.me" target="_blank" rel="noreferrer noopen">https://handle.me"</a>, or
-                      share your custom link that corresponds to your Handle, like this: <code>https://handle.me/<strong>$my_new_handle</strong></code></p>
+                      <p>On launch day, you can search for an address at <a href="https://Handle.me" target="_blank" rel="noreferrer noopen">Handle.me</a>, or
+                      share your custom link that corresponds to your Handle, like this: <code>https://Handle.me/<strong>my_new_Handle</strong></code></p>
                       <p>
                         dApps will integrate the Handle Standard as they choose. You can already see a list of <Link to="/#partners" className="text-primary-100">our current Partners here</Link>!
                       </p>
@@ -133,8 +141,8 @@ function FAQPage() {
                   description: () => (
                     <ul>
                       <li>Moving to smart contract minting.</li>
-                      <li>Burner/recycling pot for privacy and/or temporary handle usage.</li>
-                      <li>An official handle marketplace.</li>
+                      <li>Burner/recycling pot for privacy and/or temporary Handle usage.</li>
+                      <li>An official Handle marketplace.</li>
                       <li>DAO governance.</li>
                     </ul>
                   )
