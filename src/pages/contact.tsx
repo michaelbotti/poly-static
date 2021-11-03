@@ -30,10 +30,10 @@ function ContactPage() {
     setState({ ...state, [e.target.name]: e.target.value })
   }
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
-    fetch("/", {
+    await fetch("/", {
       method: "POST",
       headers: { "Content-Type": "application/x-www-form-urlencoded" },
       body: encode({
@@ -41,18 +41,8 @@ function ContactPage() {
         ...state
       })
     })
-      .then(async (res) => {
-        console.log(await res.json());
-        if (res.status === 200) {
-          setSuccess(true)
-        } else {
-          setSuccess(false);
-        }
-      })
-      .catch(e => {
-        console.log(e);
-        setSuccess(false)
-      });
+      .then(() => setSuccess(true))
+      .catch(() => setSuccess(false));
   }
 
   const isValid = useMemo(() => {
