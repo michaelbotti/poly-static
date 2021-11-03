@@ -5,7 +5,7 @@ import Button from "../components/button";
 import SEO from "../components/seo";
 
 function MintPage() {
-  const targetDate = new Date('Tue Nov 07 2021 16:00:00 UTC');
+  const targetDate = new Date('Tue Nov 07 2021 14:00:00 UTC');
 
   return (
     <>
