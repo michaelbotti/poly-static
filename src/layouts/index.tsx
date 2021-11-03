@@ -1,3 +1,4 @@
+import { Link } from "gatsby";
 import React, { FC, useEffect, useState } from "react";
 
 import Header from "../components/header";
@@ -31,7 +32,7 @@ const Layout: FC = ({ children }): JSX.Element => {
 
         <footer className="bg-dark-100 pt-16">
           <p className="text-center text-dark-350">
-            &copy; 2021 ADA Handle • <strong>Policy ID</strong>: 5b7e2b5608c0f38eb186241f8b883d2e7bcad382f78c1e4e8993e513
+            &copy; 2021 ADA Handle • <Link className="text-primary-100" to="/tou">Terms of Use</Link>
           </p>
         </footer>
       </div>

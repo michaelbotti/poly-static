@@ -1,20 +1,21 @@
 import React from "react";
 
 import SEO from "../components/seo";
-import { Button } from '../components/button';
-import { Logo } from '../components/logo';
 
-import Wallet from '../images/handle-wallet.svg';
 import Cardano from '../images/cardano.svg';
 import Payment from '../images/payment-simple.svg';
 import Ecosystem from '../images/ecosystem.svg';
 import NonCustodial from '../images/non-custodial.svg';
-import App from '../images/app-bg.jpeg';
-
+import App from '../images/app-bg.png';
 import b58 from '../images/logo_b58_wallet_flat.png';
 import Maladex from '../images/maladex-logo-small.png';
 import SundaeSwap from '../images/sundae.png';
 import Nami from '../images/nami.svg';
+import Gero from '../images/gerowallet.png';
+import Ridotto from '../images/RIDOTTO.png';
+import VyFi from '../images/vyfi.png';
+import NFTMaker from '../images/nft-maker.png';
+import Cardax from '../images/cardax.png';
 
 function IndexPage() {
   return (
@@ -23,14 +24,14 @@ function IndexPage() {
         title="Home"
       />
 
-      <section id="top" className="z-0 relative mb-24">
+      <section id="top" className="z-0 relative mb-0">
         <div className="grid grid-cols-12 content-center overflow-hidden max-w-5xl mx-auto">
           <div className="col-span-12 lg:col-span-8 lg:col-start-3 relative z-10 text-center">
             <h2 className="inline-block mt-8 mb-4 text-5xl font-bold leading-none">
               <em>Custom</em> Cardano addresses for everyone.
             </h2>
             <div className="mt-4">
-              <p className="text-xl mb-8 md:pr-8 text-dark-350">
+              <p className="text-xl mb-8 lg:pr-8 text-dark-350">
                 An <strong className="underline">NFT-powered</strong> naming solution for your Cardano wallet address, secured entirely on-chain via the Handle Standard<sup>&trade;</sup>.
               </p>
               <a href="#integrations" className="text-primary-100 text-lg inline-block inline-flex items-center">
@@ -48,43 +49,51 @@ function IndexPage() {
         </div>
       </section>
       <div className="bg-dark-200 -mx-8">
-        <section id="integrations" className="mb-48 z-10 relative w-full max-w-5xl px-4 pt-4 pb-8 mx-auto md:px-8 md:pt-16">
+        <section id="integrations" className="mb-48 z-10 relative w-full max-w-5xl px-4 pt-4 pb-8 mx-auto lg:px-8 lg:pt-16">
           <h2 className="text-white text-4xl font-bold leading-tight text-center">Partners</h2>
-          <div className="grid grid-cols-12 mt-8 place-content-center gap-8">
-            <a href="https://maladex.com" className="block col-span-4 shadow-lg rounded-lg bg-dark-100 p-8 lg:p-16 flex items-center justify-center transform hover:-translate-y-2" rel="nofollow" target="_blank">
+          <div className="grid grid-cols-12 mt-8 place-content-center gap-8 px-4 lg:px-0">
+            <a href="https://maladex.com" className="block col-span-6 lg:col-span-4 shadow-lg rounded-lg bg-dark-100 p-8 lg:p-16 flex items-center justify-center transform hover:-translate-y-2" rel="nofollow noopener" target="_blank">
               <img className="w-48" src={Maladex} alt="Maladex" />
             </a>
-            <a href="https://namiwallet.io" className="block col-span-4 shadow-lg rounded-lg bg-dark-100 p-8 lg:p-16 flex items-center justify-center transform hover:-translate-y-2" rel="nofollow" target="_blank">
+            <a href="https://namiwallet.io" className="block col-span-6 lg:col-span-4 shadow-lg rounded-lg bg-dark-100 p-8 lg:p-16 flex items-center justify-center transform hover:-translate-y-2" rel="nofollow noopener" target="_blank">
               <img className="w-28" src={Nami} alt="Nami Wallet" />
             </a>
-            <a href="https://sundaeswap.finance" className="block col-span-4 shadow-lg rounded-lg bg-dark-100 p-8 lg:p-16 flex items-center justify-center transform hover:-translate-y-2" rel="nofollow" target="_blank">
+            <a href="https://sundaeswap.finance" className="block col-span-6 lg:col-span-4 shadow-lg rounded-lg bg-dark-100 p-8 lg:p-16 flex items-center justify-center transform hover:-translate-y-2" rel="nofollow noopener" target="_blank">
               <img className="w-32" src={SundaeSwap} alt="SundaeSwap" />
             </a>
-            <a href="https://b58.finance/" className="block col-span-4 shadow-lg rounded-lg bg-dark-100 p-8 lg:p-16 flex items-center justify-center transform hover:-translate-y-2" rel="nofollow" target="_blank">
+            <a href="https://b58.finance/" className="block col-span-6 lg:col-span-4 shadow-lg rounded-lg bg-dark-100 p-8 lg:p-16 flex items-center justify-center transform hover:-translate-y-2" rel="nofollow noopener" target="_blank">
               <img className="w-32" src={b58} alt="b58 Finance" />
             </a>
-            <a href="https://namiwallet.io" className="block col-span-4 shadow-lg rounded-lg bg-dark-100 p-8 lg:p-16 flex items-center justify-center transform hover:-translate-y-2" rel="nofollow" target="_blank">
-              <img className="w-28" src={Nami} alt="Nami Wallet" />
+            <a href="https://gerowallet.io/" className="block col-span-6 lg:col-span-4 shadow-lg rounded-lg bg-dark-100 p-8 lg:p-16 flex items-center justify-center transform hover:-translate-y-2" rel="nofollow noopener" target="_blank">
+              <img className="w-32" src={Gero} alt="Gero Wallet" />
             </a>
-            <a href="https://sundaeswap.finance" className="block col-span-4 shadow-lg rounded-lg bg-dark-100 p-8 lg:p-16 flex items-center justify-center transform hover:-translate-y-2" rel="nofollow" target="_blank">
-              <img className="w-32" src={SundaeSwap} alt="SundaeSwap" />
+            <a href="https://ridotto.io" className="block col-span-6 lg:col-span-4 shadow-lg rounded-lg bg-dark-100 p-8 lg:p-16 flex items-center justify-center transform hover:-translate-y-2" rel="nofollow noopener" target="_blank">
+              <img className="w-48" src={Ridotto} alt="Ridotto" />
+            </a>
+            <a href="https://pro.nft-maker.io/" className="block col-span-6 lg:col-span-4 shadow-lg rounded-lg bg-dark-100 p-8 lg:p-16 flex items-center justify-center transform hover:-translate-y-2" rel="nofollow noopener" target="_blank">
+              <img className="w-48" src={NFTMaker} alt="NFT-Maker" />
+            </a>
+            <a href="https://www.vyfi.io/" className="block col-span-6 lg:col-span-4 shadow-lg rounded-lg bg-dark-100 p-8 lg:p-16 flex items-center justify-center transform hover:-translate-y-2" rel="nofollow noopener" target="_blank">
+              <img className="w-32" src={VyFi} alt="VyFi" />
+            </a>
+            <a href="https://cardax.io/" className="block col-span-6 lg:col-span-4 shadow-lg rounded-lg bg-dark-100 p-8 lg:p-16 flex items-center justify-center transform hover:-translate-y-2" rel="nofollow noopener" target="_blank">
+              <img className="w-36" src={Cardax} alt="Cardax" />
             </a>
           </div>
         </section>
       </div>
-      <section id="how-it-works" className="bg-dark-100 px-16 md:px-0">
+      <section id="how-it-works" className="bg-dark-100">
         <h2 className="text-white text-4xl font-bold leading-tight text-center">How it Works</h2>
-        <div className="z-10 relative w-full max-w-5xl px-4 pt-4 pb-8 mx-auto md:px-8 md:pt-16 md:pb-32">
+        <div className="z-10 relative w-full max-w-5xl px-4 pt-4 pb-8 mx-auto lg:px-8 lg:pt-16 lg:pb-32">
           <div className="grid grid-cols-12 py-16 gap-4 place-items-center">
-            <div className="hidden md:block md:col-span-5 px-16 md:px-0">
+            <div className="hidden lg:block lg:col-span-5 px-16 lg:px-0">
               <img className="w-full xl:-ml-24" src={Payment} />
             </div>
-            <div className="col-span-12 md:col-span-7 p-16 shadow-lg bg-dark-200 rounded-lg" id="simple">
+            <div className="col-span-12 lg:col-span-7 p-8 lg:p-16 shadow-lg bg-dark-200 rounded-lg" id="simple">
               <h2 className="inline-block text-white mb-4 text-4xl font-bold leading-tight"><em>Simple &amp; Flexible NFT's on Cardano.</em></h2>
               <div className="text-white">
                 <p>Each Handle is a unique NFT, minted and issued on the Cardano blockchain. These NFTs act as unique identifiers for the UTXO that they reside in.</p>
                 <p>With a predictable standard, dApp developers can query the Cardano blockchain at any time to determine the current residing address of a Handle.</p>
-                <Button animate buttonStyle="secondary" internal link="/mint">Get Your Handle Now! &rarr;</Button>
               </div>
             </div>
           </div>
@@ -92,7 +101,7 @@ function IndexPage() {
           <hr className="w-12 border-dark-300 border-2 block my-8 mx-auto" />
 
           <div className="grid grid-cols-12 py-16 gap-4 place-items-center">
-            <div className="col-span-12 md:col-span-7 p-16 shadow-lg bg-dark-200 rounded-lg" id="simple">
+            <div className="col-span-12 lg:col-span-7 p-8 lg:p-16 shadow-lg bg-dark-200 rounded-lg" id="simple">
               <h2 className="inline-block text-white mb-4 text-4xl font-bold leading-tight"><em>Secured Entirely on Cardano Layer 1</em></h2>
               <div className="text-white">
                 <p>Unlike many other routing services on Ethereum, Handles are secured entirely as native assets on the Cardano blockchain, on the Layer 1 ledger.</p>
@@ -100,42 +109,42 @@ function IndexPage() {
                   will always be accurate — 100% of the time.
                 </p>
                 <p><strong>Now that's reliable.</strong></p>
-                <Button buttonStyle="secondary" internal link="/mint">Purchase a Handle!</Button>
               </div>
             </div>
-            <div className="hidden md:block md:col-span-5 px-16 md:px-0">
-              <img className="w-full xl:ml-24" src={Cardano} />
+            <div className="hidden lg:block lg:col-span-5 px-16 lg:px-0">
+              <img className="w-full xl:ml-24" src={NonCustodial} />
             </div>
           </div>
 
-          <hr className="mx-auto my-16 w-8 h-1 bg-dark-300 block" />
+          <hr className="w-12 border-dark-300 border-2 block my-8 mx-auto" />
 
-          <div className="grid grid-cols-12 py-16 gap-4 content-center">
-            <div className="hidden md:block md:col-span-7 px-16 md:px-0">
-              <img className="w-full xl:-ml-24" src={NonCustodial} />
+          <div className="grid grid-cols-12 py-16 gap-4 place-items-center">
+            <div className="hidden lg:block lg:col-span-5 px-16 lg:px-0">
+              <img className="w-full xl:-ml-24" src={Cardano} />
             </div>
-            <div className="col-span-12 md:col-span-5" id="non-custodial">
-              <h2 className="inline-block text-white mb-4 text-4xl font-bold leading-tight"><em>Non-custodial address resolver.</em></h2>
+            <div className="col-span-12 lg:col-span-7 p-8 lg:p-16 shadow-lg bg-dark-200 rounded-lg" id="simple">
+              <h2 className="inline-block text-white mb-4 text-4xl font-bold leading-tight"><em>A Standard for Upgrades</em></h2>
               <div className="text-white">
-                <p>$handle works completely as an address routing service that lives on the Cardano blockchain. We <strong>never request, see, or interface with your private wallet keys</strong>.</p>
-                <p>Instead, we utilize revolutionary new technology to ensure that we simply return a valid Cardano crypto address whenever a $handle is submitted, either to our web app or our upcoming API.</p>
-                <Button buttonStyle="secondary" internal link="/mint">Purchase a Handle!</Button>
+                <p>The Handle Standard supports version upgrading and backwards compatability. Once a version change happens, Partners are notified of the new version's Policy ID.</p>
+                <p>Lookups happen from most recent Policy ID to the first, incentivizing upgrades among users to ensure faster retrieval results.</p>
+                <p>This allows the Handle Standard to evolve with the broader Cardano ecosystem.</p>
               </div>
             </div>
           </div>
 
-          <hr className="mx-auto my-16 w-8 h-1 bg-dark-300 block" />
+          <hr className="w-12 border-dark-300 border-2 block my-8 mx-auto" />
 
-          <div className="grid grid-cols-12 py-16 gap-4 content-center">
-            <div className="col-span-12 md:col-span-5" id="roadmap">
-              <h2 className="inline-block text-white mb-4 text-4xl font-bold leading-tight"><em>Creating a better crypto experience.</em></h2>
+          <div className="grid grid-cols-12 py-16 gap-4 place-items-center">
+            <div className="col-span-12 lg:col-span-7 p-8 lg:p-16 shadow-lg bg-dark-200 rounded-lg" id="simple">
+              <h2 className="inline-block text-white mb-4 text-4xl font-bold leading-tight"><em>Handle Augmentation<br/> &amp; A Composable Future</em></h2>
               <div className="text-white">
-                <p>$handle abstracts the annoyance of complex wallet addresses and replaces it with a <strong>simple and intuitive solution</strong>.</p>
-                <p>We have big plans, including an slick dApp interface for sending and receiving native Cardano tokens (deployed on launch day), as well as a full-featured public API for websites, wallets, and exchanges to utilize.</p>
-                <Button buttonStyle="secondary" internal link="/mint">Purchase a Handle!</Button>
+                <p>ADA Handle has an in-depth roadmap for the future including a future DAO for governance, and community-voted on Handle Augmentation support.</p>
+                <p>Aside from the countless use-cases for standardized naming (such as an integrated mobile wallet experience similar to Cash App), Handle Augmentation
+                  will allow users to opt-in to additional metadata added to their unique Handle, providing an extendable pattern for Partners to build upon.
+                </p>
               </div>
             </div>
-            <div className="hidden md:block md:col-span-7 px-16 md:px-0">
+            <div className="hidden lg:block lg:col-span-5 px-16 lg:px-0">
               <img className="w-full xl:ml-24" src={Ecosystem} />
             </div>
           </div>

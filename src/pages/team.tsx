@@ -19,7 +19,7 @@ function TeamPage() {
   return (
     <>
       <SEO title="Team" />
-      <section className="mt-16 mb-32 max-w-xl mx-auto">
+      <section className="mb-8 lg:mt-16 lg:mb-32 max-w-xl mx-auto">
         <h2 className="inline-block mb-4 text-4xl text-center font-bold leading-none">
           About the Team
         </h2>
@@ -27,8 +27,8 @@ function TeamPage() {
         of long crypto addresses, and thought things could be more simple (and more extendable) than current solutions.</p>
       </section>
       <section className="my-16 max-w-6xl mx-auto">
-        <div className="grid grid-cols-12 gap-16">
-          <div className="col-12 lg:col-span-4 p-4 lg:p-8 bg-dark-200 rounded-lg shadow-lg">
+        <div className="grid grid-cols-12 lg:gap-16">
+          <div className="mb-4 lg:mb-0 col-span-12 lg:col-span-4 p-4 lg:p-8 bg-dark-200 rounded-lg shadow-lg">
             <div className="flex align-center justify-between">
               <div>
                 <h3 className="text-3xl font-bold">Calvin</h3>
@@ -45,7 +45,7 @@ function TeamPage() {
             community of like-minded crypto enthusiests intent on redefining decentralized media.</p>
             <p>Calvin lives in Boise, Idaho with his wife, Tanya, and has 3 boys.</p>
           </div>
-          <div className="col-12 lg:col-span-4 p-4 lg:p-8 bg-dark-200 rounded-lg shadow-lg">
+          <div className="mb-4 lg:mb-0 col-span-12 lg:col-span-4 p-4 lg:p-8 bg-dark-200 rounded-lg shadow-lg">
             <div className="flex align-center justify-between">
               <div>
                 <h3 className="text-3xl font-bold">Conrad</h3>
@@ -61,7 +61,7 @@ function TeamPage() {
             <p>Conrad is a sports aficionado. When he's not working, you'll catch him on the West Side Highway cycling or skateboarding.</p>
             <p>Originally from São Paulo, Conrad moved to New York in 2011. Conrad is married to Caroline.</p>
           </div>
-          <div className="col-12 lg:col-span-4 p-4 lg:p-8 bg-dark-200 rounded-lg shadow-lg">
+          <div className="mb-4 lg:mb-0 col-span-12 lg:col-span-4 p-4 lg:p-8 bg-dark-200 rounded-lg shadow-lg">
             <div className="flex align-center justify-between">
               <div>
                 <h3 className="text-3xl font-bold">Mr. Goose</h3>

@@ -29,18 +29,17 @@ const navItems: NavItem[] = [
     title: 'Team'
   },
   {
+    route: '/contact',
+    title: 'Contact'
+  },
+  {
     route: 'https://medium.com/ada-handle',
     title: 'Blog',
     external: true
   },
-  {
-    route: '/tou',
-    title: 'Terms of Use'
-  }
 ];
 
 const Header: FC<HeaderProps> = ({ className, showMint = true }) => {
-  const { betaState } = useContext(HandleMintContext);
   const [isExpanded, toggleExpansion] = useState<boolean>(false);
 
   return (
@@ -49,7 +48,7 @@ const Header: FC<HeaderProps> = ({ className, showMint = true }) => {
         <div className="max-w-5xl bg-dark-100 mx-auto flex flex-wrap items-center justify-between">
           <Link to="/">
             <h1 className="flex items-center no-underline">
-              <span className="sr-only">$handle</span>
+              <span className="sr-only">ADA Handle</span>
               <Logo />
             </h1>
           </Link>
@@ -70,8 +69,9 @@ const Header: FC<HeaderProps> = ({ className, showMint = true }) => {
             </button>
 
             <nav
+              onClick={() => toggleExpansion(false)}
               className={`${
-                isExpanded ? `block absolute top-full left-0 p-8 z-50 shadow-lg w-48` : `hidden w-full`
+                isExpanded ? `block absolute bg-dark-200 shadow-lg rounded-lg top-full left-0 px-4 pb-4 z-50 shadow-lg w-48` : `hidden w-full`
               } md:block md:items-center md:w-auto`}
             >
               {navItems.map((link) => {
@@ -98,19 +98,13 @@ const Header: FC<HeaderProps> = ({ className, showMint = true }) => {
               })}
             </nav>
           </div>
-          {showMint && (
-            <Button
-              animate
-              href={'/mint'}
-            >
-              Beta Sale Open! &rarr;
-            </Button>
-          )}
-          {!showMint && betaState && (
-            <p className="text-lg m-0">
-              <span className="font-bold">Handles Minted:</span> {betaState.totalHandles.toLocaleString('en-US')}/15,000
-            </p>
-          )}
+          <Button
+            animate
+            size="small"
+            href={'/mint'}
+          >
+            Beta Sale! &rarr;
+          </Button>
         </div>
       </header>
     </>

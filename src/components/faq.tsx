@@ -29,7 +29,7 @@ const FAQ: FC<FAQProps> = ({ faqs }): JSX.Element => {
                         </button>
                         <div
                             id={`faq-${index}`}
-                            className={`${index === activeIndex ? 'block' : 'hidden'} bg-dark-200 p-4 lg:p-8 rounded-lg shadow-lg`}
+                            className={`${index === activeIndex ? 'block' : 'hidden'} bg-dark-100 p-4 lg:p-8 rounded-lg shadow-lg`}
                             aria-hidden={index === activeIndex ? 'false' : 'true'}>
                             {faq.description()}
                         </div>
