@@ -5,6 +5,8 @@ import SEO from "../components/seo";
 import Calvin from '../images/calvin.jpeg';
 import Goose from '../images/goose.jpeg';
 import Conrad from '../images/conrad.jpeg';
+import BigIrishLion from '../images/bigirishlion.jpeg';
+import PapaGoose from '../images/papagoose.jpeg';
 
 const Twitter = () => (
   <svg className="mt-4 w-8 h-8 block opacity-60 hover:opacity-100" viewBox="0 0 20 20">
@@ -27,6 +29,7 @@ function TeamPage() {
         of long crypto addresses, and thought things could be more simple (and more extendable) than current solutions.</p>
       </section>
       <section className="my-16 max-w-6xl mx-auto">
+        <h3 className="text-white text-3xl text-center mb-8">Founders</h3>
         <div className="grid grid-cols-12 lg:gap-16">
           <div className="mb-4 lg:mb-0 col-span-12 lg:col-span-4 p-4 lg:p-8 bg-dark-200 rounded-lg shadow-lg">
             <div className="flex align-center justify-between">
@@ -78,6 +81,44 @@ function TeamPage() {
             <p>Finding Cardano was a perfect fit for his ethos as he brings a light-hearted yet severely professional approach to negotiation, management, and business trategy.</p>
           </div>
         </div>
+
+        <hr className="w-12 border-dark-300 border-2 block my-8" />
+
+        <h3 className="text-white text-3xl text-center mb-8">Engineers</h3>
+        <div className="grid grid-cols-12 lg:gap-16">
+          <div className="mb-4 lg:mb-0 col-span-12 lg:col-span-4 lg:col-start-3 p-4 lg:p-8 bg-dark-200 rounded-lg shadow-lg">
+            <div className="flex align-center justify-between">
+              <div>
+                <h3 className="text-3xl font-bold">BigIrishLion</h3>
+                <h4 className="uppercase">Full-Stack Engineer</h4>
+                <a href="https://twitter.com/bigirishlion">
+                <Twitter />
+                </a>
+              </div>
+              <img src={BigIrishLion} className="w-20 h-20 rounded-full" />
+            </div>
+            <hr className="w-12 border-dark-300 border-2 block my-8" />
+            <p>BigIrishLion has over 12 years of experience with web and software development with projects ranging from video game sites to archery training mobile applications.</p>
+            <p>He is a Serverless evangelist and is proficient with Amazon Web Services and Google Cloud Platform.</p>
+            <p>In his spare time, he enjoys coding, cooking sourdough bread with his wife Rachelle and being used as a jungle gym for his 3 kids.</p>
+          </div>
+          <div className="mb-4 lg:mb-0 col-span-12 lg:col-span-4 p-4 lg:p-8 bg-dark-200 rounded-lg shadow-lg">
+            <div className="flex align-center justify-between">
+              <div>
+                <h3 className="text-3xl font-bold">Papa Goose</h3>
+                <h4 className="uppercase">Platform Engineer</h4>
+                <a href="https://twitter.com/PapaGooseCrypto">
+                <Twitter />
+                </a>
+              </div>
+              <img src={PapaGoose} className="w-20 h-20 rounded-full" />
+            </div>
+            <hr className="w-12 border-dark-300 border-2 block my-8" />
+            <p>Based in Silicon Valley, this 25-year veteran of coding has spent the last decade in finance tech and platform systems in the great Financial District of San Francisco.</p>
+            <p>Papa Goose spends his free time tricking out Lambda functions, burning up Raspberry Pi boards, and building epic marble runs with his two youngest sons. The feathered fatherly friend also has two fully-grown goslings. One is rumored to be a well-respected Crypto aficionado.</p>
+          </div>
+        </div>
+
       </section>
     </>
   );

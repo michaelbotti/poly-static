@@ -102,7 +102,7 @@ const Form: FC<Form> = ({ subscribe, message, status }): JSX.Element => {
             value={checked ? "Y" : "N"}
           />
           <label className="ml-2 text-white" htmlFor="gdpr">
-            I agree to receive marketing emails. <a href="#mailchimp">*</a>
+            I agree to receive marketing emails.
           </label>
         </div>
       </fieldset>

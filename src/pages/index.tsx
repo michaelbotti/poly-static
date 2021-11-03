@@ -16,6 +16,7 @@ import Ridotto from '../images/RIDOTTO.png';
 import VyFi from '../images/vyfi.png';
 import NFTMaker from '../images/nft-maker.png';
 import Cardax from '../images/cardax.png';
+import WM from '../images/wm.png';
 
 function IndexPage() {
   return (
@@ -63,6 +64,9 @@ function IndexPage() {
             </a>
             <a href="https://b58.finance/" className="block col-span-6 lg:col-span-4 shadow-lg rounded-lg bg-dark-100 p-8 lg:p-16 flex items-center justify-center transform hover:-translate-y-2" rel="nofollow noopener" target="_blank">
               <img className="w-32" src={b58} alt="b58 Finance" />
+            </a>
+            <a href="https://worldmobile.io/" className="block col-span-6 lg:col-span-4 shadow-lg rounded-lg bg-dark-100 p-8 lg:p-16 flex items-center justify-center transform hover:-translate-y-2" rel="nofollow noopener" target="_blank">
+              <img className="w-36" src={WM} alt="World Mobile" />
             </a>
             <a href="https://gerowallet.io/" className="block col-span-6 lg:col-span-4 shadow-lg rounded-lg bg-dark-100 p-8 lg:p-16 flex items-center justify-center transform hover:-translate-y-2" rel="nofollow noopener" target="_blank">
               <img className="w-32" src={Gero} alt="Gero Wallet" />
