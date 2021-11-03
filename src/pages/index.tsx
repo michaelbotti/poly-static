@@ -32,7 +32,7 @@ function IndexPage() {
             </h2>
             <div className="mt-4">
               <p className="text-xl mb-8 lg:pr-8 text-dark-350">
-                An <strong className="underline">NFT-powered</strong> naming solution for your Cardano wallet address, secured entirely on-chain via the Handle Standard<sup>&trade;</sup>.
+                An <strong className="underline">NFT-powered</strong> naming solution for your Cardano wallet address, secured entirely on-chain via the Handle Standard.
               </p>
               <a href="#integrations" className="text-primary-100 text-lg inline-block inline-flex items-center">
                 Learn More
