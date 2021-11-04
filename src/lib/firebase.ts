@@ -1,6 +1,6 @@
 import { initializeApp, FirebaseOptions } from 'firebase/app';
 
-export const config: FirebaseOptions = {
+const config: FirebaseOptions = {
   apiKey: "AIzaSyAjLfhecwnZJyl-lv8FdXasQZGmYEEJ-wc",
   authDomain: "ada-handle-reserve.firebaseapp.com",
   databaseURL: "https://ada-handle-reserve-default-rtdb.firebaseio.com",

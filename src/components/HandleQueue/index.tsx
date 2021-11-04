@@ -144,7 +144,7 @@ export const HandleQueue = (): JSX.Element => {
             }}
           >
             {null === betaState && "Loading..."}
-            {null !== betaState && !betaState.error && `${betaState.chainLoad.toFixed(3)}%`}
+            {null !== betaState && !betaState.error && `${(betaState.chainLoad * 100).toFixed(2)}%`}
             {null !== betaState && betaState.error && "N/A"}
           </span>
         </div>

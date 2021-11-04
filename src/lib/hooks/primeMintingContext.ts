@@ -1,5 +1,5 @@
-import { getFirestore, collection, getDocs } from 'firebase/firestore';
 import { SetStateAction, useContext, useEffect } from 'react';
+import { getFirestore, collection, getDocs } from 'firebase/firestore';
 
 import { HandleMintContext, ReservedHandlesType } from '../../context/mint';
 import { app } from '../firebase';
@@ -21,17 +21,5 @@ export const usePrimeMintingContext = async () => {
 
       setPrimed(true);
     })();
-
-    // // Stay in sync with active sessions by subscribing.
-    // const pendingSessionsRef = getPendingSessionsRef();
-    // const unsubscribePending = onValue(pendingSessionsRef, (snapshot) => {
-    //   if (!snapshot) {
-    //     return;
-    //   }
-
-    //   setPendingSessions(snapshot.val());
-    // });
-
-    // return () => unsubscribePending();
   }, []);
 }
