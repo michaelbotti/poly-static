@@ -1,5 +1,5 @@
 import { Dispatch, SetStateAction, useEffect, useState } from "react";
-import { MAX_SESSION_LENGTH } from "../constants";
+import { MAX_ACCESS_LENGTH, MAX_SESSION_LENGTH } from "../constants";
 
 import { getAccessTokenFromCookie } from "../helpers/session";
 
@@ -12,8 +12,9 @@ export const useAccessOpen = (): [
   useEffect(() => {
     const updateAccess = () => {
       const accessToken = getAccessTokenFromCookie();
+      console.log(accessToken)
 
-      if (accessToken) {
+      if (accessToken && Date.now () - accessToken.data.exp < MAX_ACCESS_LENGTH) {
         setAccessOpen(true);
       } else {
         setAccessOpen(false);
@@ -21,7 +22,7 @@ export const useAccessOpen = (): [
     }
 
     updateAccess();
-    const interval = setInterval(updateAccess, MAX_SESSION_LENGTH);
+    const interval = setInterval(updateAccess, 10000);
 
     return () => clearInterval(interval);
   }, []);

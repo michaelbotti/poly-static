@@ -1,5 +1,3 @@
-export const RESERVE_EXPIRE_DATE = new Date('10/23/2021');
-export const CRON_LENGTH = 60000; // 1 minute
 export const MAX_SESSION_LENGTH = 600000; // 10 minutes
 export const MAX_ACCESS_LENGTH = 1800000; // 30 minutes
 export const AUTH_CODE_EXPIRE = 60000; // 10 minutes

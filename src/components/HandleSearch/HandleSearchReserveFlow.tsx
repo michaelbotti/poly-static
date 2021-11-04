@@ -22,7 +22,6 @@ import { HandleSearchConnectTwitter } from "./";
 import { Loader } from "../Loader";
 import { SessionResponseBody } from '../../../netlify/functions/session';
 import { getAccessTokenFromCookie, getAllCurrentSessionData, getRecaptchaToken, setSessionTokenCookie } from "../../lib/helpers/session";
-import { getActiveSessionUnavailable } from "../../lib/helpers/search";
 
 export const HandleSearchReserveFlow = ({ className = "", ...rest }) => {
   const {
@@ -76,7 +75,10 @@ export const HandleSearchReserveFlow = ({ className = "", ...rest }) => {
     const headers = new Headers();
     headers.append(HEADER_HANDLE, handle);
     headers.append(HEADER_RECAPTCHA, recaptchaToken);
-    headers.append(HEADER_JWT_ACCESS_TOKEN, getAccessTokenFromCookie());
+    const accessToken = getAccessTokenFromCookie();
+    if (accessToken) {
+      headers.append(HEADER_JWT_ACCESS_TOKEN, accessToken.token);
+    }
 
     /**
      * Add a Twitter auth token to verify on the server. This is
@@ -86,12 +88,6 @@ export const HandleSearchReserveFlow = ({ className = "", ...rest }) => {
     if (twitterToken) {
       headers.append(HEADER_TWITTER_ACCESS_TOKEN, twitterToken);
     }
-
-    // // Check pending sessions.
-    // if (pendingSessions && pendingSessions.includes(handle)) {
-    //   setHandleResponse(getActiveSessionUnavailable());
-    //   return;
-    // }
 
     try {
       setFetchingSession(true);

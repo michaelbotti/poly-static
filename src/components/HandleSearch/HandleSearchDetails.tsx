@@ -12,10 +12,10 @@ export const HandleDetails = (): JSX.Element => {
   return (
     <h4 className="text-xl">
       {handle.length === 0 ? (
-        <span className="font-bold text-xl">Rarity / Price</span>
+        <span className="text-xl">Rarity / Price</span>
       ) : (
         <span className="font-bold text-xl">
-          <span style={{ color: hex }}>{slug}</span> / {cost} ₳
+          <span style={{ color: hex }}>{slug}</span> / {cost ? `${cost} ₳` : 'Auction Only'}
         </span>
       )}
     </h4>

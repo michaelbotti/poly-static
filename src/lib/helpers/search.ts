@@ -1,4 +1,5 @@
 const RESPONSE_UNAVAILABLE_DEFAULT = 'Sorry! This handle is unavailable.';
+const RESPONSE_UNAVAILABLE_TWITTER = 'Reserved! Please unlock with Twitter below.';
 const RESPONSE_AVAILABLE_DEFAULT = 'Yay! This handle is available.';
 const RESPONSE_BETA_PHASE_UNAVAILABLE = 'Legendary handles are not available yet.';
 const RESPONSE_ACTIVE_SESSION_UNAVAILABLE = 'Pending purchase. Try again soon!';
@@ -42,7 +43,7 @@ export const getTwitterResponseAvailable = (link?: string): HandleResponseBody =
 });
 
 export const getTwitterResponseUnvailable = (link?: string): HandleResponseBody => ({
-    message: RESPONSE_UNAVAILABLE_DEFAULT,
+    message: RESPONSE_UNAVAILABLE_TWITTER,
     available: false,
     twitter: true,
     link

@@ -13,13 +13,13 @@ import { Link } from "gatsby";
 import { HandleMintContext } from "../../context/mint";
 
 const getResponseMessage = (count: number): string => {
-  if (count < 50) {
-    return `Don't go anywhere, you are ${
+  if (count < 20) {
+    return `You are ${
       count === 0 ? "first" : `#${count}`
-    } in line and part of the next batch! Auth codes can take up to 5 minutes to arrive.`;
+    } in line and part of the next batch! Auth codes can take up to 5 minutes to arrive, so feel free to come back.`;
   }
 
-  if (count > 50 && count < 200) {
+  if (count > 20 && count < 200) {
     return `You are #${count} in line. Estimated wait time is between 30 minutes and 2 hours.`;
   }
 
@@ -74,7 +74,6 @@ export const HandleQueue = (): JSX.Element => {
 
     if (res.updated) {
       const message = getResponseMessage(res.position);
-      res.position < 50 && setAction("auth");
       setResponseMessage(message);
     } else {
       setTimeoutResponseMessage(res?.message || "That didn't work. Try again.");
@@ -114,7 +113,7 @@ export const HandleQueue = (): JSX.Element => {
 
       const { error, verified, message, token, data } = res;
       if (!error && verified && token && data) {
-        setAccessTokenCookie(token, data.exp);
+        setAccessTokenCookie(res, data.exp);
         setAccessOpen(true);
         window.location.reload();
       }
@@ -197,6 +196,7 @@ export const HandleQueue = (): JSX.Element => {
           } focus:ring-0 focus:ring-opacity-0 border-2 outline-none form-input bg-dark-100 border-dark-300 px-6 py-4 text-xl w-full appearance-none`}
           defaultCountry="US"
           value={phoneInput}
+          // @ts-ignore
           onChange={setPhoneInput}
         />
         {"auth" === action && (
@@ -258,7 +258,9 @@ export const HandleQueue = (): JSX.Element => {
           {!authenticating && !savingSpot && "Submit"}
         </Button>
       </form>
-      {responseMessage && <p className="my-2">{responseMessage}</p>}
+      {responseMessage && (
+        <p className="my-2 text-xl font-bold">{responseMessage}</p>
+      )}
     </>
   );
 };

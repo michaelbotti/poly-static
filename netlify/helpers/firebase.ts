@@ -64,7 +64,7 @@ export const getMintedHandles = async (): Promise<string[] | false> => {
 export const getReservedHandles = async (): Promise<ReservedHandlesType | false> => {
   return firebase
     .firestore()
-    .collection(buildCollectionNameWithSuffix("/reservedHandles"))
+    .collection("reservedHandles")
     .get()
     .then(snapshot => {
       if (snapshot.empty) {

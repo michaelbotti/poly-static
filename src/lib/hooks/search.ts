@@ -48,9 +48,14 @@ export const useSyncAvailableStatus = async (unsanitizedHandle: string) => {
     (async () => {
       setFetching(true);
       const accessToken = getAccessTokenFromCookie();
+
+      if (!accessToken) {
+        return;
+      }
+
       const headers: HeadersInit = {
         [HEADER_HANDLE]: handle,
-        [HEADER_JWT_ACCESS_TOKEN]: accessToken
+        [HEADER_JWT_ACCESS_TOKEN]: accessToken.token
       };
 
       // Search on-chain.
