@@ -2,7 +2,7 @@ import React from "react";
 
 import SEO from "../components/seo";
 
-import Calvin from '../images/calvin.jpeg';
+import Calvin from '../images/calvin.png';
 import Goose from '../images/goose.jpeg';
 import Conrad from '../images/conrad.jpeg';
 import BigIrishLion from '../images/bigirishlion.jpeg';
