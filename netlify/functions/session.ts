@@ -15,15 +15,11 @@ import {
   HEADER_JWT_ACCESS_TOKEN,
   HEADER_JWT_SESSION_TOKEN
 } from "../../src/lib/constants";
-import {
-  ActiveSessionType,
-  ReservedHandlesType,
-} from "../../src/context/mint";
 import { fetchNodeApp } from '../helpers/util';
 import { getRarityCost, isValid, normalizeNFTHandle } from "../../src/lib/helpers/nfts";
 import { getSecret } from "../helpers";
 import { verifyTwitterUser } from "../helpers";
-import { getActiveSessionUnavailable, HandleResponseBody } from "../../src/lib/helpers/search";
+import { HandleResponseBody } from "../../src/lib/helpers/search";
 import { getActiveSessions, getReservedHandles, initFirebase } from "../helpers/firebase";
 
 export interface NodeSessionResponseBody {
@@ -160,34 +156,6 @@ const handler: Handler = async (
       };
     }
   }
-
-  // // Ping pending sessions.
-  // let pendingSessionCutLine = false;
-  // await database
-  //   .ref("/pendingSessions")
-  //     .transaction((snapshot: string[] | null) => {
-  //       if (!snapshot) {
-  //         return [handle];
-  //       }
-
-  //       if (snapshot.includes(handle)) {
-  //         pendingSessionCutLine = true;
-  //         return snapshot;
-  //       }
-
-  //       return [
-  //         ...snapshot,
-  //         handle
-  //       ];
-  //   });
-
-  // if (pendingSessionCutLine) {
-  //   return {
-  //     statusCode: 403,
-  //     body: JSON.stringify(getActiveSessionUnavailable())
-  //   }
-  // }
-
 
   /**
    * We sign a session JWT tokent to authorize the purchase,
