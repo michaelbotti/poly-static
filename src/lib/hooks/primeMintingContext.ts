@@ -1,8 +1,6 @@
 import { SetStateAction, useContext, useEffect } from 'react';
-import { getFirestore, collection, getDocs } from 'firebase/firestore';
 
 import { HandleMintContext, ReservedHandlesType } from '../../context/mint';
-import { app } from '../firebase';
 import { useAccessOpen } from './access';
 import { HEADER_JWT_ACCESS_TOKEN } from '../constants';
 import { getAccessTokenFromCookie } from '../helpers/session';
