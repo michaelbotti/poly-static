@@ -9,10 +9,8 @@ export const RECAPTCHA_SITE_KEY = '6Ld0QUkcAAAAAN-_KvCv8R_qke8OYxotNJzIg2RP';
 // Keys
 export const COOKIE_SESSION_PREFIX = 'CURRENT_HANDLE_SESSION';
 export const COOKIE_ACCESS_KEY = 'ADAHANDLE_HAS_ACCESS';
-export const IP_ADDRESS_KEY ='ADAHANDLE_IP_ADDRESS';
 
 // Headers.
-export const HEADER_IP_ADDRESS = 'x-ip-address';
 export const HEADER_HANDLE = 'x-handle';
 export const HEADER_RECAPTCHA = 'x-recaptcha';
 export const HEADER_TWITTER_ACCESS_TOKEN = 'x-twitter-token';
