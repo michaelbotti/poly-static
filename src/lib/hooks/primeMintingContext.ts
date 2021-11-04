@@ -10,9 +10,14 @@ export const usePrimeMintingContext = async () => {
   const [accessOpen] = useAccessOpen();
 
   useEffect(() => {
+    fetch('/.netlify/functions/queue').catch();
+    fetch('/.netlify/functions/verify').catch();
+
+    if (!accessOpen) {
+      return;
+    }
+
     (async () => {
-      fetch('/.netlify/functions/queue').catch();
-      fetch('/.netlify/functions/verify').catch();
 
       const accessToken = getAccessTokenFromCookie();
       if (accessOpen && accessToken && !reservedHandles) {
