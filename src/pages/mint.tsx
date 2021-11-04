@@ -31,7 +31,6 @@ function MintPage() {
     setPaymentSessions(getAllCurrentSessionData());
   }
 
-
   return (
     <>
       <SEO title="Mint" />
