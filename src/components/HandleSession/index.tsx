@@ -44,6 +44,12 @@ export const HandleSession = ({
 
   // Check current session payment status.
   useEffect(() => {
+    const accessToken = getAccessTokenFromCookie();
+
+    if (!accessToken) {
+      return;
+    }
+
     const controller = new AbortController();
     const updatePaymentStatus = async () => {
       await fetch(
@@ -51,7 +57,7 @@ export const HandleSession = ({
         {
           signal: controller.signal,
           headers: {
-            [HEADER_JWT_ACCESS_TOKEN]: getAccessTokenFromCookie(),
+            [HEADER_JWT_ACCESS_TOKEN]: accessToken.token,
             [HEADER_JWT_SESSION_TOKEN]: sessionData.token
           }
         }
