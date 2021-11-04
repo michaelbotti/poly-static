@@ -24,3 +24,9 @@ export const fetchNodeApp = async (
     }
   )
 }
+
+export const isProduction = () =>
+  process.env.NODE_ENV === 'production' || process.env.NODE_ENV === 'master';
+
+export const buildCollectionNameWithSuffix = (collectionName: string): string =>
+  isProduction() ? collectionName : `${collectionName}_dev`;

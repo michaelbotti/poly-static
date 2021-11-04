@@ -1,6 +1,7 @@
 import admin from "firebase-admin";
 import { ActiveSessionType, ReservedHandlesType } from "../../src/context/mint";
 import { getS3 } from "./aws";
+import { buildCollectionNameWithSuffix } from "./util";
 
 let firebase: admin.app.App;
 export const initFirebase = async (): Promise<admin.app.App> => {
@@ -41,10 +42,29 @@ export const verifyTwitterUser = async (token: string): Promise<number | false> 
   }
 }
 
+export const getMintedHandles = async (): Promise<string[] | false> => {
+  return firebase
+    .firestore()
+    .collection(buildCollectionNameWithSuffix("/mintedHandles"))
+    .get()
+    .then(snapshot => {
+      if (snapshot.empty) {
+        return false;
+      }
+
+      const handles = snapshot?.docs?.map(doc => doc?.data() as string[]);
+      if (handles.length === 0) {
+        return false;
+      }
+
+      return handles[0];
+    });
+}
+
 export const getReservedHandles = async (): Promise<ReservedHandlesType | false> => {
   return firebase
     .firestore()
-    .collection("/reservedHandles")
+    .collection(buildCollectionNameWithSuffix("/reservedHandles"))
     .get()
     .then(snapshot => {
       if (snapshot.empty) {
@@ -63,7 +83,7 @@ export const getReservedHandles = async (): Promise<ReservedHandlesType | false>
 export const getActiveSessions = async (): Promise<ActiveSessionType[] | false> => {
   return firebase
     .firestore()
-    .collection("/activeSessions")
+    .collection(buildCollectionNameWithSuffix("/activeSessions"))
     .get()
     .then(snapshot => {
       if (snapshot.empty) {
@@ -78,7 +98,7 @@ export const getActiveSessions = async (): Promise<ActiveSessionType[] | false> 
 export const getPaidSessions = async (): Promise<ActiveSessionType[] | false> => {
   return firebase
     .firestore()
-    .collection("/paidSessions")
+    .collection(buildCollectionNameWithSuffix("/paidSessions"))
     .get()
     .then(snapshot => {
       if (snapshot.empty) {

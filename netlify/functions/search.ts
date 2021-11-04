@@ -19,8 +19,7 @@ import {
   HEADER_HANDLE,
   HEADER_JWT_ACCESS_TOKEN,
 } from "../../src/lib/constants";
-import { ReservedHandlesType } from "../../src/context/mint";
-import { getActiveSessions, getPaidSessions, getReservedHandles, initFirebase } from "../helpers/firebase";
+import { getActiveSessions, getMintedHandles, getPaidSessions, getReservedHandles, initFirebase } from "../helpers/firebase";
 import { fetchNodeApp } from "../helpers/util";
 import { decode } from "querystring";
 
@@ -45,10 +44,11 @@ const handler: Handler = async (
     };
   }
 
-  const firebase = await initFirebase();
+  await initFirebase();
 
   const handle = normalizeNFTHandle(headerHandle);
   const activeSessions = await getActiveSessions();
+  const mintedHandles = await getMintedHandles();
 
   const { phoneNumber } = decode(headerAccess);
   if (
@@ -127,7 +127,10 @@ const handler: Handler = async (
     };
   }
 
-  if (reservedHandles && reservedHandles?.blacklist?.includes(handle)) {
+  if (
+    (reservedHandles && reservedHandles?.blacklist?.includes(handle)) ||
+    (mintedHandles && mintedHandles?.includes(handle))
+  ) {
     return {
       statusCode: 403,
       body: JSON.stringify(getDefaultResponseUnvailable()),
