@@ -1,8 +1,6 @@
 import { fetch } from 'cross-fetch';
 
-export const getNodeEndpointUrl = () => process.env.NODE_ENV !== 'production'
-  ? process.env.NODEJS_APP_TESTNET_URL
-  : process.env.NODEJS_APP_MAINNET_URL
+export const getNodeEndpointUrl = () => process.env.NODEJS_APP_ENDPOINT;
 
 export const fetchNodeApp = async (
   endpoint: string,
