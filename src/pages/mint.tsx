@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext, useEffect, useMemo, useState } from "react";
 
 import { HandleMintContext } from "../context/mint";
 import { usePrimeMintingContext } from "../lib/hooks/primeMintingContext";
@@ -9,15 +9,16 @@ import { HandleSearchReserveFlow } from "../components/HandleSearch";
 import { Loader } from "../components/Loader";
 import NFTPreview from "../components/NFTPreview";
 import { HandleQueue } from "../components/HandleQueue";
-import { getAllCurrentSessionData, getSessionTokenFromCookie } from "../lib/helpers/session";
+import { getAccessTokenFromCookie, getAllCurrentSessionData, getSessionTokenFromCookie } from "../lib/helpers/session";
 import { HandleSession } from "../components/HandleSession";
 import { HandleNavigation } from "../components/HandleNavigation";
 import { SessionResponseBody } from "../../netlify/functions/session";
+import Countdown from "react-countdown";
 
 function MintPage() {
   const { primed, handle, currentIndex, betaState } = useContext(HandleMintContext);
   const [paymentSessions, setPaymentSessions] = useState<(false | SessionResponseBody)[]>();
-  const [accessOpen] = useAccessOpen();
+  const [accessOpen, setAccessOpen] = useAccessOpen();
 
   useEffect(() => {
     setPaymentSessions(getAllCurrentSessionData());
@@ -25,6 +26,7 @@ function MintPage() {
 
   usePrimeMintingContext();
 
+  const currentAccess = useMemo(() => getAccessTokenFromCookie(), [currentIndex]);
   const currentSession = currentIndex > 0 ? getSessionTokenFromCookie(currentIndex) as SessionResponseBody : null;
 
   const refreshPaymentSessions = () => {
@@ -35,6 +37,17 @@ function MintPage() {
     <>
       <SEO title="Mint" />
       <section id="top" className="max-w-5xl mx-auto">
+        {currentAccess && (
+          <Countdown
+            onComplete={() => setAccessOpen(false)}
+            date={new Date(currentAccess.data.exp * 1000)}
+            renderer={({ formatted }) => {
+              return (
+                <p className="text-white text-right">Access Expires: {formatted.minutes}:{formatted.seconds}</p>
+              )
+            }}
+          />
+        )}
         <HandleNavigation paymentSessions={paymentSessions} updatePaymentSessions={refreshPaymentSessions} />
         <div
           className="grid grid-cols-12 gap-4 lg:gap-8 bg-dark-200 rounded-lg rounded-tl-none place-content-start p-4 lg:p-8 mb-16"

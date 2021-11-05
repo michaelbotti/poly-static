@@ -1,7 +1,6 @@
 import React, { useContext } from 'react';
-import Countdown from 'react-countdown';
 import { HandleMintContext } from '../../context/mint';
-import { getAccessTokenFromCookie, getSessionTokenFromCookie } from '../../lib/helpers/session';
+import { getSessionTokenFromCookie } from '../../lib/helpers/session';
 import { useAccessOpen } from '../../lib/hooks/access';
 
 export const HandleNavigation = ({
@@ -15,7 +14,6 @@ export const HandleNavigation = ({
     return null;
   }
 
-  const accessToken = getAccessTokenFromCookie();
   return (
     <div className="flex justify-start place-content-center relative">
       <div className={`absolute bg-primary-100 w-8 h-8 flex items-center justify-center rounded-full -top-2 -left-2 z-10`}>
@@ -25,19 +23,6 @@ export const HandleNavigation = ({
         onClick={() => setCurrentIndex(0)}
         className={`${currentIndex !== 0 ? 'opacity-40' : ''} bg-dark-200 flex-inline items-center justify-center px-4 py-2 rounded-t-lg mr-4 relative`}
       >
-        {accessToken && (
-          <Countdown
-            onComplete={() => setCurrentIndex(0)}
-            date={accessToken.data.exp}
-            renderer={({ formatted, total }) => {
-              const isWarning = total < 120 * 1000;
-
-              return (
-                <p className="absolute top-0 left-0 w-full -transform-y-100">Time Left: {formatted.minutes}:{formatted.seconds}</p>
-              )
-            }}
-          />
-        )}
         <h4 className="text-lg p-4">Mint a Handle!</h4>
       </button>
       {paymentSessions && paymentSessions.map((session, index) => {
