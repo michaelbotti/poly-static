@@ -24,8 +24,8 @@ function MintPage() {
                   seconds
                 }) => (
                   <>
-                    {days && <><span className="text-5xl lg:text-jumbo block">{days} Days</span></>}
-                    <span className="text-3xl mt-2 lg:mt-0 lg:text-5xl text-primary-200 block">
+                    <span className="text-dark-350 font-normal text-2xl uppercase inline-block mb-8 tracking-wider">Time Till Launch</span>
+                    <span className="text-3xl my-2 lg:mt-0 lg:text-jumbo text-primary-200 block">
                       {zeroPad(hours)}h, {zeroPad(minutes)}m, {zeroPad(seconds)}s
                     </span>
                   </>
