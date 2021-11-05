@@ -215,42 +215,42 @@ export const HandleQueue = (): JSX.Element => {
                   value={authInput}
                   className={`focus:ring-0 focus:ring-opacity-0 border-2 outline-none form-input bg-dark-100 border-dark-300 px-6 py-4 text-xl w-full appearance-none`}
                 />
+                <div className="flex items-center text-sm bg-dark-100 border-dark-300 border-l-2 border-r-2 p-4 pb-0">
+                  <input
+                    className="form-checkbox p-2 text-primary-200 rounded focus:ring-primary-200 cursor-pointer"
+                    id="tou"
+                    name="tou"
+                    type="checkbox"
+                    checked={touChecked}
+                    onChange={() => setTouChecked(!touChecked)}
+                  />
+                  <label className="ml-2 text-white py-3 cursor-pointer" htmlFor="tou">
+                    I have read and agree to the ADA Handle {" "}
+                    <Link to="/tou" className="text-primary-100">
+                      Terms of Use
+                    </Link>
+                  </label>
+                </div>
+                <div className="flex items-center text-sm bg-dark-100 border-dark-300 border-l-2 border-r-2 p-4 pt-0">
+                  <input
+                    className="form-checkbox p-2 text-primary-200 rounded focus:ring-primary-200 cursor-pointer"
+                    id="refunds"
+                    name="refunds"
+                    type="checkbox"
+                    checked={refundsChecked}
+                    onChange={() => setRefundsChecked(!refundsChecked)}
+                  />
+                  <label className="ml-2 text-white py-3 cursor-pointer" htmlFor="refunds">
+                    I understand <strong className="underline">refunds will take up to 14 days to process!</strong>
+                  </label>
+                </div>
               </>
             )}
-            <div className="flex items-center text-sm bg-dark-100 border-dark-300 border-l-2 border-r-2 p-4 pb-0">
-              <input
-                className="form-checkbox p-2 text-primary-200 rounded focus:ring-primary-200 cursor-pointer"
-                id="tou"
-                name="tou"
-                type="checkbox"
-                checked={touChecked}
-                onChange={() => setTouChecked(!touChecked)}
-              />
-              <label className="ml-2 text-white py-3 cursor-pointer" htmlFor="tou">
-                I have read and agree to the ADA Handle {" "}
-                <Link to="/tou" className="text-primary-100">
-                  Terms of Use
-                </Link>
-              </label>
-            </div>
-            <div className="flex items-center text-sm bg-dark-100 border-dark-300 border-l-2 border-r-2 p-4 pt-0">
-              <input
-                className="form-checkbox p-2 text-primary-200 rounded focus:ring-primary-200 cursor-pointer"
-                id="refunds"
-                name="refunds"
-                type="checkbox"
-                checked={refundsChecked}
-                onChange={() => setRefundsChecked(!refundsChecked)}
-              />
-              <label className="ml-2 text-white py-3 cursor-pointer" htmlFor="refunds">
-                I understand <strong className="underline">refunds will take up to 14 days to process!</strong>
-              </label>
-            </div>
             <Button
               className={`w-full rounded-t-none`}
               buttonStyle={"primary"}
               type="submit"
-              disabled={authenticating || savingSpot || !touChecked || !refundsChecked}
+              disabled={authenticating || savingSpot || ("auth" === action && (!touChecked || !refundsChecked))}
               onClick={
                 touChecked && refundsChecked && "auth" === action
                   ? handleAuthenticating
