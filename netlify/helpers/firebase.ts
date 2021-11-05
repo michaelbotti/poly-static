@@ -42,7 +42,7 @@ export const verifyTwitterUser = async (token: string): Promise<number | false> 
   }
 }
 
-export const getMintedHandles = async (): Promise<string[] | false> => {
+export const getMintedHandles = async (): Promise<{ handleName: string }[] | false> => {
   return firebase
     .firestore()
     .collection(buildCollectionNameWithSuffix("/mintedHandles"))
@@ -52,12 +52,12 @@ export const getMintedHandles = async (): Promise<string[] | false> => {
         return false;
       }
 
-      const handles = snapshot?.docs?.map(doc => doc?.data() as string[]);
+      const handles = snapshot?.docs?.map(doc => doc?.data() as { handleName: string });
       if (handles.length === 0) {
         return false;
       }
 
-      return handles[0];
+      return handles;
     });
 }
 

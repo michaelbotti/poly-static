@@ -12,9 +12,7 @@ export const useAccessOpen = (): [
   useEffect(() => {
     const updateAccess = () => {
       const accessToken = getAccessTokenFromCookie();
-      console.log(accessToken)
-
-      if (accessToken && Date.now () - accessToken.data.exp < MAX_ACCESS_LENGTH) {
+      if (accessToken && accessToken.data.exp * 1000 > (Date.now() - MAX_ACCESS_LENGTH)) {
         setAccessOpen(true);
       } else {
         setAccessOpen(false);

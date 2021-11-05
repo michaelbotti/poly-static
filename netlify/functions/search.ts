@@ -129,7 +129,7 @@ const handler: Handler = async (
 
   if (
     (reservedHandles && reservedHandles?.blacklist?.includes(handle)) ||
-    (mintedHandles && mintedHandles?.includes(handle))
+    (mintedHandles && mintedHandles?.some(({ handleName }) => handleName === handle))
   ) {
     return {
       statusCode: 403,

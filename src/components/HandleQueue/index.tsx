@@ -16,7 +16,7 @@ const getResponseMessage = (count: number): string => {
   if (count < 20) {
     return `You are ${
       count === 0 ? "first" : `#${count}`
-    } in line and part of the next batch! Auth codes can take up to 5 minutes to arrive, so feel free to come back.`;
+    } in line and part of the next batch! Auth codes are NOT sent immediately, so feel free to come back.`;
   }
 
   if (count > 20 && count < 200) {
@@ -31,6 +31,7 @@ export const HandleQueue = (): JSX.Element => {
   const [savingSpot, setSavingSpot] = useState<boolean>(false);
   const [authenticating, setAuthenticating] = useState<boolean>(false);
   const [action, setAction] = useState<"save" | "auth">("save");
+  const [submitted, setSubmitted] = useState<boolean>(false);
   const [responseMessage, setResponseMessage] = useState<string>(null);
   const [phoneInput, setPhoneInput] = useState<string>("");
   const [authInput, setAuthInput] = useState<string>("");
@@ -75,6 +76,7 @@ export const HandleQueue = (): JSX.Element => {
     if (res.updated) {
       const message = getResponseMessage(res.position);
       setResponseMessage(message);
+      setSubmitted(true);
     } else {
       setTimeoutResponseMessage(res?.message || "That didn't work. Try again.");
     }
@@ -159,105 +161,109 @@ export const HandleQueue = (): JSX.Element => {
       <h3 className="text-2xl text-white text-center mb-4">
         Register Your Spot
       </h3>
-      <div className="flex align-center justify-stretch bg-dark-200 rounded-t-lg border-2 border-b-0 border-dark-300">
-        <button
-          onClick={() => {
-            setAuthInput("");
-            setAction("save");
-          }}
-          className={`text-white text-center p-4 w-1/2 rounded-lg rounded-r-none rounded-bl-none border-b-4 ${
-            "save" === action
-              ? "border-primary-100"
-              : "opacity-80 border-dark-200"
-          }`}
-        >
-          Enter Queue
-        </button>
-        <button
-          onClick={() => {
-            setAction("auth");
-          }}
-          className={`text-white text-center p-4 w-1/2 rounded-lg rounded-l-none rounded-br-none border-b-4 ${
-            "auth" === action
-              ? "border-primary-100"
-              : "opacity-80 border-dark-200"
-          }`}
-        >
-          Authenticate
-        </button>
-      </div>
-      <form onSubmit={(e) => e.preventDefault()} ref={form} className="bg-dark-100 border-dark-300">
-        <PhoneInput
-          name="phone"
-          disabled={savingSpot}
-          placeholder={"Your mobile number..."}
-          className={`${
-            "auth" === action ? "rounded-none border-b-0" : ""
-          } focus:ring-0 focus:ring-opacity-0 border-2 outline-none form-input bg-dark-100 border-dark-300 px-6 py-4 text-xl w-full appearance-none`}
-          defaultCountry="US"
-          value={phoneInput}
-          // @ts-ignore
-          onChange={setPhoneInput}
-        />
-        {"auth" === action && (
-          <>
-            <input
-              name="auth"
-              data-lpignore="true"
-              disabled={authenticating}
-              placeholder={"Your 6 digit code..."}
-              type="number"
-              onChange={(e) => setAuthInput(e.target.value)}
-              value={authInput}
-              className={`focus:ring-0 focus:ring-opacity-0 border-2 outline-none form-input bg-dark-100 border-dark-300 px-6 py-4 text-xl w-full appearance-none`}
+      {!submitted && (
+        <>
+          <div className="flex align-center justify-stretch bg-dark-200 rounded-t-lg border-2 border-b-0 border-dark-300">
+            <button
+              onClick={() => {
+                setAuthInput("");
+                setAction("save");
+              }}
+              className={`text-white text-center p-4 w-1/2 rounded-lg rounded-r-none rounded-bl-none border-b-4 ${
+                "save" === action
+                  ? "border-primary-100"
+                  : "opacity-80 border-dark-200"
+              }`}
+            >
+              Enter Queue
+            </button>
+            <button
+              onClick={() => {
+                setAction("auth");
+              }}
+              className={`text-white text-center p-4 w-1/2 rounded-lg rounded-l-none rounded-br-none border-b-4 ${
+                "auth" === action
+                  ? "border-primary-100"
+                  : "opacity-80 border-dark-200"
+              }`}
+            >
+              Authenticate
+            </button>
+          </div>
+          <form onSubmit={(e) => e.preventDefault()} ref={form} className="bg-dark-100 border-dark-300">
+            <PhoneInput
+              name="phone"
+              disabled={savingSpot}
+              placeholder={"Your mobile number..."}
+              className={`${
+                "auth" === action ? "rounded-none border-b-0" : ""
+              } focus:ring-0 focus:ring-opacity-0 border-2 outline-none form-input bg-dark-100 border-dark-300 px-6 py-4 text-xl w-full appearance-none`}
+              defaultCountry="US"
+              value={phoneInput}
+              // @ts-ignore
+              onChange={setPhoneInput}
             />
-          </>
-        )}
-        <div className="flex items-center text-sm bg-dark-100 border-dark-300 border-l-2 border-r-2 p-4 pb-0">
-          <input
-            className="form-checkbox p-2 text-primary-200 rounded focus:ring-primary-200 cursor-pointer"
-            id="tou"
-            name="tou"
-            type="checkbox"
-            checked={touChecked}
-            onChange={() => setTouChecked(!touChecked)}
-          />
-          <label className="ml-2 text-white py-3 cursor-pointer" htmlFor="tou">
-            I have read and agree to the ADA Handle {" "}
-            <Link to="/tou" className="text-primary-100">
-              Terms of Use
-            </Link>
-          </label>
-        </div>
-        <div className="flex items-center text-sm bg-dark-100 border-dark-300 border-l-2 border-r-2 p-4 pt-0">
-          <input
-            className="form-checkbox p-2 text-primary-200 rounded focus:ring-primary-200 cursor-pointer"
-            id="refunds"
-            name="refunds"
-            type="checkbox"
-            checked={refundsChecked}
-            onChange={() => setRefundsChecked(!refundsChecked)}
-          />
-          <label className="ml-2 text-white py-3 cursor-pointer" htmlFor="refunds">
-            I understand <strong className="underline">refunds will take up to 14 days to process!</strong>
-          </label>
-        </div>
-        <Button
-          className={`w-full rounded-t-none`}
-          buttonStyle={"primary"}
-          type="submit"
-          disabled={authenticating || savingSpot || !touChecked || !refundsChecked}
-          onClick={
-            touChecked && refundsChecked && "auth" === action
-              ? handleAuthenticating
-              : handleSaving
-          }
-        >
-          {authenticating && "Authenticating..."}
-          {savingSpot && "Entering queue..."}
-          {!authenticating && !savingSpot && "Submit"}
-        </Button>
-      </form>
+            {"auth" === action && (
+              <>
+                <input
+                  name="auth"
+                  data-lpignore="true"
+                  disabled={authenticating}
+                  placeholder={"Your 6 digit code..."}
+                  type="number"
+                  onChange={(e) => setAuthInput(e.target.value)}
+                  value={authInput}
+                  className={`focus:ring-0 focus:ring-opacity-0 border-2 outline-none form-input bg-dark-100 border-dark-300 px-6 py-4 text-xl w-full appearance-none`}
+                />
+              </>
+            )}
+            <div className="flex items-center text-sm bg-dark-100 border-dark-300 border-l-2 border-r-2 p-4 pb-0">
+              <input
+                className="form-checkbox p-2 text-primary-200 rounded focus:ring-primary-200 cursor-pointer"
+                id="tou"
+                name="tou"
+                type="checkbox"
+                checked={touChecked}
+                onChange={() => setTouChecked(!touChecked)}
+              />
+              <label className="ml-2 text-white py-3 cursor-pointer" htmlFor="tou">
+                I have read and agree to the ADA Handle {" "}
+                <Link to="/tou" className="text-primary-100">
+                  Terms of Use
+                </Link>
+              </label>
+            </div>
+            <div className="flex items-center text-sm bg-dark-100 border-dark-300 border-l-2 border-r-2 p-4 pt-0">
+              <input
+                className="form-checkbox p-2 text-primary-200 rounded focus:ring-primary-200 cursor-pointer"
+                id="refunds"
+                name="refunds"
+                type="checkbox"
+                checked={refundsChecked}
+                onChange={() => setRefundsChecked(!refundsChecked)}
+              />
+              <label className="ml-2 text-white py-3 cursor-pointer" htmlFor="refunds">
+                I understand <strong className="underline">refunds will take up to 14 days to process!</strong>
+              </label>
+            </div>
+            <Button
+              className={`w-full rounded-t-none`}
+              buttonStyle={"primary"}
+              type="submit"
+              disabled={authenticating || savingSpot || !touChecked || !refundsChecked}
+              onClick={
+                touChecked && refundsChecked && "auth" === action
+                  ? handleAuthenticating
+                  : handleSaving
+              }
+            >
+              {authenticating && "Authenticating..."}
+              {savingSpot && "Entering queue..."}
+              {!authenticating && !savingSpot && "Submit"}
+            </Button>
+          </form>
+        </>
+      )}
       {responseMessage && (
         <p className="my-2 text-xl font-bold">{responseMessage}</p>
       )}
