@@ -39,16 +39,15 @@ const NFTPreview: FC<NFTPreviewProps> = ({
           {showHeader && <p className="m-0 text-center">Your NFT Preview</p>}
           {showPrice && (
             <div className="text-center mt-2 mb-8">
-              <HandleDetails />
+              <HandleDetails handle={handle} />
             </div>
           )}
         </>
       )}
       <div className="flex justify-center h-full w-full">
         <div
-          className={`${
-            handle.length > 0 ? "" : "opacity-50"
-          } bg-dark-100 text-white relative overflow-hidden mx-auto w-96 h-96 max-w-full max-h-full border border-2 border-dark-200 shadow-xl rounded-lg`}
+          className={`${handle.length > 0 ? "" : "opacity-50"
+            } bg-dark-100 text-white relative overflow-hidden mx-auto w-96 h-96 max-w-full max-h-full border border-2 border-dark-200 shadow-xl rounded-lg`}
         >
           <img
             src={Background}
