@@ -23,12 +23,8 @@ function MintPage() {
   const [accessOpen, setAccessOpen] = useAccessOpen();
 
   useEffect(() => {
-    const controller = new AbortController();
-
     const updateBetaState = async () => {
-      await fetch("/.netlify/functions/state", {
-        signal: controller.signal
-      })
+      await fetch("/.netlify/functions/state")
         .then(async (res) => {
           const data: StateResponseBody = await res.json();
           setBetaState(data);
@@ -40,11 +36,6 @@ function MintPage() {
     }
 
     updateBetaState();
-    const interval = setInterval(updateBetaState, STATE_INTERVAL);
-    return () => {
-      controller.abort();
-      clearInterval(interval);
-    }
   }, []);
 
   useEffect(() => {

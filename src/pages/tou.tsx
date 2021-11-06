@@ -1,7 +1,6 @@
 import React from "react";
 
 import SEO from "../components/seo";
-import FAQ from "../components/faq";
 
 function TOUPage() {
   return (
