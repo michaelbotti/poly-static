@@ -1,5 +1,6 @@
 import React, { useRef, useState, useContext, useEffect } from "react";
 import PhoneInput from "react-phone-number-input";
+import Cookie from 'js-cookie';
 
 import { QueueResponseBody } from "../../../netlify/functions/queue";
 import { VerifyResponseBody } from "../../../netlify/functions/verify";
@@ -42,7 +43,7 @@ export const HandleQueue = (): JSX.Element => {
   const [, setAccessOpen] = useAccessOpen();
 
   useEffect(() => {
-    const savedPhone = window.localStorage.getItem('ADA_HANDLE_PHONE');
+    const savedPhone = Cookie.get('ADA_HANDLE_PHONE');
     if (savedPhone) {
       setAction('auth');
       setPhoneInput(savedPhone);
@@ -85,7 +86,9 @@ export const HandleQueue = (): JSX.Element => {
       const message = getResponseMessage(res.position);
       setResponseMessage(message);
       setSubmitted(true);
-      window.localStorage.setItem('ADA_HANDLE_PHONE', phoneInput);
+      Cookie.set('ADA_HANDLE_PHONE', phoneInput, {
+        expires: 1
+      });
     } else {
       setTimeoutResponseMessage(res?.message || "That didn't work. Try again.");
     }
@@ -124,7 +127,7 @@ export const HandleQueue = (): JSX.Element => {
 
       const { error, verified, message, token, data } = res;
       if (!error && verified && token && data) {
-        window.localStorage.removeItem('ADA_HANDLE_PHONE');
+        Cookie.remove('ADA_HANDLE_PHONE');
         setAccessTokenCookie(res, data.exp);
         setAccessOpen(true);
         window.location.reload();
@@ -281,7 +284,10 @@ export const HandleQueue = (): JSX.Element => {
             <p className="text-center">
               <Button onClick={() => {
                 setResponseMessage(null);
-                setSubmitted(false)
+                setSubmitted(false);
+                if (null !== window.localStorage.getItem('ADA_HANDLE_PHONE')) {
+                  setAction('auth');
+                }
               }}>Dismiss This Message</Button>
             </p>
           )}
