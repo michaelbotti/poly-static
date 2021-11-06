@@ -14,7 +14,7 @@ function MintPage() {
               Uh-oh!
             </h2>
             <p className="text-lg text-center">
-              Something has gone wrong with our minting process. We're sorry for the inconvenience! We're working on resolving the problem as soon as possible.
+              We're busy fixing some issues. We're sorry for the inconvenience! We're working on resolving the problem as soon as possible.
             </p>
             <p className="text-lg text-center">
               For updates, follow our official <a href="https://twitter.com/adahandle" target="_blank" rel="noopener nofollow" className="text-primary-100">Twitter account</a>. If you were in the middle of a session, please <Link className="text-primary-100" to="/contact">let us know</Link>.
