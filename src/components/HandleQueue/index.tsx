@@ -124,6 +124,7 @@ export const HandleQueue = (): JSX.Element => {
 
       const { error, verified, message, token, data } = res;
       if (!error && verified && token && data) {
+        window.localStorage.removeItem('ADA_HANDLE_PHONE');
         setAccessTokenCookie(res, data.exp);
         setAccessOpen(true);
         window.location.reload();
