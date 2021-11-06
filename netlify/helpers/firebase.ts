@@ -45,6 +45,7 @@ export const verifyTwitterUser = async (token: string): Promise<number | false> 
 }
 
 export const getMintedHandles = async (): Promise<{ handleName: string }[] | false> => {
+  console.log('testing:' + process.env.NODE_ENV)
   return firebase
     .firestore()
     .collection(buildCollectionNameWithSuffix("/mintedHandles"))
