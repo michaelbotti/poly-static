@@ -32,7 +32,7 @@ const Layout: FC = ({ children }): JSX.Element => {
 
         <footer className="bg-dark-100 pt-16">
           <p className="text-center text-dark-350">
-            &copy; 2021 ADA Handle • <Link className="text-primary-100" to="/tou">Terms of Use</Link>
+            &copy; 2021 ADA Handle • <Link className="text-primary-100" to="/tou">Terms of Use</Link> • PolicyID: <a href="https://cardanoscan.io/tokenPolicy/d5df2ddadd04b98215f7c3ea94fd9ab8194968f94d9d32377fd26a7c" target="_blank" rel="noopener nofollow">d5df2ddadd04b98215f7c3ea94fd9ab8194968f94d9d32377fd26a7c</a>
           </p>
         </footer>
       </div>
