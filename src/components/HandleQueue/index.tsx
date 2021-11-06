@@ -209,7 +209,7 @@ export const HandleQueue = (): JSX.Element => {
                 name="phone"
                 disabled={savingSpot}
                 placeholder={"Your mobile number..."}
-                className={`focus:ring-0 focus:ring-opacity-0 border-2 outline-none form-input bg-dark-100 border-dark-300 px-6 py-4 text-xl w-full appearance-none`}
+                className={`focus:ring-0 focus:ring-opacity-0 border-2 outline-none form-input bg-dark-100 border-dark-300 px-6 py-4 text-xl w-full`}
                 defaultCountry="US"
                 value={phoneInput}
                 // @ts-ignore
@@ -285,7 +285,7 @@ export const HandleQueue = (): JSX.Element => {
               <Button onClick={() => {
                 setResponseMessage(null);
                 setSubmitted(false);
-                if (!Cookie.get('ADA_HANDLE_PHONE')) {
+                if (Cookie.get('ADA_HANDLE_PHONE')) {
                   setAction('auth');
                 }
               }}>Dismiss This Message</Button>
