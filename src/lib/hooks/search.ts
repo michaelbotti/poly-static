@@ -31,7 +31,8 @@ export const useSyncAvailableStatus = async (unsanitizedHandle: string) => {
         available: false,
         message: 'Sorry, but you don\'t have enough time for another session!',
         twitter: false
-      })
+      });
+      return;
     }
 
     if (handle.length === 0) {
