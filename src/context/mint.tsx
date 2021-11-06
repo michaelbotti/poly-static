@@ -91,6 +91,22 @@ export const HandleMintContextProvider = ({ children, ...rest }) => {
   const [currentIndex, setCurrentIndex] = useState<number>(0);
   const [betaState, setBetaState] = useState<StateResponseBody>(null);
 
+  useEffect(() => {
+    const updateBetaState = async () => {
+      await fetch("/.netlify/functions/state")
+        .then(async (res) => {
+          const data: StateResponseBody = await res.json();
+          setBetaState(data);
+        })
+        .catch((e) => {
+          setBetaState(null);
+          console.log(e);
+        });
+    }
+
+    updateBetaState();
+  }, []);
+
   return (
     <HandleMintContext.Provider value={{
       ...defaultState,

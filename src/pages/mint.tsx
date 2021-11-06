@@ -14,29 +14,11 @@ import { HandleSession } from "../components/HandleSession";
 import { HandleNavigation } from "../components/HandleNavigation";
 import { SessionResponseBody } from "../../netlify/functions/session";
 import Countdown from "react-countdown";
-import { StateResponseBody } from "../../netlify/functions/state";
-import { STATE_INTERVAL } from "../lib/constants";
 
 function MintPage() {
-  const { primed, handle, currentIndex, betaState, setBetaState } = useContext(HandleMintContext);
+  const { primed, handle, currentIndex, betaState } = useContext(HandleMintContext);
   const [paymentSessions, setPaymentSessions] = useState<(false | SessionResponseBody)[]>();
   const [accessOpen, setAccessOpen] = useAccessOpen();
-
-  useEffect(() => {
-    const updateBetaState = async () => {
-      await fetch("/.netlify/functions/state")
-        .then(async (res) => {
-          const data: StateResponseBody = await res.json();
-          setBetaState(data);
-        })
-        .catch((e) => {
-          setBetaState(null);
-          console.log(e);
-        });
-    }
-
-    updateBetaState();
-  }, []);
 
   useEffect(() => {
     setPaymentSessions(getAllCurrentSessionData());
