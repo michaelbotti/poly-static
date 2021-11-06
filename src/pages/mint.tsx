@@ -14,11 +14,38 @@ import { HandleSession } from "../components/HandleSession";
 import { HandleNavigation } from "../components/HandleNavigation";
 import { SessionResponseBody } from "../../netlify/functions/session";
 import Countdown from "react-countdown";
+import { StateResponseBody } from "../../netlify/functions/state";
+import { STATE_INTERVAL } from "../lib/constants";
 
 function MintPage() {
-  const { primed, handle, currentIndex, betaState } = useContext(HandleMintContext);
+  const { primed, handle, currentIndex, betaState, setBetaState } = useContext(HandleMintContext);
   const [paymentSessions, setPaymentSessions] = useState<(false | SessionResponseBody)[]>();
   const [accessOpen, setAccessOpen] = useAccessOpen();
+
+  useEffect(() => {
+    const controller = new AbortController();
+
+    const updateBetaState = async () => {
+      await fetch("/.netlify/functions/state", {
+        signal: controller.signal
+      })
+        .then(async (res) => {
+          const data: StateResponseBody = await res.json();
+          setBetaState(data);
+        })
+        .catch((e) => {
+          setBetaState(null);
+          console.log(e);
+        });
+    }
+
+    updateBetaState();
+    const interval = setInterval(updateBetaState, STATE_INTERVAL);
+    return () => {
+      controller.abort();
+      clearInterval(interval);
+    }
+  }, []);
 
   useEffect(() => {
     setPaymentSessions(getAllCurrentSessionData());
@@ -75,8 +102,7 @@ function MintPage() {
                   </ul>
                 </div>
                 <div className="col-span-12 md:col-span-6">
-                  {betaState?.totalHandles < 15000 && <HandleQueue />}
-                  {betaState?.totalHandles >= 15000 && (
+                  {betaState?.totalHandles >= 15000 ? (
                     <div className="flex items-center justify-between mb-8 lg:mb-12">
                       <div className="w-1/2 text-center">
                         <h4 className="text-white text-center font-bold">
@@ -84,7 +110,7 @@ function MintPage() {
                         </h4>
                       </div>
                     </div>
-                  )}
+                  ) : <HandleQueue />}
                 </div>
               </>
             )}
