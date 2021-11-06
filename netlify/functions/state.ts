@@ -27,6 +27,7 @@ const handler: Handler = async (
 
   try {
     const data = await getCachedState();
+    console.log(data);
     if (!data) {
       throw Error('No state data!');
     }
