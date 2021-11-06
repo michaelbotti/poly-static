@@ -281,7 +281,10 @@ export const HandleQueue = (): JSX.Element => {
             <p className="text-center">
               <Button onClick={() => {
                 setResponseMessage(null);
-                setSubmitted(false)
+                setSubmitted(false);
+                if (null !== window.localStorage.getItem('ADA_HANDLE_PHONE')) {
+                  setAction('auth');
+                }
               }}>Dismiss This Message</Button>
             </p>
           )}
