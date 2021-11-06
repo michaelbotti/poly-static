@@ -122,7 +122,11 @@ export const HandleSession = ({
       <h2 className="font-bold text-3xl mb-2">
         Session Active
       </h2>
-      <p className="text-lg">Submit your payment <u>exactly</u> in the amount shown. Invalid payments will be refunded, but your session will remain till it expires!</p>
+      <p className="text-lg">Submit your payment <u>exactly</u> in the amount shown. Invalid payments will be refunded, but can take up to 14 days!</p>
+      <ul>
+        <li>Do NOT send from an exchange. Only use wallets you own the keys to (like Nami, Yoroi, Daedalus, etc).</li>
+        <li>Do NOT send more than one payment. Patience!</li>
+      </ul>
       <hr className="w-12 border-dark-300 border-2 block my-8" />
       {fetchingPayment ? (
         <div className="flex flex-col items-center justify-center">
