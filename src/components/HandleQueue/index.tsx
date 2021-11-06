@@ -1,4 +1,4 @@
-import React, { useRef, useState, useContext } from "react";
+import React, { useRef, useState, useContext, useEffect } from "react";
 import PhoneInput from "react-phone-number-input";
 
 import { QueueResponseBody } from "../../../netlify/functions/queue";
@@ -41,6 +41,14 @@ export const HandleQueue = (): JSX.Element => {
   const form = useRef(null);
   const [, setAccessOpen] = useAccessOpen();
 
+  useEffect(() => {
+    const savedPhone = window.localStorage.getItem('ADA_HANDLE_PHONE');
+    if (savedPhone) {
+      setAction('auth');
+      setPhoneInput(savedPhone);
+    }
+  }, []);
+
   const setTimeoutResponseMessage = (message: string) => {
     setResponseMessage(message);
     setTimeout(() => {
@@ -77,6 +85,7 @@ export const HandleQueue = (): JSX.Element => {
       const message = getResponseMessage(res.position);
       setResponseMessage(message);
       setSubmitted(true);
+      window.localStorage.setItem('ADA_HANDLE_PHONE', phoneInput);
     } else {
       setTimeoutResponseMessage(res?.message || "That didn't work. Try again.");
     }
@@ -115,6 +124,7 @@ export const HandleQueue = (): JSX.Element => {
 
       const { error, verified, message, token, data } = res;
       if (!error && verified && token && data) {
+        window.localStorage.removeItem('ADA_HANDLE_PHONE');
         setAccessTokenCookie(res, data.exp);
         setAccessOpen(true);
         window.location.reload();
@@ -175,7 +185,7 @@ export const HandleQueue = (): JSX.Element => {
                   : "opacity-80 border-dark-200"
               }`}
             >
-              Enter Queue
+              Enter Phone Number
             </button>
             <button
               onClick={() => {
@@ -187,22 +197,22 @@ export const HandleQueue = (): JSX.Element => {
                   : "opacity-80 border-dark-200"
               }`}
             >
-              Authenticate
+              Enter Access Code
             </button>
           </div>
           <form onSubmit={(e) => e.preventDefault()} ref={form} className="bg-dark-100 border-dark-300">
-            <PhoneInput
-              name="phone"
-              disabled={savingSpot}
-              placeholder={"Your mobile number..."}
-              className={`${
-                "auth" === action ? "rounded-none border-b-0" : ""
-              } focus:ring-0 focus:ring-opacity-0 border-2 outline-none form-input bg-dark-100 border-dark-300 px-6 py-4 text-xl w-full appearance-none`}
-              defaultCountry="US"
-              value={phoneInput}
-              // @ts-ignore
-              onChange={setPhoneInput}
-            />
+            {action === 'save' && (
+              <PhoneInput
+                name="phone"
+                disabled={savingSpot}
+                placeholder={"Your mobile number..."}
+                className={`focus:ring-0 focus:ring-opacity-0 border-2 outline-none form-input bg-dark-100 border-dark-300 px-6 py-4 text-xl w-full appearance-none`}
+                defaultCountry="US"
+                value={phoneInput}
+                // @ts-ignore
+                onChange={setPhoneInput}
+              />
+            )}
             {"auth" === action && (
               <>
                 <input
@@ -265,7 +275,17 @@ export const HandleQueue = (): JSX.Element => {
         </>
       )}
       {responseMessage && (
-        <p className="my-2 text-xl font-bold">{responseMessage}</p>
+        <>
+          <p className="my-2 text-lg font-bold text-center">{responseMessage}</p>
+          {!savingSpot && (
+            <p className="text-center">
+              <Button onClick={() => {
+                setResponseMessage(null);
+                setSubmitted(false)
+              }}>Dismiss This Message</Button>
+            </p>
+          )}
+        </>
       )}
     </>
   );
