@@ -285,7 +285,7 @@ export const HandleQueue = (): JSX.Element => {
               <Button onClick={() => {
                 setResponseMessage(null);
                 setSubmitted(false);
-                if (null !== window.localStorage.getItem('ADA_HANDLE_PHONE')) {
+                if (!Cookie.get('ADA_HANDLE_PHONE')) {
                   setAction('auth');
                 }
               }}>Dismiss This Message</Button>
