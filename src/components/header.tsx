@@ -41,6 +41,7 @@ const navItems: NavItem[] = [
 
 const Header: FC<HeaderProps> = ({ className, showMint = true }) => {
   const [isExpanded, toggleExpansion] = useState<boolean>(false);
+  const { betaState } = useContext(HandleMintContext);
 
   return (
     <>
@@ -98,13 +99,18 @@ const Header: FC<HeaderProps> = ({ className, showMint = true }) => {
               })}
             </nav>
           </div>
-          <Button
-            animate
-            size="small"
-            href={'/mint'}
-          >
-            Beta Sale! &rarr;
-          </Button>
+          {showMint && (
+            <Button
+              animate
+              size="small"
+              href={'/mint'}
+            >
+              Beta Sale! &rarr;
+            </Button>
+          )}
+          {!showMint && betaState && !betaState.error && (
+            <p className="text-lg">{betaState.totalHandles}/15,000</p>
+          )}
         </div>
       </header>
     </>

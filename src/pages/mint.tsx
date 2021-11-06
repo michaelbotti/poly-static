@@ -75,8 +75,7 @@ function MintPage() {
                   </ul>
                 </div>
                 <div className="col-span-12 md:col-span-6">
-                  {betaState?.totalHandles < 15000 && <HandleQueue />}
-                  {betaState?.totalHandles >= 15000 && (
+                  {betaState?.totalHandles >= 15000 ? (
                     <div className="flex items-center justify-between mb-8 lg:mb-12">
                       <div className="w-1/2 text-center">
                         <h4 className="text-white text-center font-bold">
@@ -84,7 +83,7 @@ function MintPage() {
                         </h4>
                       </div>
                     </div>
-                  )}
+                  ) : <HandleQueue />}
                 </div>
               </>
             )}

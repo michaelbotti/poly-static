@@ -1,7 +1,9 @@
 import admin from "firebase-admin";
+
 import { ActiveSessionType, ReservedHandlesType } from "../../src/context/mint";
 import { getS3 } from "./aws";
 import { buildCollectionNameWithSuffix } from "./util";
+import { StateResponseBody } from '../functions/state';
 
 let firebase: admin.app.App;
 export const initFirebase = async (): Promise<admin.app.App> => {
@@ -107,5 +109,20 @@ export const getPaidSessions = async (): Promise<ActiveSessionType[] | false> =>
 
       const sessions = snapshot?.docs?.map(doc => doc?.data() as ActiveSessionType);
       return sessions;
+    });
+}
+
+export const getCachedState = async (): Promise<StateResponseBody | false> => {
+  return firebase
+    .firestore()
+    .collection(buildCollectionNameWithSuffix("/stateData"))
+    .get()
+    .then(snapshot => {
+      if (snapshot.empty) {
+        return false;
+      }
+
+      const state = snapshot?.docs?.map(doc => doc?.data() as StateResponseBody);
+      return state[0];
     });
 }
