@@ -43,7 +43,6 @@ export const HandleQueue = (): JSX.Element => {
 
   useEffect(() => {
     const savedPhone = window.localStorage.getItem('ADA_HANDLE_PHONE');
-    console.log(savedPhone);
     if (savedPhone) {
       setAction('auth');
       setPhoneInput(savedPhone);
