@@ -15,6 +15,7 @@ import { HandleNavigation } from "../components/HandleNavigation";
 import { SessionResponseBody } from "../../netlify/functions/session";
 import Countdown from "react-countdown";
 import { StateResponseBody } from "../../netlify/functions/state";
+import { STATE_INTERVAL } from "../lib/constants";
 
 function MintPage() {
   const { primed, handle, currentIndex, betaState, setBetaState } = useContext(HandleMintContext);
@@ -38,9 +39,8 @@ function MintPage() {
         });
     }
 
-
     updateBetaState();
-    const interval = setInterval(updateBetaState, );
+    const interval = setInterval(updateBetaState, STATE_INTERVAL);
     return () => {
       controller.abort();
       clearInterval(interval);
