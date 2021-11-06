@@ -25,6 +25,15 @@ const handler: Handler = async (
   event: HandlerEvent,
   context: HandlerContext
 ): Promise<HandlerResponse> => {
+  // Temporarily disable queuing.
+  return {
+    statusCode: 500,
+    body: JSON.stringify({
+      error: true,
+      message: "We're fixing some things. Try again later."
+    })
+  };
+
   const { headers } = event;
   if (!headers[HEADER_PHONE]) {
     return {
