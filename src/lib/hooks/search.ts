@@ -13,17 +13,26 @@ import {
   BETA_PHASE_MATCH,
   HEADER_HANDLE,
   HEADER_JWT_ACCESS_TOKEN,
+  MAX_ACCESS_LENGTH,
 } from "../constants";
 import { HandleMintContext } from "../../context/mint";
 import { normalizeNFTHandle } from "../helpers/nfts";
 import { getAccessTokenFromCookie } from "../helpers/session";
 
 export const useSyncAvailableStatus = async (unsanitizedHandle: string) => {
+  const currentAccess = getAccessTokenFromCookie();
   const { setFetching, setHandleResponse, reservedHandles } =
     useContext(HandleMintContext);
 
   useEffect(() => {
     const handle = normalizeNFTHandle(unsanitizedHandle);
+    if (Date.now() + MAX_ACCESS_LENGTH > (currentAccess && currentAccess.data.exp * 1000)) {
+      setHandleResponse({
+        available: false,
+        message: 'Sorry, but you don\'t have enough time for another session!',
+        twitter: false
+      })
+    }
 
     if (handle.length === 0) {
       setHandleResponse(null);
