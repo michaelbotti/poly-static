@@ -8,12 +8,9 @@ import {
 import { HEADER_PHONE } from "../../src/lib/constants";
 import { fetchNodeApp } from "../helpers/util";
 
-
 interface AppendAccessResponse {
   updated: boolean;
   alreadyExists: boolean;
-  position: number;
-  chainLoad: number | null;
 }
 
 export interface QueueResponseBody extends AppendAccessResponse {
@@ -42,10 +39,7 @@ const handler: Handler = async (
       headers: {
         [HEADER_PHONE]: headers[HEADER_PHONE]
       }
-    }).then(res => {
-      console.log(res);
-      return res.json()
-    })
+    }).then(res => res.json())
     .catch(e => console.log(e));
 
     return {

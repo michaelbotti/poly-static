@@ -26,7 +26,9 @@ export const useSyncAvailableStatus = async (unsanitizedHandle: string) => {
 
   useEffect(() => {
     const handle = normalizeNFTHandle(unsanitizedHandle);
-    if (Date.now() + MAX_SESSION_LENGTH > (currentAccess ? currentAccess.data.exp * 1000 : 0)) {
+
+    // Don't allow new sessions when their's 5 minutes left.
+    if (Date.now() + 300000 > (currentAccess ? currentAccess.data.exp * 1000 : 0)) {
       setHandleResponse({
         available: false,
         message: 'Sorry, but you don\'t have enough time for another session!',

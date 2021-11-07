@@ -125,7 +125,7 @@ export const HandleSession = ({
       <p className="text-lg">Submit your payment <u>exactly</u> in the amount shown. Invalid payments will be refunded, but can take up to 14 days!</p>
       <ul>
         <li>Do NOT send from an exchange. Only use wallets you own the keys to (like Nami, Yoroi, Daedalus, etc).</li>
-        <li>Do NOT send more than one payment. Patience!</li>
+        <li>Do NOT send more than one payment.</li>
       </ul>
       <hr className="w-12 border-dark-300 border-2 block my-8" />
       {fetchingPayment ? (
@@ -185,7 +185,7 @@ export const HandleSession = ({
                       <div>
                         <h2 className="text-2xl font-bold mb-2"><strong>Yay!</strong> Your payment was successful!</h2>
                         <p className="text-lg">We're minting your handle <strong>right now.</strong> Please allow up to a few hours to receive your NFT.</p>
-                        <p className="text-lg">Your unique URL (pending Handle NFT delivery): <a className="text-primary-100" href={`https://test.handle.me/${sessionData.data.handle}`} target="_blank">https://handle.me/{sessionData.data.handle}</a></p>
+                        <p className="text-lg">Your unique URL: <a className="text-primary-100" href={'undefined' !== typeof window && window.location.host !== 'adahandle.com' ? `https://testnet.handle.me/${sessionData.data.handle}` : `https://handle.me/${sessionData.data.handle}`} target="_blank">https://handle.me/{sessionData.data.handle}</a></p>
                         <p className="text-lg">This session will close in: <strong>{formatted.minutes}:{formatted.seconds}</strong></p>
                       </div>
                     </>
