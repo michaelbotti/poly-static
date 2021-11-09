@@ -6,7 +6,7 @@ import {
 } from "@netlify/functions";
 
 import { HEADER_PHONE } from "../../src/lib/constants";
-import { fetchNodeApp } from "../helpers/util";
+import { fetchNodeApp, getNodeEndpointUrl } from "../helpers/util";
 
 interface AppendAccessResponse {
   updated: boolean;
@@ -32,6 +32,12 @@ const handler: Handler = async (
       } as QueueResponseBody)
     }
   }
+
+  console.log(
+    getNodeEndpointUrl(),
+    process.env.APP_ENV,
+    HEADER_PHONE
+  )
 
   try {
     const data: QueueResponseBody = await fetchNodeApp(`queue`, {
