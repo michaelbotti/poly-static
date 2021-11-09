@@ -12,8 +12,9 @@ import { HandleMintContext } from "../../context/mint";
 
 import "react-phone-number-input/style.css";
 
-const getCachedPhoneNumber = () => btoa(window.localStorage.getItem('ADA_HANDLE_PHONE'));
-const setCachedPhoneNumber = (phone: string) => window.localStorage.setItem('ADA_HANDLE_PHONE', atob(phone));
+const getCachedPhoneNumber = (): void => { btoa(window.localStorage.getItem('ADA_HANDLE_PHONE')) };
+const setCachedPhoneNumber = (phone: string): void => window.localStorage.setItem('ADA_HANDLE_PHONE', atob(phone));
+const deleteCachedPhoneNumber = (): void => window.localStorage.removeItem('ADA_HANDLE_PHONE');
 
 export const HandleQueue = (): JSX.Element => {
   const { betaState } = useContext(HandleMintContext);
@@ -271,6 +272,7 @@ export const HandleQueue = (): JSX.Element => {
           Never submitted your phone number?<br/>
           <button className="text-primary-100" onClick={() => {
             setAction('save');
+            deleteCachedPhoneNumber();
             setLocallyCachedPhone(null);
           }}>Reset Local Cache</button>
         </p>
