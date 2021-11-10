@@ -121,7 +121,6 @@ export const HandleQueue = (): JSX.Element => {
         .then((res) => res.json())
         .catch((e) => console.log(e));
 
-      console.log(res);
       const { error, verified, message, token, data } = res;
       if (!error && verified && token && data) {
         deleteCachedPhoneNumber();
@@ -294,8 +293,9 @@ export const HandleQueue = (): JSX.Element => {
             <p className="text-center">
               {submitted && (
                 <Button size="small" className="mt-2" onClick={() => {
-                  setResponseMessage(null);
+                  setAction('auth');
                   setSubmitted(false);
+                  setResponseMessage(null);
                 }}>Dismiss This Message</Button>
               )}
             </p>
