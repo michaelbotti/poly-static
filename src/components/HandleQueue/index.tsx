@@ -1,5 +1,6 @@
-import React, { useRef, useState, useContext } from "react";
+import React, { useRef, useState, useContext, useEffect } from "react";
 import PhoneInput from "react-phone-number-input";
+import { Link } from "gatsby";
 
 import { QueueResponseBody } from "../../../netlify/functions/queue";
 import { VerifyResponseBody } from "../../../netlify/functions/verify";
@@ -7,24 +8,16 @@ import { HEADER_PHONE, HEADER_PHONE_AUTH } from "../../lib/constants";
 import { useAccessOpen } from "../../lib/hooks/access";
 import Button from "../button";
 import { setAccessTokenCookie } from "../../lib/helpers/session";
-
-import "react-phone-number-input/style.css";
-import { Link } from "gatsby";
 import { HandleMintContext } from "../../context/mint";
 
-const getResponseMessage = (count: number): string => {
-  if (count < 20) {
-    return `You are ${
-      count === 0 ? "first" : `#${count}`
-    } in line and part of the next batch! Auth codes are NOT sent immediately, so feel free to come back.`;
-  }
+import "react-phone-number-input/style.css";
 
-  if (count > 20 && count < 200) {
-    return `You are #${count} in line. Estimated wait time is between 30 minutes and 2 hours.`;
-  }
-
-  return `You are #${count} in line. Estimated wait time is more than 2 hours.`;
+const getCachedPhoneNumber = (): string => {
+  const cache = window.localStorage.getItem('ADA_HANDLE_PHONE');
+  return typeof cache === 'string' ? atob(cache) : null;
 };
+const setCachedPhoneNumber = (phone: string): void => window.localStorage.setItem('ADA_HANDLE_PHONE', btoa(phone));
+const deleteCachedPhoneNumber = (): void => window.localStorage.removeItem('ADA_HANDLE_PHONE');
 
 export const HandleQueue = (): JSX.Element => {
   const { betaState } = useContext(HandleMintContext);
@@ -37,9 +30,17 @@ export const HandleQueue = (): JSX.Element => {
   const [authInput, setAuthInput] = useState<string>("");
   const [touChecked, setTouChecked] = useState<boolean>(false);
   const [refundsChecked, setRefundsChecked] = useState<boolean>(false);
+  const [locallyCachedPhone, setLocallyCachedPhone] = useState<string>(getCachedPhoneNumber());
 
   const form = useRef(null);
   const [, setAccessOpen] = useAccessOpen();
+
+  useEffect(() => {
+    console.log(locallyCachedPhone);
+    if (typeof locallyCachedPhone === 'string' && locallyCachedPhone.length > 0) {
+      setAction('auth');
+    }
+  }, []);
 
   const setTimeoutResponseMessage = (message: string) => {
     setResponseMessage(message);
@@ -51,7 +52,7 @@ export const HandleQueue = (): JSX.Element => {
   /**
    * Send the user's phone number to a queue.
    * We set a cron on the backend to allow users
-   * in via batches of 50, depending on current
+   * in via batches of 20, depending on current
    * chain load.
    */
   const handleSaving = async (e: Event) => {
@@ -63,7 +64,7 @@ export const HandleQueue = (): JSX.Element => {
     }
 
     setSavingSpot(true);
-    setResponseMessage("Checking your place in line...");
+    setResponseMessage("Submitting phone number...");
     const res: QueueResponseBody = await fetch(`/.netlify/functions/queue`, {
       method: "POST",
       headers: {
@@ -74,8 +75,15 @@ export const HandleQueue = (): JSX.Element => {
       .catch((e) => console.log(e));
 
     if (res.updated) {
-      const message = getResponseMessage(res.position);
-      setResponseMessage(message);
+      // We have to update local state as well as local storage.
+      setCachedPhoneNumber(phoneInput);
+      setLocallyCachedPhone(phoneInput);
+
+      // Clear the input field for phone.
+      setPhoneInput('');
+
+      // Update response state.
+      setResponseMessage(`Success! You'll receive a text once it's your turn. Remember, once you receive an auth code, it is ONLY valid for 10 minutes!`);
       setSubmitted(true);
     } else {
       setTimeoutResponseMessage(res?.message || "That didn't work. Try again.");
@@ -94,8 +102,8 @@ export const HandleQueue = (): JSX.Element => {
   const handleAuthenticating = async (e: Event) => {
     e.preventDefault();
 
-    if (authInput.length === 0 || phoneInput.length === 0) {
-      setResponseMessage("Inputs must not be empty...");
+    if (authInput.length !== 6) {
+      setResponseMessage("Auth code must be 6 digits.");
       return;
     }
 
@@ -105,7 +113,7 @@ export const HandleQueue = (): JSX.Element => {
         "/.netlify/functions/verify",
         {
           headers: {
-            [HEADER_PHONE]: phoneInput,
+            [HEADER_PHONE]: phoneInput || locallyCachedPhone,
             [HEADER_PHONE_AUTH]: authInput,
           },
         }
@@ -115,8 +123,8 @@ export const HandleQueue = (): JSX.Element => {
 
       const { error, verified, message, token, data } = res;
       if (!error && verified && token && data) {
+        deleteCachedPhoneNumber();
         setAccessTokenCookie(res, data.exp);
-        setAccessOpen(true);
         window.location.reload();
       }
 
@@ -159,50 +167,52 @@ export const HandleQueue = (): JSX.Element => {
         </div>
       </div>
       <h3 className="text-2xl text-white text-center mb-4">
-        Register Your Spot
+        {locallyCachedPhone ? <>Gain Access</> : <>Register Your Spot</>}
       </h3>
       {!submitted && (
         <>
           <div className="flex align-center justify-stretch bg-dark-200 rounded-t-lg border-2 border-b-0 border-dark-300">
-            <button
-              onClick={() => {
-                setAuthInput("");
-                setAction("save");
-              }}
-              className={`text-white text-center p-4 w-1/2 rounded-lg rounded-r-none rounded-bl-none border-b-4 ${
-                "save" === action
-                  ? "border-primary-100"
-                  : "opacity-80 border-dark-200"
-              }`}
-            >
-              Enter Queue
-            </button>
+            {!locallyCachedPhone && (
+              <button
+                onClick={() => {
+                  setAuthInput("");
+                  setAction("save");
+                }}
+                className={`text-white text-center p-4 w-1/2 rounded-lg rounded-r-none rounded-bl-none border-b-4 ${
+                  "save" === action
+                    ? "border-primary-100"
+                    : "opacity-80 border-dark-200"
+                }`}
+              >
+                Enter Phone Number
+              </button>
+            )}
             <button
               onClick={() => {
                 setAction("auth");
               }}
-              className={`text-white text-center p-4 w-1/2 rounded-lg rounded-l-none rounded-br-none border-b-4 ${
+              className={`text-white text-center p-4 rounded-lg rounded-l-none rounded-br-none border-b-4 ${
                 "auth" === action
                   ? "border-primary-100"
                   : "opacity-80 border-dark-200"
-              }`}
+              } ${locallyCachedPhone ? 'w-full' : 'w-1/2'}`}
             >
-              Authenticate
+              Enter Access Code
             </button>
           </div>
           <form onSubmit={(e) => e.preventDefault()} ref={form} className="bg-dark-100 border-dark-300">
-            <PhoneInput
-              name="phone"
-              disabled={savingSpot}
-              placeholder={"Your mobile number..."}
-              className={`${
-                "auth" === action ? "rounded-none border-b-0" : ""
-              } focus:ring-0 focus:ring-opacity-0 border-2 outline-none form-input bg-dark-100 border-dark-300 px-6 py-4 text-xl w-full appearance-none`}
-              defaultCountry="US"
-              value={phoneInput}
-              // @ts-ignore
-              onChange={setPhoneInput}
-            />
+            {action === 'save' && !locallyCachedPhone && (
+              <PhoneInput
+                name="phone"
+                disabled={savingSpot}
+                placeholder={"Your mobile number..."}
+                className={`focus:ring-0 focus:ring-opacity-0 border-2 outline-none form-input bg-dark-100 border-dark-300 px-6 py-4 text-xl w-full`}
+                defaultCountry="US"
+                value={phoneInput}
+                // @ts-ignore
+                onChange={setPhoneInput}
+              />
+            )}
             {"auth" === action && (
               <>
                 <input
@@ -264,8 +274,33 @@ export const HandleQueue = (): JSX.Element => {
           </form>
         </>
       )}
+      {locallyCachedPhone && !submitted && (
+        <p className="text-center mt-2">
+          Never submitted your phone number?<br/>
+          <button className="text-primary-100" onClick={() => {
+            setAction('save');
+
+            // Update local state and local storage.
+            deleteCachedPhoneNumber();
+            setLocallyCachedPhone(null);
+          }}>Reset Local Cache</button>
+        </p>
+      )}
       {responseMessage && (
-        <p className="my-2 text-xl font-bold">{responseMessage}</p>
+        <>
+          <p className="my-2 text-center">{responseMessage}</p>
+          {!savingSpot && (
+            <p className="text-center">
+              {submitted && (
+                <Button size="small" className="mt-2" onClick={() => {
+                  setAction('auth');
+                  setSubmitted(false);
+                  setResponseMessage(null);
+                }}>Dismiss This Message</Button>
+              )}
+            </p>
+          )}
+        </>
       )}
     </>
   );

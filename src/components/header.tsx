@@ -1,11 +1,10 @@
 import { Link } from "gatsby";
-import React, { useState, FC, useEffect, useContext } from "react";
+import React, { useState, FC, useContext } from "react";
 import { HandleMintContext } from "../context/mint";
-import { getAccessTokenFromCookie, getSessionTokenFromCookie } from "../lib/helpers/session";
-import { useAccessOpen } from "../lib/hooks/access";
 import Button from "./button";
 
 import Logo from './logo';
+import { Twitter } from '../pages/team';
 
 interface HeaderProps {
   className?: string;
@@ -41,6 +40,7 @@ const navItems: NavItem[] = [
 
 const Header: FC<HeaderProps> = ({ className, showMint = true }) => {
   const [isExpanded, toggleExpansion] = useState<boolean>(false);
+  const { betaState } = useContext(HandleMintContext);
 
   return (
     <>
@@ -96,15 +96,28 @@ const Header: FC<HeaderProps> = ({ className, showMint = true }) => {
                   </Link>
                 )
               })}
+              <a
+                className={'block mt-4 text-dark-300 hover:text-primary-200 no-underline md:inline-block md:mt-0 md:ml-6 text-dark-400'}
+                href="https://twitter.com/adahandle"
+                target="_blank"
+                rel="noopener nofollow"
+              >
+                <Twitter className="inline w-6 h-6 block opacity-60 hover:opacity-100" />
+              </a>
             </nav>
           </div>
-          <Button
-            animate
-            size="small"
-            href={'/mint'}
-          >
-            Beta Sale! &rarr;
-          </Button>
+          {showMint && (
+            <Button
+              animate
+              size="small"
+              href={'/mint'}
+            >
+              Beta Sale! &rarr;
+            </Button>
+          )}
+          {!showMint && betaState && !betaState.error && (
+            <p className="text-lg">{betaState.totalHandles}/15,000</p>
+          )}
         </div>
       </header>
     </>

@@ -1,7 +1,6 @@
 import React from "react";
 
 import SEO from "../components/seo";
-import FAQ from "../components/faq";
 
 function TOUPage() {
   return (
@@ -17,7 +16,7 @@ function TOUPage() {
       <section id="faq" className="my-16 max-w-3xl mx-auto">
         <div className="p-4 lg:p-8 bg-dark-200 rounded-lg shadow-lg">
           <h3 className="text-3xl">TERMS & CONDITIONS FOR NFTS BOUGHT AS PART OF THE ADA HANDLE OFFERING</h3>
-          <p><strong>Last updated on October 9, 2021</strong></p>
+          <p><strong>Last updated on November 6th, 2021</strong></p>
           <p>These terms and conditions constitute a legally binding agreement (the “Agreement”) between the purchaser/user (also referred to herein as “You”, “Your” or “User”) and ADA Handle ( “we” , “us” or “our”), governing your purchase and use of Handles as part of the ADA Handle Offering (the “Offering”). BY PARTICIPATING IN THIS OFFERING AND USE OF A HANDLE, YOU AGREE TO BE BOUND BY THESE TERMS AND ALL OF THE TERMS INCORPORATED HEREIN. IF YOU DO NOT AGREE TO BE BOUND BY THE TERMS AND CONDITIONS OF THIS AGREEMENT, YOU MAY NOT PARTICIPATE IN THE OFFERING AND MUST DISCONTNUE USE OF YOUR HANDLE.</p>
           <p>By entering into this Agreement, and/or by you participating in the ADA Handle Offering, and/or using your Handle, you expressly acknowledge that you understand this Agreement and accept all of its terms. IF YOU DO NOT AGREE TO BE BOUND BY THE TERMS AND CONDITIONS OF THIS AGREEMENT, YOU MAY NOT PARTICIPATE IN THE OFFERING AND MUST DISCONTINUE USE OF YOUR HANDLE.</p>
 
@@ -40,8 +39,9 @@ function TOUPage() {
 
           <h4 className="text-xl mt-4 inline-block font-bold">5. Rights</h4>
           <ul>
-            <li>(a) Free and Clear Ownership of your Handle.  Once successfully purchased, you are the sole owner of the Handle.  ADA Handle retains no interests, rights or controls over the Handle after the NFT has been transmitted.  As a result, once purchased, you are solely responsible for the maintenance of the Handle and its lawful use.</li>
-            <li>(b) Transfers of Handle. You have the unlimited right to transfer the Handle.  However, the use of the Handle by any successor transferee is an agreement by that transferee to these terms and conditions.  IF YOU ARE A TRANSFEREE OF A HANDLE AND DO NOT AGREE TO THESE TERMS AND CONDITIONS YOU SHALL DISCONTINUE USE OF THE HANDLE.</li>
+            <li>(a) Free and Clear Ownership of your Handle.  Once successfully purchased, you are the sole owner of the Handle.  ADA Handle retains no rights or controls over the Handle after the NFT has been transmitted.  As a result, once purchased, you are solely responsible for the maintenance of the Handle and its lawful use.</li>
+            <li>(b) Transfers of Handle. You have the unlimited right to transfer the Handle.  However, the use of the Handle by any successor transferee is an agreement by that transferee to these terms and conditions.  IF YOU ARE A TRANSFEREE OF A HANDLE AND DO NOT AGREE TO THESE TERMS AND CONDITIONS YOU SHALL DISCONTINUE USE OF THE HANDLE.</li>
+            <li>To support the continued use and development of the platform, ADA Handle may collect royalties equal to two percent (2%) of the sale price from subsequent sales of Handles when such sales occur within a marketplace which supports the <a href="https://github.com/cardano-foundation/CIPs/pull/116/files" className="text-primary-100">CIP-0027 proposal</a>.</li>
             <li>To the extent that the Handle contains Third Party copyrighted or trademarked terms, you understand and agree as follows: (i) that nothing in this Agreement nor the purchase of your Handle conferred the right to use such copyrighted or trademarked term in a way that may mislead or confuse the public (ii) if a third-party properly and rightfully informs you of a violation of their Intellectual Property, You will be solely responsible for resolving the alleged violation; failure to do so will be deemed a breach of this Agreement.</li>
           </ul>
           <h4 className="text-xl mt-4 inline-block font-bold">6. DISCLAIMER OF WARRANTIES & LIMITATION OF LIABILITY</h4>
