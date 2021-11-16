@@ -19,7 +19,7 @@ import {
   HEADER_HANDLE,
   HEADER_JWT_ACCESS_TOKEN,
 } from "../../src/lib/constants";
-import { getActiveSessions, getMintedHandles, getPaidSessions, getReservedHandles, initFirebase } from "../helpers/firebase";
+import { getActiveSessionsByHandle, getActiveSessionsByPhoneNumber, getMintedHandles, getPaidSessionByHandle, getReservedHandles, initFirebase } from "../helpers/firebase";
 import { fetchNodeApp } from "../helpers/util";
 import { decode } from "querystring";
 
@@ -47,14 +47,11 @@ const handler: Handler = async (
   await initFirebase();
 
   const handle = normalizeNFTHandle(headerHandle);
-  const activeSessions = await getActiveSessions();
   const mintedHandles = await getMintedHandles();
 
   const { phoneNumber } = decode(headerAccess);
-  if (
-    activeSessions &&
-    activeSessions.filter((data) => data?.phoneNumber === phoneNumber).length > 3
-  ) {
+  const activeSessionsByPhone = await getActiveSessionsByPhoneNumber(phoneNumber);
+  if (activeSessionsByPhone.length > 3) {
     return {
       statusCode: 403,
       body: JSON.stringify({
@@ -64,23 +61,16 @@ const handler: Handler = async (
     };
   }
 
-  if (
-    activeSessions &&
-    activeSessions.filter(
-      (data) => data?.handle === handle
-    ).length > 0
-  ) {
+  const activeSessionsByHandle = await getActiveSessionsByHandle(handle);
+  if (activeSessionsByHandle) {
     return {
       statusCode: 403,
       body: JSON.stringify(getDefaultActiveSessionUnvailable()),
     };
   }
 
-  const paidSessions = await getPaidSessions();
-
-  if (
-    paidSessions &&
-    paidSessions.find((data) => data?.handle === handle)) {
+  const paidSession = await getPaidSessionByHandle(handle);
+  if (paidSession) {
     return {
       statusCode: 403,
       body: JSON.stringify(getDefaultActiveSessionUnvailable()),

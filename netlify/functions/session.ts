@@ -20,7 +20,7 @@ import { getRarityCost, isValid, normalizeNFTHandle } from "../../src/lib/helper
 import { getSecret } from "../helpers";
 import { verifyTwitterUser } from "../helpers";
 import { HandleResponseBody } from "../../src/lib/helpers/search";
-import { getActiveSessions, getReservedHandles, initFirebase } from "../helpers/firebase";
+import { getActiveSessionsByPhoneNumber, getActiveSessionsByHandle, getReservedHandles, initFirebase } from "../helpers/firebase";
 
 export interface NodeSessionResponseBody {
   error: boolean,
@@ -99,13 +99,9 @@ const handler: Handler = async (
     }
   }
 
-  const reservedhandles = await getReservedHandles();
-  const activeSessions = await getActiveSessions();
-
   const { phoneNumber } = decode(accessToken) as AccessTokenPayload;
-  const tooManySessions = activeSessions && activeSessions?.filter(
-    ({ phoneNumber: existingPhoneNumber }) => existingPhoneNumber === phoneNumber
-  ).length > 3;
+  const activeSessionsByPhone = await getActiveSessionsByPhoneNumber(phoneNumber);
+  const tooManySessions = activeSessionsByPhone.length > 3;
 
   if (tooManySessions) {
     return {
@@ -117,11 +113,8 @@ const handler: Handler = async (
     }
   }
 
-  const handleBeingPurchased = activeSessions && activeSessions?.filter(({ handle }) =>
-    handle === headerHandle
-  ).length > 0;
-
-  if (handleBeingPurchased) {
+  const activeSessionsByHandle = await getActiveSessionsByHandle(handle);
+  if (activeSessionsByHandle) {
     return {
       statusCode: 403,
       body: JSON.stringify({
@@ -131,8 +124,9 @@ const handler: Handler = async (
     }
   }
 
-  if (reservedhandles) {
-    const { manual, spos, blacklist } = reservedhandles;
+  const reservedHandles = await getReservedHandles();
+  if (reservedHandles) {
+    const { manual, spos, blacklist } = reservedHandles;
     if (blacklist?.includes(handle)) {
       return {
         statusCode: 403,
@@ -210,7 +204,7 @@ const handler: Handler = async (
  * @param ip
  * @returns
  */
- const passesRecaptcha = async (
+const passesRecaptcha = async (
   token: string
 ): Promise<boolean | HandlerResponse> => {
   const recaptcha_url = new URL(
