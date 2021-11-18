@@ -19,6 +19,7 @@
     "gatsby-plugin-web-font-loader": "^1.0.4",
     "js-cookie": "^3.0.1",
     "jsonwebtoken": "^8.5.1",
+    "query-string": "^7.0.1",
     "react": "^17.0.2",
     "react-countdown": "^2.3.2",
     "react-dom": "^17.0.2",
