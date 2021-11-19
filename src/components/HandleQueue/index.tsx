@@ -33,11 +33,11 @@ export const HandleQueue = (): JSX.Element => {
   const { betaState } = useContext(HandleMintContext);
   const [savingSpot, setSavingSpot] = useState<boolean>(false);
   const [authenticating, setAuthenticating] = useState<boolean>(false);
-  const [action, setAction] = useState<"save" | "auth">("save");
   const [submitted, setSubmitted] = useState<boolean>(false);
   const [responseMessage, setResponseMessage] = useState<string>(null);
   const [emailInput, setEmailInput] = useState<string>("");
   const [authInput, setAuthInput] = useState<string>("");
+  const [emailChecked, setEmailChecked] = useState<boolean>(false);
   const [touChecked, setTouChecked] = useState<boolean>(false);
   const [refundsChecked, setRefundsChecked] = useState<boolean>(false);
 
@@ -80,6 +80,11 @@ export const HandleQueue = (): JSX.Element => {
 
     if (emailInput.includes('+')) {
       setTimeoutResponseMessage("Sorry, we do not support email addresses with the (+) character. Try again!");
+      return;
+    }
+
+    if (!emailChecked) {
+      setTimeoutResponseMessage("Sorry, you must agree to receive email alerts!");
       return;
     }
 
@@ -213,8 +218,8 @@ export const HandleQueue = (): JSX.Element => {
                     id="acceptEmail"
                     name="acceptEmail"
                     type="checkbox"
-                    checked={touChecked}
-                    onChange={() => setTouChecked(!touChecked)}
+                    checked={emailChecked}
+                    onChange={() => setEmailChecked(!emailChecked)}
                   />
                   <label className="ml-2 text-white py-3 cursor-pointer" htmlFor="acceptEmail">
                     I agree to receive email notifications.
@@ -265,21 +270,29 @@ export const HandleQueue = (): JSX.Element => {
                 </div>
               </>
             )}
-            <Button
-              className={`w-full rounded-t-none`}
-              buttonStyle={"primary"}
-              type="submit"
-              disabled={authenticating || savingSpot || (activeEmail && (!touChecked || !refundsChecked))}
-              onClick={
-                touChecked && refundsChecked && activeEmail
-                  ? handleAuthenticating
-                  : handleSaving
-              }
-            >
-              {authenticating && "Authenticating..."}
-              {savingSpot && "Entering queue..."}
-              {!authenticating && !savingSpot && "Submit"}
-            </Button>
+            {activeEmail ? (
+              <Button
+                className={`w-full rounded-t-none`}
+                buttonStyle={"primary"}
+                type="submit"
+                disabled={authenticating || !touChecked || !refundsChecked}
+                onClick={handleAuthenticating}
+              >
+                {authenticating && "Authenticating..."}
+                {!authenticating && "Submit"}
+              </Button>
+            ) : (
+              <Button
+                className={`w-full rounded-t-none`}
+                buttonStyle={"primary"}
+                type="submit"
+                disabled={savingSpot || !emailChecked}
+                onClick={handleSaving}
+              >
+                {savingSpot && "Entering queue..."}
+                {!authenticating && !savingSpot && "Submit"}
+              </Button>
+            )}
           </form>
           {responseMessage && (
             <>
