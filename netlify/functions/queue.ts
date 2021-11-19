@@ -28,7 +28,7 @@ const handler: Handler = async (
       statusCode: 400,
       body: JSON.stringify({
         error: true,
-        message: 'Missing phone number.'
+        message: 'Missing email address.'
       } as QueueResponseBody)
     }
   }
