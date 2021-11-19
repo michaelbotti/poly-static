@@ -61,31 +61,18 @@ function MintPage() {
                 </div>
               </div>
             )}
-            {false === accessOpen && (
-              <>
-                <div className="col-span-12 md:col-span-6 relative z-10">
-                  <h2 className="w-full text-4xl font-bold text-primary-100 mb-2">Beta Launch 🎉</h2>
-                  <hr className="w-12 border-dark-300 border-2 block my-8" />
-                  <h3 className="text-lg uppercase mb-4">How it Works</h3>
-                  <ul className="text-lg">
-                    <li className="leading-normal"><p><strong><u>Enter your email address.</u></strong> We DO NOT keep this data beyond your session.</p></li>
-                    <li className="leading-normal"><p>20 participants will receive an access code every five minutes, good for one <span className="font-bold underline">30 minute access window</span>.</p></li>
-                    <li className="leading-normal"><p>Access codes <span className="font-bold underline">will be paused if the blockchain load is above 80%</span>, ensuring timely transaction times.</p></li>
-                    <li className="leading-normal"><p>Within that window, you can mint up to <span className="font-bold underline">3 individual Handles at a time (9 total)</span> before having to re-enter the queue.</p></li>
-                  </ul>
-                </div>
-                <div className="col-span-12 md:col-span-6">
-                  {!accessOpen && betaState?.totalHandles >= 15000 ? (
-                    <div className="flex items-center justify-between mb-8 lg:mb-12">
-                      <div className="w-1/2 text-center">
-                        <h4 className="text-white text-center font-bold">
-                          Sold Out!
-                        </h4>
-                      </div>
-                    </div>
-                  ) : <HandleQueue />}
-                </div>
-              </>
+            {!accessOpen && betaState?.totalHandles <= 15000 && (
+              <div className="col-span-12 md:col-span-6 md:col-start-4   relative z-10">
+                <h2 className="text-primary-100 font-bold text-5xl text-center mb-8">Beta Sale</h2>
+                <HandleQueue />
+              </div>
+            )}
+            {!accessOpen && betaState?.totalHandles > 15000 && (
+              <div className="col-span-12 md:col-span-6 md:col-start-4   relative z-10">
+                <h2 className="text-primary-100 font-bold text-5xl text-center mb-8">Beta Sale</h2>
+                <h2 className="text-white font-bold text-3xl text-center mb-8">Sold Out!</h2>
+                <p className="text-lg text-center">We have officially sold out of our first 15,000 public access Handles. We will re-open public minting as soon as possible!</p>
+              </div>
             )}
             {accessOpen && (
               <>

@@ -15,18 +15,28 @@ const validateEmail = (email: string): boolean => {
   return res.test(String(email).toLowerCase());
 }
 
-const useActiveEmail = (): string | null => {
-  if (typeof window === undefined) {
-    return null;
+const getActiveEmail = (): string | null => {
+  let value = null;
+  if (typeof window !== undefined) {
+    const { search } = useLocation();
+    const { activeEmail } = parse(search) as { activeEmail: string };
+    if (activeEmail && validateEmail(activeEmail)) {
+      value = activeEmail;
+    }
   }
 
-  const { search } = useLocation();
-  const { activeEmail } = parse(search) as { activeEmail: string };
-  if (activeEmail && validateEmail(activeEmail)) {
-    return activeEmail;
+  return value;
+}
+
+const getActiveAuthCode = (): string | null => {
+  let value = null;
+  if (typeof window !== undefined) {
+    const { search } = useLocation();
+    const { activeAuthCode } = parse(search) as { activeAuthCode: string };
+    value = activeAuthCode || null;
   }
 
-  return null;
+  return value;
 }
 
 export const HandleQueue = (): JSX.Element => {
@@ -41,8 +51,15 @@ export const HandleQueue = (): JSX.Element => {
   const [touChecked, setTouChecked] = useState<boolean>(false);
   const [refundsChecked, setRefundsChecked] = useState<boolean>(false);
 
-  const activeEmail = useActiveEmail();
+  const activeEmail = getActiveEmail();
+  const activeAuthCode = getActiveAuthCode();
   const form = useRef(null);
+
+  useEffect(() => {
+    if (activeAuthCode) {
+      setAuthInput(activeAuthCode);
+    }
+  }, []);
 
   const setTimeoutResponseMessage = (message: string) => {
     setResponseMessage(message);
@@ -104,7 +121,7 @@ export const HandleQueue = (): JSX.Element => {
       setEmailInput('');
 
       // Update response state.
-      setResponseMessage(`You did it! Check your email for confirmation, and make sure to check your spam folder! We suggesting TURNING ON email notifications so you don't miss an auth code.`);
+      setResponseMessage(`You have successfully been entered into the queue! Check your email for further instructions about your access code.`);
       setSubmitted(true);
     } else {
       setTimeoutResponseMessage(res?.message || "That didn't work. Try again.");
@@ -186,20 +203,22 @@ export const HandleQueue = (): JSX.Element => {
           </span>
         </div>
       </div>
-      <h3 className="text-2xl text-white text-center mb-4">
-        {!submitted && activeEmail && <>Enter Your Access Code!</>}
-        {!submitted && !activeEmail && <>Enter Your Email</>}
-        {submitted && <>Success!</>}
-      </h3>
       {submitted ? (
-        <>
-          <div className="w-12 h-12 text-3xl bg-primary-200 text-white flex items-center justify-center rounded mx-auto mb-4">
-            &#10003;
-          </div>
-          <p className="text-lg text-center">{responseMessage}</p>
-        </>
+        <div className="bg-dark-100 rounded-lg shadow-lg p-8 block">
+          <h3 className="text-2xl text-white text-center mb-4 font-bold">
+            <div className="w-12 h-12 text-3xl bg-primary-200 text-white flex items-center justify-center rounded mx-auto mb-4">
+              &#10003;
+            </div>
+            Success!
+          </h3>
+          <p className="text-lg text-center text-dark-350">{responseMessage}</p>
+          <p className="text-center text-lg font-bold">You may close this window.</p>
+        </div>
       ) : (
         <>
+          <h3 className="text-2xl text-white text-center mb-4">
+            {activeEmail ? <>Enter Your Access Code!</> : <>Enter Your Email</>}
+          </h3>
           <form onSubmit={(e) => e.preventDefault()} ref={form} className="bg-dark-100 border-dark-300 rounded-t-lg">
             {!activeEmail && (
               <>
@@ -294,20 +313,7 @@ export const HandleQueue = (): JSX.Element => {
               </Button>
             )}
           </form>
-          {responseMessage && (
-            <>
-              <p className="my-2 text-center">{responseMessage}</p>
-              {!savingSpot && (
-                <p className="text-center">
-                  {submitted && (
-                    <Button size="small" className="mt-2" onClick={() => {
-                      setResponseMessage(null);
-                    }}>Dismiss This Message</Button>
-                  )}
-                </p>
-              )}
-            </>
-          )}
+          {responseMessage && <p className="my-2 text-center">{responseMessage}</p>}
         </>
       )}
     </>
