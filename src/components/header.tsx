@@ -1,7 +1,8 @@
-import { Link } from "gatsby";
+import { withPrefix, Link } from "gatsby";
 import React, { useState, FC, useContext } from "react";
 import { HandleMintContext } from "../context/mint";
 import Button from "./button";
+import { Helmet } from "react-helmet";
 
 import Logo from './logo';
 import { Twitter } from '../pages/team';
@@ -45,6 +46,9 @@ const Header: FC<HeaderProps> = ({ className, showMint = true }) => {
   return (
     <>
       <header className={`bg-dark-100 p-4 md:p-8 ${className}`} style={{ minHeight: 120 }}>
+      <Helmet>
+          <script src={withPrefix('fp-load.js')} type="text/javascript" />
+      </Helmet>
         <div className="max-w-5xl bg-dark-100 mx-auto flex flex-wrap items-center justify-between">
           <Link to="/">
             <h1 className="flex items-center no-underline">
