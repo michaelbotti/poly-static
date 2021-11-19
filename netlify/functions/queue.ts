@@ -5,7 +5,7 @@ import {
   HandlerResponse,
 } from "@netlify/functions";
 
-import { HEADER_PHONE } from "../../src/lib/constants";
+import { HEADER_EMAIL } from "../../src/lib/constants";
 import { fetchNodeApp, getNodeEndpointUrl } from "../helpers/util";
 
 interface AppendAccessResponse {
@@ -23,7 +23,7 @@ const handler: Handler = async (
   context: HandlerContext
 ): Promise<HandlerResponse> => {
   const { headers } = event;
-  if (!headers[HEADER_PHONE]) {
+  if (!headers[HEADER_EMAIL]) {
     return {
       statusCode: 400,
       body: JSON.stringify({
@@ -33,17 +33,11 @@ const handler: Handler = async (
     }
   }
 
-  console.log(
-    getNodeEndpointUrl(),
-    process.env.APP_ENV,
-    HEADER_PHONE
-  )
-
   try {
     const data: QueueResponseBody = await fetchNodeApp(`queue`, {
       method: 'POST',
       headers: {
-        [HEADER_PHONE]: headers[HEADER_PHONE]
+        [HEADER_EMAIL]: headers[HEADER_EMAIL]
       }
     }).then(res => res.json())
     .catch(e => console.log(e));
