@@ -4,10 +4,10 @@ import { Link } from "gatsby";
 
 import { QueueResponseBody } from "../../../netlify/functions/queue";
 import { VerifyResponseBody } from "../../../netlify/functions/verify";
-import { HEADER_PHONE, HEADER_PHONE_AUTH } from "../../lib/constants";
+import { HEADER_PHONE, HEADER_PHONE_AUTH, HEADER_RECAPTCHA } from "../../lib/constants";
 import { useAccessOpen } from "../../lib/hooks/access";
 import Button from "../button";
-import { setAccessTokenCookie } from "../../lib/helpers/session";
+import { getRecaptchaToken, setAccessTokenCookie } from "../../lib/helpers/session";
 import { HandleMintContext } from "../../context/mint";
 
 import "react-phone-number-input/style.css";
@@ -65,10 +65,13 @@ export const HandleQueue = (): JSX.Element => {
 
     setSavingSpot(true);
     setResponseMessage("Submitting phone number...");
+
+    const recaptchaToken: string = await getRecaptchaToken();
     const res: QueueResponseBody = await fetch(`/.netlify/functions/queue`, {
       method: "POST",
       headers: {
         [HEADER_PHONE]: phoneInput,
+        [HEADER_RECAPTCHA]: recaptchaToken
       },
     })
       .then((res) => res.json())
