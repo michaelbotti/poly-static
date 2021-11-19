@@ -104,7 +104,7 @@ export const HandleQueue = (): JSX.Element => {
       setEmailInput('');
 
       // Update response state.
-      setResponseMessage(`You did it! Check your email for confirmation, and make sure to check your spam folder!`);
+      setResponseMessage(`You did it! Check your email for confirmation, and make sure to check your spam folder! We suggesting TURNING ON email notifications so you don't miss an auth code.`);
       setSubmitted(true);
     } else {
       setTimeoutResponseMessage(res?.message || "That didn't work. Try again.");
