@@ -269,9 +269,9 @@ export const HandleQueue = (): JSX.Element => {
               className={`w-full rounded-t-none`}
               buttonStyle={"primary"}
               type="submit"
-              disabled={authenticating || savingSpot || ("auth" === action && (!touChecked || !refundsChecked))}
+              disabled={authenticating || savingSpot || (activeEmail && (!touChecked || !refundsChecked))}
               onClick={
-                touChecked && refundsChecked && "auth" === action
+                touChecked && refundsChecked && activeEmail
                   ? handleAuthenticating
                   : handleSaving
               }
