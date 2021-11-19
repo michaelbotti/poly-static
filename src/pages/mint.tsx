@@ -53,8 +53,8 @@ function MintPage() {
           className="grid grid-cols-12 gap-4 lg:gap-8 bg-dark-200 rounded-lg rounded-tl-none place-content-start p-4 lg:p-8 mb-16"
           style={{ minHeight: "60vh" }}
           >
-            {null === accessOpen && (
-              <div className="col-span-12 md:col-span-6 relative z-10">
+            {null === accessOpen || null === betaState && (
+              <div className="col-span-12 md:col-span-6 md:col-start-4 relative z-10">
                 <div className="grid justify-center content-center h-full w-full p-8 flex-wrap">
                   <p className="w-full text-center">Fetching details...</p>
                   <Loader />
@@ -62,13 +62,13 @@ function MintPage() {
               </div>
             )}
             {!accessOpen && betaState?.totalHandles <= 15000 && (
-              <div className="col-span-12 md:col-span-6 md:col-start-4   relative z-10">
+              <div className="col-span-12 md:col-span-6 md:col-start-4 relative z-10">
                 <h2 className="text-primary-100 font-bold text-5xl text-center mb-8">Beta Sale</h2>
                 <HandleQueue />
               </div>
             )}
             {!accessOpen && betaState?.totalHandles > 15000 && (
-              <div className="col-span-12 md:col-span-6 md:col-start-4   relative z-10">
+              <div className="col-span-12 md:col-span-6 md:col-start-4 relative z-10">
                 <h2 className="text-primary-100 font-bold text-5xl text-center mb-8">Beta Sale</h2>
                 <h2 className="text-white font-bold text-3xl text-center mb-8">Sold Out!</h2>
                 <p className="text-lg text-center">We have officially sold out of our first 15,000 public access Handles. We will re-open public minting as soon as possible!</p>
