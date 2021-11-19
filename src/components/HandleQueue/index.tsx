@@ -11,7 +11,7 @@ import { setAccessTokenCookie } from "../../lib/helpers/session";
 import { HandleMintContext } from "../../context/mint";
 
 const validateEmail = (email: string): boolean => {
-  const res = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+  const res = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
   return res.test(String(email).toLowerCase());
 }
 
@@ -33,11 +33,11 @@ export const HandleQueue = (): JSX.Element => {
   const { betaState } = useContext(HandleMintContext);
   const [savingSpot, setSavingSpot] = useState<boolean>(false);
   const [authenticating, setAuthenticating] = useState<boolean>(false);
-  const [action, setAction] = useState<"save" | "auth">("save");
   const [submitted, setSubmitted] = useState<boolean>(false);
   const [responseMessage, setResponseMessage] = useState<string>(null);
   const [emailInput, setEmailInput] = useState<string>("");
   const [authInput, setAuthInput] = useState<string>("");
+  const [emailChecked, setEmailChecked] = useState<boolean>(false);
   const [touChecked, setTouChecked] = useState<boolean>(false);
   const [refundsChecked, setRefundsChecked] = useState<boolean>(false);
 
@@ -83,6 +83,11 @@ export const HandleQueue = (): JSX.Element => {
       return;
     }
 
+    if (!emailChecked) {
+      setTimeoutResponseMessage("Sorry, you must agree to receive email alerts!");
+      return;
+    }
+
     setSavingSpot(true);
     setResponseMessage("Submitting email...");
     const res: QueueResponseBody = await fetch(`/.netlify/functions/queue`, {
@@ -99,7 +104,7 @@ export const HandleQueue = (): JSX.Element => {
       setEmailInput('');
 
       // Update response state.
-      setResponseMessage(`You did it! Check your email for confirmation, and make sure to check your spam folder!`);
+      setResponseMessage(`You did it! Check your email for confirmation, and make sure to check your spam folder! We suggesting TURNING ON email notifications so you don't miss an auth code.`);
       setSubmitted(true);
     } else {
       setTimeoutResponseMessage(res?.message || "That didn't work. Try again.");
@@ -213,8 +218,8 @@ export const HandleQueue = (): JSX.Element => {
                     id="acceptEmail"
                     name="acceptEmail"
                     type="checkbox"
-                    checked={touChecked}
-                    onChange={() => setTouChecked(!touChecked)}
+                    checked={emailChecked}
+                    onChange={() => setEmailChecked(!emailChecked)}
                   />
                   <label className="ml-2 text-white py-3 cursor-pointer" htmlFor="acceptEmail">
                     I agree to receive email notifications.
@@ -265,21 +270,29 @@ export const HandleQueue = (): JSX.Element => {
                 </div>
               </>
             )}
-            <Button
-              className={`w-full rounded-t-none`}
-              buttonStyle={"primary"}
-              type="submit"
-              disabled={authenticating || savingSpot || ("auth" === action && (!touChecked || !refundsChecked))}
-              onClick={
-                touChecked && refundsChecked && "auth" === action
-                  ? handleAuthenticating
-                  : handleSaving
-              }
-            >
-              {authenticating && "Authenticating..."}
-              {savingSpot && "Entering queue..."}
-              {!authenticating && !savingSpot && "Submit"}
-            </Button>
+            {activeEmail ? (
+              <Button
+                className={`w-full rounded-t-none`}
+                buttonStyle={"primary"}
+                type="submit"
+                disabled={authenticating || !touChecked || !refundsChecked}
+                onClick={handleAuthenticating}
+              >
+                {authenticating && "Authenticating..."}
+                {!authenticating && "Submit"}
+              </Button>
+            ) : (
+              <Button
+                className={`w-full rounded-t-none`}
+                buttonStyle={"primary"}
+                type="submit"
+                disabled={savingSpot || !emailChecked}
+                onClick={handleSaving}
+              >
+                {savingSpot && "Entering queue..."}
+                {!authenticating && !savingSpot && "Submit"}
+              </Button>
+            )}
           </form>
           {responseMessage && (
             <>

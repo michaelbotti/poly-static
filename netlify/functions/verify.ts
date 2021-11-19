@@ -27,7 +27,7 @@ const handler: Handler = async (
   if (!headers[HEADER_EMAIL]) {
     return {
       statusCode: 400,
-      body: 'Missing phone number.'
+      body: 'Missing email address.'
     }
   }
 
