@@ -217,7 +217,7 @@ export const HandleQueue = (): JSX.Element => {
       ) : (
         <>
           <h3 className="text-2xl text-white text-center mb-4">
-            {activeEmail ? <>Enter Your Access Code!</> : <>Enter Your Email</>}
+            {activeEmail ? <>Submit Your Access Code!</> : <>Get an Access Code</>}
           </h3>
           <form onSubmit={(e) => e.preventDefault()} ref={form} className="bg-dark-100 border-dark-300 rounded-t-lg">
             {!activeEmail && (
@@ -313,6 +313,7 @@ export const HandleQueue = (): JSX.Element => {
               </Button>
             )}
           </form>
+          {(activeEmail || activeAuthCode) && <p className="text-center mt-2"><Link to={'/mint/'} className="text-primary-100">Back to Queue</Link></p>}
           {responseMessage && <p className="my-2 text-center">{responseMessage}</p>}
         </>
       )}

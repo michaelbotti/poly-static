@@ -28,10 +28,10 @@ export const useSyncAvailableStatus = async (unsanitizedHandle: string) => {
     const handle = normalizeNFTHandle(unsanitizedHandle);
 
     // Don't allow new sessions when their's 5 minutes left.
-    if (Date.now() + 300000 > (currentAccess ? currentAccess.data.exp * 1000 : 0)) {
+    if (Date.now() + 300000 > (currentAccess ? currentAccess.data.exp * 1000 : 0) && !reservedHandles.twitter.includes(handle)) {
       setHandleResponse({
-        available: false,
-        message: 'Sorry, but you don\'t have enough time for another session!',
+        available: true,
+        message: 'Less than 5 minutes! This attempt may be refunded.',
         twitter: false
       });
       return;
