@@ -110,8 +110,6 @@ export const HandleQueue = (): JSX.Element => {
     setResponseMessage("Submitting email...");
 
     const encodedClientAgentInfo = await buildClientAgentInfo();
-    console.log(encodedClientAgentInfo);
-    return;
     const res = await fetch(`/.netlify/functions/queue`, {
       method: "POST",
       headers: {
