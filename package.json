@@ -40,6 +40,7 @@
     "develop": "gatsby develop",
     "netlify:dev": "netlify dev",
     "netlify:build": "netlify build",
+    "netlify:local": "NODEJS_APP_ENDPOINT=http://localhost:3000 yarn netlify:dev",
     "build": "gatsby build",
     "serve": "gatsby serve",
     "clean": "gatsby clean",

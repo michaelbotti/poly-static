@@ -2,42 +2,19 @@ import React, { useRef, useState, useContext, useEffect } from "react";
 import { Link } from "gatsby";
 import { useLocation } from '@reach/router';
 import { parse } from 'query-string';
-import { ClientJS } from 'clientjs';
 
 import { QueueResponseBody } from "../../../netlify/functions/queue";
-import { ClientAgentInfo, ClientAgentInfoResponseBody } from "../../../netlify/functions/clientAgent";
 import { VerifyResponseBody } from "../../../netlify/functions/verify";
 import { HEADER_EMAIL, HEADER_EMAIL_AUTH } from "../../lib/constants";
 import Button from "../button";
 import { setAccessTokenCookie } from "../../lib/helpers/session";
 import { HandleMintContext } from "../../context/mint";
+import { buildClientAgentInfo } from "../../lib/helpers/clientInfo";
 
 
 const validateEmail = (email: string): boolean => {
   const res = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
   return res.test(String(email).toLowerCase());
-}
-
-const getAgentInfo = (): ClientAgentInfo => {
-  const clientAgent = new ClientJS();
-  return {
-    userAgent: clientAgent.getUserAgent(),
-    printScreen: clientAgent.getScreenPrint(),
-    colorDepth: clientAgent.getColorDepth(),
-    currentResolution: clientAgent.getCurrentResolution(),
-    availableResolution: clientAgent.getAvailableResolution(),
-    dpiX: clientAgent.getDeviceXDPI(),
-    dpiY: clientAgent.getDeviceYDPI(),
-    pluginList: clientAgent.getPlugins(),
-    fontList: clientAgent.getFonts(),
-    localStorage: clientAgent.isLocalStorage(),
-    sessionStorage: clientAgent.isSessionStorage(),
-    timeZone: clientAgent.getTimeZone(),
-    language: clientAgent.getLanguage(),
-    systemLanguage: clientAgent.getSystemLanguage(),
-    cookies: clientAgent.isCookie(),
-    canasPrint: clientAgent.getCanvasPrint()
-  }
 }
 
 const useActiveEmail = (): string | null => {
@@ -52,20 +29,6 @@ const useActiveEmail = (): string | null => {
   }
 
   return null;
-}
-
-const submitClientAgentInfo = async (): string | null => {
-  const res: ClientAgentInfoResponseBody = await fetch(`/.netlify/functions/clientAgent`, {
-    method: "POST",
-    body: JSON.stringify(getAgentInfo()),
-  })
-    .then((res) => res.json())
-    .catch((e) => console.log(e));
-
-  // Clear the input field for email.
-  if (res.suspicious) {
-    // What to do here? Stop
-  }
 }
 
 export const HandleQueue = (): JSX.Element => {
@@ -124,11 +87,16 @@ export const HandleQueue = (): JSX.Element => {
 
     setSavingSpot(true);
     setResponseMessage("Submitting email...");
-    const res: QueueResponseBody = await fetch(`/.netlify/functions/queue`, {
+
+    const encodedClientAgentInfo = buildClientAgentInfo();
+    const res = await fetch(`/.netlify/functions/queue`, {
       method: "POST",
       headers: {
         [HEADER_EMAIL]: emailInput || activeEmail,
       },
+      body: JSON.stringify({
+        clientAgent: encodedClientAgentInfo,
+      }),
     })
       .then((res) => res.json())
       .catch((e) => console.log(e));
