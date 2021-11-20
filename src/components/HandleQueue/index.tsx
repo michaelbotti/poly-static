@@ -3,7 +3,6 @@ import { Link } from "gatsby";
 import { useLocation } from '@reach/router';
 import { parse } from 'query-string';
 
-import { QueueResponseBody } from "../../../netlify/functions/queue";
 import { VerifyResponseBody } from "../../../netlify/functions/verify";
 import { HEADER_EMAIL, HEADER_EMAIL_AUTH } from "../../lib/constants";
 import Button from "../button";
@@ -110,7 +109,7 @@ export const HandleQueue = (): JSX.Element => {
     setSavingSpot(true);
     setResponseMessage("Submitting email...");
 
-    const encodedClientAgentInfo = buildClientAgentInfo();
+    const encodedClientAgentInfo = await buildClientAgentInfo();
     const res = await fetch(`/.netlify/functions/queue`, {
       method: "POST",
       headers: {

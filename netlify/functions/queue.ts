@@ -6,7 +6,7 @@ import {
 } from "@netlify/functions";
 
 import { HEADER_CLIENT_IP, HEADER_EMAIL } from "../../src/lib/constants";
-import { fetchNodeApp, getNodeEndpointUrl } from "../helpers/util";
+import { fetchNodeApp } from "../helpers/util";
 
 interface AppendAccessResponse {
   updated: boolean;
