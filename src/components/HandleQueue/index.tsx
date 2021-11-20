@@ -9,6 +9,8 @@ import { HEADER_EMAIL, HEADER_EMAIL_AUTH } from "../../lib/constants";
 import Button from "../button";
 import { setAccessTokenCookie } from "../../lib/helpers/session";
 import { HandleMintContext } from "../../context/mint";
+import { buildClientAgentInfo } from "../../lib/helpers/clientInfo";
+
 
 const validateEmail = (email: string): boolean => {
   const res = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
@@ -107,11 +109,16 @@ export const HandleQueue = (): JSX.Element => {
 
     setSavingSpot(true);
     setResponseMessage("Submitting email...");
-    const res: QueueResponseBody = await fetch(`/.netlify/functions/queue`, {
+
+    const encodedClientAgentInfo = buildClientAgentInfo();
+    const res = await fetch(`/.netlify/functions/queue`, {
       method: "POST",
       headers: {
         [HEADER_EMAIL]: emailInput || activeEmail,
       },
+      body: JSON.stringify({
+        clientAgent: encodedClientAgentInfo,
+      }),
     })
       .then((res) => res.json())
       .catch((e) => console.log(e));

@@ -5,7 +5,7 @@ import {
   HandlerResponse,
 } from "@netlify/functions";
 
-import { HEADER_EMAIL } from "../../src/lib/constants";
+import { HEADER_CLIENT_IP, HEADER_EMAIL } from "../../src/lib/constants";
 import { fetchNodeApp, getNodeEndpointUrl } from "../helpers/util";
 
 interface AppendAccessResponse {
@@ -22,7 +22,7 @@ const handler: Handler = async (
   event: HandlerEvent,
   context: HandlerContext
 ): Promise<HandlerResponse> => {
-  const { headers } = event;
+  const { headers, body } = event;
   if (!headers[HEADER_EMAIL]) {
     return {
       statusCode: 400,
@@ -33,14 +33,29 @@ const handler: Handler = async (
     }
   }
 
+  if (!body) {
+    return {
+      statusCode: 400,
+      body: JSON.stringify({
+        error: true,
+        message: 'Invalid request'
+      } as QueueResponseBody)
+    }
+  }
+
+  const parsedBody = JSON.parse(body);
+  const requestBody = { ...parsedBody, clientIp: headers[HEADER_CLIENT_IP] }
+
   try {
     const data: QueueResponseBody = await fetchNodeApp(`queue`, {
       method: 'POST',
       headers: {
-        [HEADER_EMAIL]: headers[HEADER_EMAIL]
-      }
+        [HEADER_EMAIL]: headers[HEADER_EMAIL],
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(requestBody)
     }).then(res => res.json())
-    .catch(e => console.log(e));
+      .catch(e => console.log(e));
 
     return {
       statusCode: 200,

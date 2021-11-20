@@ -6,9 +6,9 @@
   "dependencies": {
     "@emurgo/cardano-serialization-lib-nodejs": "^9.1.0",
     "@emurgo/cip14-js": "^3.0.1",
-    "@fingerprintjs/fingerprintjs-pro": "^3.5.3",
     "@tailwindcss/forms": "^0.3.4",
     "aws-sdk": "^2.990.0",
+    "clientjs": "^0.2.1",
     "cross-fetch": "^3.1.4",
     "firebase": "^9.3.0",
     "firebase-admin": "^10",
@@ -40,6 +40,7 @@
     "develop": "gatsby develop",
     "netlify:dev": "netlify dev",
     "netlify:build": "netlify build",
+    "netlify:local": "NODEJS_APP_ENDPOINT=http://localhost:3000 yarn netlify:dev",
     "build": "gatsby build",
     "serve": "gatsby serve",
     "clean": "gatsby clean",
