@@ -24,9 +24,10 @@ export const buildClientAgentInfo = async (): Promise<string> => {
         return '';
     }
 
+    let response;
     await import('clientjs').then(({ ClientJS }) => {
       const clientAgent = new ClientJS();
-      return buffer.Buffer.from(JSON.stringify({
+      response = buffer.Buffer.from(JSON.stringify({
           userAgent: clientAgent.getUserAgent(),
           printScreen: clientAgent.getScreenPrint(),
           colorDepth: clientAgent.getColorDepth(),
@@ -45,5 +46,7 @@ export const buildClientAgentInfo = async (): Promise<string> => {
           canvasPrint: clientAgent.getCanvasPrint()
       })).toString('base64');
     });
+
+    return response;
 }
 
