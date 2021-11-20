@@ -21,7 +21,7 @@ export interface ClientAgentInfo {
 }
 
 export const buildClientAgentInfo = (): string => {
-    if (window === undefined) {
+    if (typeof window === undefined) {
         return '';
     }
 
