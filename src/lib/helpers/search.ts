@@ -5,7 +5,7 @@ const RESPONSE_BETA_PHASE_UNAVAILABLE = 'Legendary handles are not available yet
 const RESPONSE_ACTIVE_SESSION_UNAVAILABLE = 'Pending purchase. Try again soon!';
 const RESPONSE_SESSION_COUNT_UNAVAILABLE = 'Sorry! You can only have 3 active sessions at a time.';
 const RESPONSE_SPO_HANDLE_UNAVAILABLE = 'Reserved for the stake pool. Email private@adahandle.com to claim!';
-const RESPONSE_RESERVED_HANDLE_UNAVAILABLE = 'We reserved this handle for you! Send an email to private@adahandle.com to claim it.';
+const RESPONSE_RESERVED_HANDLE_UNAVAILABLE = 'This Handle is reserved. Send an email to private@adahandle.com to claim it.';
 
 export interface HandleResponseBody {
   available: boolean;
