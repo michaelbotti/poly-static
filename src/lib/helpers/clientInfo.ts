@@ -21,6 +21,10 @@ export interface ClientAgentInfo {
 }
 
 export const buildClientAgentInfo = (): string => {
+    if (window === undefined) {
+        return '';
+    }
+
     const clientAgent = new ClientJS();
     return buffer.Buffer.from(JSON.stringify({
         userAgent: clientAgent.getUserAgent(),
