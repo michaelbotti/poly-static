@@ -45,7 +45,7 @@ const unauthorizedResponse: HandlerResponse = {
 };
 
 interface AccessTokenPayload extends JwtPayload {
-  phoneNumber: string;
+  emailAddress: string;
 }
 
 const handler: Handler = async (
@@ -102,9 +102,9 @@ const handler: Handler = async (
   const reservedhandles = await getReservedHandles();
   const activeSessions = await getActiveSessions();
 
-  const { phoneNumber } = decode(accessToken) as AccessTokenPayload;
+  const { emailAddress } = decode(accessToken) as AccessTokenPayload;
   const tooManySessions = activeSessions && activeSessions?.filter(
-    ({ phoneNumber: existingPhoneNumber }) => existingPhoneNumber === phoneNumber
+    ({ emailAddress: existingEmailAddress }) => existingEmailAddress === emailAddress
   ).length > 3;
 
   if (tooManySessions) {
@@ -159,7 +159,7 @@ const handler: Handler = async (
 
   /**
    * We sign a session JWT tokent to authorize the purchase,
-   * and include the access phone number to limit request.
+   * and include the access email address to limit request.
    */
   const sessionSecret = await getSecret('session');
   const sessionToken = jwt.sign(
@@ -167,7 +167,7 @@ const handler: Handler = async (
       iat: Date.now(),
       handle,
       cost: getRarityCost(handle),
-      phoneNumber
+      emailAddress
     },
     sessionSecret,
     {

@@ -50,10 +50,10 @@ const handler: Handler = async (
   const activeSessions = await getActiveSessions();
   const mintedHandles = await getMintedHandles();
 
-  const { phoneNumber } = decode(headerAccess);
+  const { emailAddress } = decode(headerAccess);
   if (
     activeSessions &&
-    activeSessions.filter((data) => data?.phoneNumber === phoneNumber).length > 3
+    activeSessions.filter((data) => data?.emailAddress === emailAddress).length > 3
   ) {
     return {
       statusCode: 403,

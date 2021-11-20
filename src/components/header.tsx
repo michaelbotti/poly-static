@@ -116,7 +116,7 @@ const Header: FC<HeaderProps> = ({ className, showMint = true }) => {
             </Button>
           )}
           {!showMint && betaState && !betaState.error && (
-            <p className="text-lg">{betaState.totalHandles}/15,000</p>
+            <p className="text-lg"><strong>Handles Minted:</strong> {betaState.totalHandles}/15,000</p>
           )}
         </div>
       </header>
