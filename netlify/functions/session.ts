@@ -66,7 +66,7 @@ const handler: Handler = async (
 
   // Anti-bot.
   const reCaptchaValidated = await passesRecaptcha(headerRecaptcha);
-  if (reCaptchaValidated) {
+  if (!reCaptchaValidated) {
     return botResponse;
   }
 
