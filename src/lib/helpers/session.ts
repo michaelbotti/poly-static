@@ -61,7 +61,10 @@ export const getRecaptchaToken = async (): Promise<string> => {
       window.grecaptcha.execute(
         RECAPTCHA_SITE_KEY,
         { action: "submit" },
-        (token: string) => token
+        (token: string) => {
+          console.log(token);
+          return token;
+        }
       )
   );
 }

@@ -110,6 +110,8 @@ export const HandleQueue = (): JSX.Element => {
     setResponseMessage("Submitting email...");
 
     const recaptchaToken: string = await getRecaptchaToken();
+    console.log(recaptchaToken);
+    return;
 
     const encodedClientAgentInfo = await buildClientAgentInfo();
     const res = await fetch(`/.netlify/functions/queue`, {
