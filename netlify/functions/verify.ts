@@ -6,7 +6,7 @@ import {
 } from "@netlify/functions";
 import { JwtPayload } from 'jsonwebtoken';
 
-import { HEADER_PHONE, HEADER_PHONE_AUTH } from "../../src/lib/constants";
+import { HEADER_EMAIL, HEADER_EMAIL_AUTH } from "../../src/lib/constants";
 import { initFirebase } from "../helpers/firebase";
 import { fetchNodeApp } from "../helpers/util";
 
@@ -24,14 +24,14 @@ const handler: Handler = async (
 ): Promise<HandlerResponse> => {
   const { headers } = event;
 
-  if (!headers[HEADER_PHONE]) {
+  if (!headers[HEADER_EMAIL]) {
     return {
       statusCode: 400,
-      body: 'Missing phone number.'
+      body: 'Missing email address.'
     }
   }
 
-  if (!headers[HEADER_PHONE_AUTH]) {
+  if (!headers[HEADER_EMAIL_AUTH]) {
     return {
       statusCode: 400,
       body: 'Missing auth code.'
@@ -44,8 +44,8 @@ const handler: Handler = async (
     const data = await fetchNodeApp(`/verify`, {
       method: 'GET',
       headers: {
-        [HEADER_PHONE]: headers[HEADER_PHONE],
-        [HEADER_PHONE_AUTH]: headers[HEADER_PHONE_AUTH]
+        [HEADER_EMAIL]: headers[HEADER_EMAIL],
+        [HEADER_EMAIL_AUTH]: headers[HEADER_EMAIL_AUTH]
       }
     }).then(res => res.json());
 

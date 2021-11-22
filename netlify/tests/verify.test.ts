@@ -25,10 +25,10 @@ describe('Verify tests', () => {
     isBase64Encoded: false
   };
 
-  it('Should fail when phone number is not provided', async () => {
+  it('Should fail when email address is not provided', async () => {
     await lambdaTester(handler).event(event).expectResolve(result => {
       expect(result.statusCode).toBe(400);
-      expect(result.body).toBe('Missing phone number.');
+      expect(result.body).toBe('Missing email address.');
     })
   });
 

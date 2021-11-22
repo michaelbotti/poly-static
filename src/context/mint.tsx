@@ -12,7 +12,7 @@ export interface ReservedHandlesType {
 }
 
 export interface ActiveSessionType {
-  phoneNumber: string;
+  emailAddress: string;
   cost: number;
   handle: string;
   start: number;

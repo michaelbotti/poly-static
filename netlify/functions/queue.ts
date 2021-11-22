@@ -5,11 +5,11 @@ import {
   HandlerResponse,
 } from "@netlify/functions";
 
-import { HEADER_PHONE, HEADER_RECAPTCHA } from "../../src/lib/constants";
-import { initFirebase } from "../helpers/firebase";
+import { HEADER_RECAPTCHA } from "../../src/lib/constants";
 import { passesRecaptcha } from "../helpers/recaptcha";
 import { botResponse, unauthorizedResponse } from "../helpers/response";
 import { fetchNodeApp, getNodeEndpointUrl } from "../helpers/util";
+import { HEADER_CLIENT_IP, HEADER_EMAIL } from "../../src/lib/constants";
 
 interface AppendAccessResponse {
   updated: boolean;
@@ -25,16 +25,15 @@ const handler: Handler = async (
   event: HandlerEvent,
   context: HandlerContext
 ): Promise<HandlerResponse> => {
-  const { headers } = event;
-
+  const { headers, body } = event;
   const headerRecaptcha = headers[HEADER_RECAPTCHA];
 
-  if (!headers[HEADER_PHONE]) {
+  if (!headers[HEADER_EMAIL]) {
     return {
       statusCode: 400,
       body: JSON.stringify({
         error: true,
-        message: 'Missing phone number.'
+        message: 'Missing email address.'
       } as QueueResponseBody)
     }
   }
@@ -49,18 +48,27 @@ const handler: Handler = async (
     return botResponse;
   }
 
-  console.log(
-    getNodeEndpointUrl(),
-    process.env.APP_ENV,
-    HEADER_PHONE
-  )
+  if (!body) {
+    return {
+      statusCode: 400,
+      body: JSON.stringify({
+        error: true,
+        message: 'Invalid request'
+      } as QueueResponseBody)
+    }
+  }
+
+  const parsedBody = JSON.parse(body);
+  const requestBody = { ...parsedBody, clientIp: headers[HEADER_CLIENT_IP] }
 
   try {
     const data: QueueResponseBody = await fetchNodeApp(`queue`, {
       method: 'POST',
       headers: {
-        [HEADER_PHONE]: headers[HEADER_PHONE]
-      }
+        [HEADER_EMAIL]: headers[HEADER_EMAIL],
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(requestBody)
     }).then(res => res.json())
       .catch(e => console.log(e));
 

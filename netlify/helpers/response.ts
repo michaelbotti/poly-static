@@ -12,7 +12,7 @@ export const botResponse: HandlerResponse = {
     statusCode: 422,
     body: JSON.stringify({
         message:
-            "Hmm, we think you might be a bot but we hope we're wrong. Please try again.",
+            "Our system thinks you might be a bot but we hope we're wrong. Please try again.",
     }),
 }
 
