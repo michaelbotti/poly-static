@@ -5,8 +5,11 @@ import {
   HandlerResponse,
 } from "@netlify/functions";
 
+import { HEADER_RECAPTCHA } from "../../src/lib/constants";
+import { passesRecaptcha } from "../helpers/recaptcha";
+import { botResponse, unauthorizedResponse } from "../helpers/response";
+import { fetchNodeApp, getNodeEndpointUrl } from "../helpers/util";
 import { HEADER_CLIENT_IP, HEADER_EMAIL } from "../../src/lib/constants";
-import { fetchNodeApp } from "../helpers/util";
 
 interface AppendAccessResponse {
   updated: boolean;
@@ -23,6 +26,8 @@ const handler: Handler = async (
   context: HandlerContext
 ): Promise<HandlerResponse> => {
   const { headers, body } = event;
+  const headerRecaptcha = headers[HEADER_RECAPTCHA];
+
   if (!headers[HEADER_EMAIL]) {
     return {
       statusCode: 400,
@@ -31,6 +36,16 @@ const handler: Handler = async (
         message: 'Missing email address.'
       } as QueueResponseBody)
     }
+  }
+
+  if (!headerRecaptcha) {
+    return unauthorizedResponse;
+  }
+
+  // Anti-bot.
+  const reCaptchaValidated = await passesRecaptcha(headerRecaptcha);
+  if (!reCaptchaValidated) {
+    return botResponse;
   }
 
   if (!body) {

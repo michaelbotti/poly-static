@@ -4,9 +4,9 @@ import { useLocation } from '@reach/router';
 import { parse } from 'query-string';
 
 import { VerifyResponseBody } from "../../../netlify/functions/verify";
-import { HEADER_EMAIL, HEADER_EMAIL_AUTH } from "../../lib/constants";
+import { HEADER_EMAIL, HEADER_EMAIL_AUTH, HEADER_RECAPTCHA } from "../../lib/constants";
 import Button from "../button";
-import { setAccessTokenCookie } from "../../lib/helpers/session";
+import { getRecaptchaToken, setAccessTokenCookie } from "../../lib/helpers/session";
 import { HandleMintContext } from "../../context/mint";
 import { buildClientAgentInfo } from "../../lib/helpers/clientInfo";
 
@@ -109,11 +109,14 @@ export const HandleQueue = (): JSX.Element => {
     setSavingSpot(true);
     setResponseMessage("Submitting email...");
 
+    const recaptchaToken: string = await getRecaptchaToken();
+
     const encodedClientAgentInfo = await buildClientAgentInfo();
     const res = await fetch(`/.netlify/functions/queue`, {
       method: "POST",
       headers: {
         [HEADER_EMAIL]: emailInput || activeEmail,
+        [HEADER_RECAPTCHA]: recaptchaToken
       },
       body: JSON.stringify({
         clientAgent: encodedClientAgentInfo,
