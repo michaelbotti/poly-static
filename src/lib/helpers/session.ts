@@ -56,12 +56,11 @@ export const setSessionTokenCookie = (data: SessionResponseBody, exp: Date, inde
 }
 
 export const getRecaptchaToken = async (): Promise<string> => {
-  return await window.grecaptcha.ready(
-    () =>
-      window.grecaptcha.execute(
-        RECAPTCHA_SITE_KEY,
-        { action: "submit" },
-        (token: string) => token
-      )
+  return await window.grecaptcha.execute(
+    RECAPTCHA_SITE_KEY,
+    { action: "submit" },
+    (token: string) => {
+      return token;
+    }
   );
 }

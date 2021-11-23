@@ -3,11 +3,10 @@ import { Link } from "gatsby";
 import { useLocation } from '@reach/router';
 import { parse } from 'query-string';
 
-import { QueueResponseBody } from "../../../netlify/functions/queue";
 import { VerifyResponseBody } from "../../../netlify/functions/verify";
-import { HEADER_EMAIL, HEADER_EMAIL_AUTH } from "../../lib/constants";
+import { HEADER_EMAIL, HEADER_EMAIL_AUTH, HEADER_RECAPTCHA } from "../../lib/constants";
 import Button from "../button";
-import { setAccessTokenCookie } from "../../lib/helpers/session";
+import { getRecaptchaToken, setAccessTokenCookie } from "../../lib/helpers/session";
 import { HandleMintContext } from "../../context/mint";
 import { buildClientAgentInfo } from "../../lib/helpers/clientInfo";
 
@@ -49,6 +48,7 @@ export const HandleQueue = (): JSX.Element => {
   const [responseMessage, setResponseMessage] = useState<string>(null);
   const [emailInput, setEmailInput] = useState<string>("");
   const [authInput, setAuthInput] = useState<string>("");
+  const [expired, setExpired] = useState<boolean>(false);
   const [emailChecked, setEmailChecked] = useState<boolean>(false);
   const [touChecked, setTouChecked] = useState<boolean>(false);
   const [refundsChecked, setRefundsChecked] = useState<boolean>(false);
@@ -110,11 +110,13 @@ export const HandleQueue = (): JSX.Element => {
     setSavingSpot(true);
     setResponseMessage("Submitting email...");
 
+    const recaptchaToken: string = await getRecaptchaToken();
     const encodedClientAgentInfo = await buildClientAgentInfo();
     const res = await fetch(`/.netlify/functions/queue`, {
       method: "POST",
       headers: {
         [HEADER_EMAIL]: emailInput || activeEmail,
+        [HEADER_RECAPTCHA]: recaptchaToken
       },
       body: JSON.stringify({
         clientAgent: encodedClientAgentInfo,
@@ -128,7 +130,7 @@ export const HandleQueue = (): JSX.Element => {
       setEmailInput('');
 
       // Update response state.
-      setResponseMessage(`You have successfully been entered into the queue! Check your email for further instructions about your access code.`);
+      setResponseMessage(`You have successfully been entered into the queue! Check your email for further instructions about your access link.`);
       setSubmitted(true);
     } else {
       setTimeoutResponseMessage(res?.message || "That didn't work. Try again.");
@@ -174,6 +176,7 @@ export const HandleQueue = (): JSX.Element => {
 
       if (!verified && error && message) {
         setResponseMessage(message);
+        setExpired(true);
       }
     } catch (e) {
       setTimeoutResponseMessage("Hmm, try that again. Something went wrong.");
@@ -322,6 +325,7 @@ export const HandleQueue = (): JSX.Element => {
           </form>
           {(activeEmail || activeAuthCode) && <p className="text-center mt-2"><Link to={'/mint/'} className="text-primary-100">Back to Queue</Link></p>}
           {responseMessage && <p className="my-2 text-center">{responseMessage}</p>}
+          {expired && <p className="my-2 text-center"><Link to="/mint" className="text-primary-100">Re-Enter the Queue</Link></p>}
         </>
       )}
     </>

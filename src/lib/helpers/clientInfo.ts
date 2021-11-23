@@ -1,5 +1,4 @@
 import * as buffer from 'buffer';
-import { ClientJS } from 'clientjs';
 
 export interface ClientAgentInfo {
     userAgent?: string,
@@ -33,24 +32,32 @@ export const buildClientAgentInfo = async (): Promise<string> => {
         return '';
     }
 
-    const clientAgent = new ClientJS();
-    return buffer.Buffer.from(JSON.stringify({
-        userAgent: clientAgent.getUserAgent(),
-        printScreen: clientAgent.getScreenPrint(),
-        colorDepth: clientAgent.getColorDepth(),
-        currentResolution: clientAgent.getCurrentResolution(),
-        availableResolution: clientAgent.getAvailableResolution(),
-        dpiX: clientAgent.getDeviceXDPI(),
-        dpiY: clientAgent.getDeviceYDPI(),
-        pluginList: clientAgent.getPlugins(),
-        fontList: await toSha256Hash(clientAgent.getFonts()),
-        localStorage: clientAgent.isLocalStorage(),
-        sessionStorage: clientAgent.isSessionStorage(),
-        timeZone: clientAgent.getTimeZone(),
-        language: clientAgent.getLanguage(),
-        systemLanguage: clientAgent.getSystemLanguage(),
-        cookies: clientAgent.isCookie(),
-        canvasPrint: await toSha256Hash(clientAgent.getCanvasPrint())
-    })).toString('base64');
+    let response;
+    await import('clientjs').then(({ ClientJS }) => {
+        const clientAgent = new ClientJS();
+
+        response = async () => {
+            buffer.Buffer.from(JSON.stringify({
+                userAgent: clientAgent.getUserAgent(),
+                printScreen: clientAgent.getScreenPrint(),
+                colorDepth: clientAgent.getColorDepth(),
+                currentResolution: clientAgent.getCurrentResolution(),
+                availableResolution: clientAgent.getAvailableResolution(),
+                dpiX: clientAgent.getDeviceXDPI(),
+                dpiY: clientAgent.getDeviceYDPI(),
+                pluginList: clientAgent.getPlugins(),
+                fontList: await toSha256Hash(clientAgent.getFonts()),
+                localStorage: clientAgent.isLocalStorage(),
+                sessionStorage: clientAgent.isSessionStorage(),
+                timeZone: clientAgent.getTimeZone(),
+                language: clientAgent.getLanguage(),
+                systemLanguage: clientAgent.getSystemLanguage(),
+                cookies: clientAgent.isCookie(),
+                canvasPrint: await toSha256Hash(clientAgent.getCanvasPrint())
+            })).toString('base64');
+        }
+    });
+
+    return response;
 }
 

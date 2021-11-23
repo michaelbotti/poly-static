@@ -19,9 +19,10 @@ import {
   HEADER_HANDLE,
   HEADER_JWT_ACCESS_TOKEN,
 } from "../../src/lib/constants";
-import { getActiveSessions, getMintedHandles, getPaidSessions, getReservedHandles, initFirebase } from "../helpers/firebase";
+import { getActiveSessionByHandle, getActiveSessionsByEmail, getMintedHandles, getPaidSessionByHandle, getReservedHandles, initFirebase } from "../helpers/firebase";
 import { fetchNodeApp } from "../helpers/util";
 import { decode } from "querystring";
+import { AccessTokenPayload } from "../helpers/jwt";
 
 // Main handler function for GET requests.
 const handler: Handler = async (
@@ -47,14 +48,11 @@ const handler: Handler = async (
   await initFirebase();
 
   const handle = normalizeNFTHandle(headerHandle);
-  const activeSessions = await getActiveSessions();
   const mintedHandles = await getMintedHandles();
 
-  const { emailAddress } = decode(headerAccess);
-  if (
-    activeSessions &&
-    activeSessions.filter((data) => data?.emailAddress === emailAddress).length > 3
-  ) {
+  const { emailAddress } = decode(headerAccess) as AccessTokenPayload;
+  const activeSessionsByPhone = await getActiveSessionsByEmail(emailAddress);
+  if (activeSessionsByPhone.length > 3) {
     return {
       statusCode: 403,
       body: JSON.stringify({
@@ -64,23 +62,16 @@ const handler: Handler = async (
     };
   }
 
-  if (
-    activeSessions &&
-    activeSessions.filter(
-      (data) => data?.handle === handle
-    ).length > 0
-  ) {
+  const activeSessionsByHandle = await getActiveSessionByHandle(handle);
+  if (activeSessionsByHandle) {
     return {
       statusCode: 403,
       body: JSON.stringify(getDefaultActiveSessionUnvailable()),
     };
   }
 
-  const paidSessions = await getPaidSessions();
-
-  if (
-    paidSessions &&
-    paidSessions.find((data) => data?.handle === handle)) {
+  const paidSession = await getPaidSessionByHandle(handle);
+  if (paidSession) {
     return {
       statusCode: 403,
       body: JSON.stringify(getDefaultActiveSessionUnvailable()),

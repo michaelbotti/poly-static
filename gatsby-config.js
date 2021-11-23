@@ -14,6 +14,14 @@ module.exports = {
     `gatsby-plugin-react-helmet`,
     `gatsby-plugin-layout`,
     {
+      resolve: `gatsby-plugin-recaptcha`,
+      options: {
+        async: true,
+        defer: false,
+        args: `?render=6Ld0QUkcAAAAAN-_KvCv8R_qke8OYxotNJzIg2RP`,
+      }
+    },
+    {
       resolve: `gatsby-plugin-google-gtag`,
       options: {
         trackingIds: [
