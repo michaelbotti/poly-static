@@ -19,9 +19,10 @@ import { fetchNodeApp } from '../helpers/util';
 import { getRarityCost, isValid, normalizeNFTHandle } from "../../src/lib/helpers/nfts";
 import { getSecret } from "../helpers";
 import { verifyTwitterUser } from "../helpers";
-import { getActiveSessions, getReservedHandles, initFirebase } from "../helpers/firebase";
-import { passesRecaptcha } from "../helpers/recaptcha";
+import { getActiveSessionsByEmail, getActiveSessionByHandle, getReservedHandles, initFirebase } from "../helpers/firebase";
 import { botResponse, responseWithMessage, unauthorizedResponse } from "../helpers/response";
+import { passesRecaptcha } from "../helpers/recaptcha";
+import { AccessTokenPayload } from "../helpers/jwt";
 
 export interface NodeSessionResponseBody {
   error: boolean,
@@ -35,10 +36,6 @@ export interface SessionResponseBody {
   address: string;
   token: string;
   data: JwtPayload
-}
-
-interface AccessTokenPayload extends JwtPayload {
-  emailAddress: string;
 }
 
 const handler: Handler = async (
@@ -80,13 +77,9 @@ const handler: Handler = async (
     }
   }
 
-  const reservedhandles = await getReservedHandles();
-  const activeSessions = await getActiveSessions();
-
   const { emailAddress } = decode(accessToken) as AccessTokenPayload;
-  const tooManySessions = activeSessions && activeSessions?.filter(
-    ({ emailAddress: existingEmailAddress }) => existingEmailAddress === emailAddress
-  ).length > 3;
+  const activeSessionsByPhone = await getActiveSessionsByEmail(emailAddress);
+  const tooManySessions = activeSessionsByPhone.length > 3;
 
   if (tooManySessions) {
     return {
@@ -98,11 +91,8 @@ const handler: Handler = async (
     }
   }
 
-  const handleBeingPurchased = activeSessions && activeSessions?.filter(({ handle }) =>
-    handle === headerHandle
-  ).length > 0;
-
-  if (handleBeingPurchased) {
+  const activeSessionsByHandle = await getActiveSessionByHandle(handle);
+  if (activeSessionsByHandle) {
     return {
       statusCode: 403,
       body: JSON.stringify({
@@ -112,8 +102,9 @@ const handler: Handler = async (
     }
   }
 
-  if (reservedhandles) {
-    const { manual, spos, blacklist } = reservedhandles;
+  const reservedHandles = await getReservedHandles();
+  if (reservedHandles) {
+    const { manual, spos, blacklist } = reservedHandles;
     if (blacklist?.includes(handle)) {
       return {
         statusCode: 403,

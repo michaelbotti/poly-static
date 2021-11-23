@@ -1,9 +1,13 @@
-import { Secret } from 'jsonwebtoken';
+import { JwtPayload, Secret } from 'jsonwebtoken';
 import { getS3 } from ".";
 
 type SecretContext = 'access' | 'session'
 
-export const getSecret = async (context: SecretContext = 'session'): Promise<Secret|null> => {
+export interface AccessTokenPayload extends JwtPayload {
+  emailAddress: string;
+}
+
+export const getSecret = async (context: SecretContext = 'session'): Promise<Secret | null> => {
   const s3 = getS3();
 
   const Key = process.env[`MY_AWS_TOKEN_KEY_${context.toUpperCase()}`];
@@ -21,7 +25,7 @@ export const getSecret = async (context: SecretContext = 'session'): Promise<Sec
       : null;
 
     return secret;
-  } catch(e) {
+  } catch (e) {
     throw new Error(e);
   }
 }

@@ -82,14 +82,15 @@ export const getReservedHandles = async (): Promise<ReservedHandlesType | false>
     });
 }
 
-export const getActiveSessions = async (): Promise<ActiveSessionType[] | false> => {
+export const getActiveSessionsByEmail = async (emailAddress: string): Promise<ActiveSessionType[]> => {
   return firebase
     .firestore()
     .collection(buildCollectionNameWithSuffix("/activeSessions"))
+    .where("emailAddress", "==", emailAddress)
     .get()
     .then(snapshot => {
       if (snapshot.empty) {
-        return false;
+        return [];
       }
 
       const sessions = snapshot?.docs?.map(doc => doc?.data() as ActiveSessionType);
@@ -97,18 +98,33 @@ export const getActiveSessions = async (): Promise<ActiveSessionType[] | false> 
     });
 }
 
-export const getPaidSessions = async (): Promise<ActiveSessionType[] | false> => {
+export const getActiveSessionByHandle = async (handle: string): Promise<ActiveSessionType | null> => {
   return firebase
     .firestore()
-    .collection(buildCollectionNameWithSuffix("/paidSessions"))
+    .collection(buildCollectionNameWithSuffix("/activeSessions"))
+    .where("handle", "==", handle)
     .get()
     .then(snapshot => {
       if (snapshot.empty) {
-        return false;
+        return null;
       }
 
-      const sessions = snapshot?.docs?.map(doc => doc?.data() as ActiveSessionType);
-      return sessions;
+      return snapshot?.docs[0]?.data() as ActiveSessionType;
+    });
+}
+
+export const getPaidSessionByHandle = async (handle: string): Promise<ActiveSessionType | null> => {
+  return firebase
+    .firestore()
+    .collection(buildCollectionNameWithSuffix("/paidSessions"))
+    .where("handle", "==", handle).limit(1)
+    .get()
+    .then(snapshot => {
+      if (snapshot.empty) {
+        return null;
+      }
+
+      return snapshot?.docs[0]?.data() as ActiveSessionType;
     });
 }
 
