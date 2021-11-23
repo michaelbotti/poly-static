@@ -1,4 +1,4 @@
-import { HandlerResponse } from "@netlify/functions";
+import { fetch } from 'cross-fetch';
 
 /**
  * Verifies against ReCaptcha.

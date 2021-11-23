@@ -8,7 +8,7 @@ import {
 import { HEADER_RECAPTCHA } from "../../src/lib/constants";
 import { passesRecaptcha } from "../helpers/recaptcha";
 import { botResponse, unauthorizedResponse } from "../helpers/response";
-import { fetchNodeApp, getNodeEndpointUrl } from "../helpers/util";
+import { fetchNodeApp } from "../helpers/util";
 import { HEADER_CLIENT_IP, HEADER_EMAIL } from "../../src/lib/constants";
 
 interface AppendAccessResponse {
