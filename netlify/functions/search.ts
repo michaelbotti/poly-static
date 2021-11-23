@@ -19,7 +19,7 @@ import {
   HEADER_HANDLE,
   HEADER_JWT_ACCESS_TOKEN,
 } from "../../src/lib/constants";
-import { getActiveSessionsByHandle, getActiveSessionsByEmail, getMintedHandles, getPaidSessionByHandle, getReservedHandles, initFirebase } from "../helpers/firebase";
+import { getActiveSessionByHandle, getActiveSessionsByEmail, getMintedHandles, getPaidSessionByHandle, getReservedHandles, initFirebase } from "../helpers/firebase";
 import { fetchNodeApp } from "../helpers/util";
 import { decode } from "querystring";
 import { AccessTokenPayload } from "../helpers/jwt";
@@ -62,7 +62,7 @@ const handler: Handler = async (
     };
   }
 
-  const activeSessionsByHandle = await getActiveSessionsByHandle(handle);
+  const activeSessionsByHandle = await getActiveSessionByHandle(handle);
   if (activeSessionsByHandle) {
     return {
       statusCode: 403,

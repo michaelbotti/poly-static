@@ -19,7 +19,7 @@ import { fetchNodeApp } from '../helpers/util';
 import { getRarityCost, isValid, normalizeNFTHandle } from "../../src/lib/helpers/nfts";
 import { getSecret } from "../helpers";
 import { verifyTwitterUser } from "../helpers";
-import { getActiveSessionsByEmail, getActiveSessionsByHandle, getReservedHandles, initFirebase } from "../helpers/firebase";
+import { getActiveSessionsByEmail, getActiveSessionByHandle, getReservedHandles, initFirebase } from "../helpers/firebase";
 import { botResponse, responseWithMessage, unauthorizedResponse } from "../helpers/response";
 import { passesRecaptcha } from "../helpers/recaptcha";
 import { AccessTokenPayload } from "../helpers/jwt";
@@ -91,7 +91,7 @@ const handler: Handler = async (
     }
   }
 
-  const activeSessionsByHandle = await getActiveSessionsByHandle(handle);
+  const activeSessionsByHandle = await getActiveSessionByHandle(handle);
   if (activeSessionsByHandle) {
     return {
       statusCode: 403,

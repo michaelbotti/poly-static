@@ -98,7 +98,7 @@ export const getActiveSessionsByEmail = async (emailAddress: string): Promise<Ac
     });
 }
 
-export const getActiveSessionsByHandle = async (handle: string): Promise<ActiveSessionType | null> => {
+export const getActiveSessionByHandle = async (handle: string): Promise<ActiveSessionType | null> => {
   return firebase
     .firestore()
     .collection(buildCollectionNameWithSuffix("/activeSessions"))
