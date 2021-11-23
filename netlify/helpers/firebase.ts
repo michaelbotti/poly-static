@@ -82,11 +82,11 @@ export const getReservedHandles = async (): Promise<ReservedHandlesType | false>
     });
 }
 
-export const getActiveSessionsByPhoneNumber = async (phoneNumber): Promise<ActiveSessionType[]> => {
+export const getActiveSessionsByEmail = async (email: string): Promise<ActiveSessionType[]> => {
   return firebase
     .firestore()
     .collection(buildCollectionNameWithSuffix("/activeSessions"))
-    .where("phoneNumber", "==", phoneNumber)
+    .where("email", "==", email)
     .get()
     .then(snapshot => {
       if (snapshot.empty) {

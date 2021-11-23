@@ -19,9 +19,10 @@ import {
   HEADER_HANDLE,
   HEADER_JWT_ACCESS_TOKEN,
 } from "../../src/lib/constants";
-import { getActiveSessionsByHandle, getActiveSessionsByPhoneNumber, getMintedHandles, getPaidSessionByHandle, getReservedHandles, initFirebase } from "../helpers/firebase";
+import { getActiveSessionsByHandle, getActiveSessionsByEmail, getMintedHandles, getPaidSessionByHandle, getReservedHandles, initFirebase } from "../helpers/firebase";
 import { fetchNodeApp } from "../helpers/util";
 import { decode } from "querystring";
+import { AccessTokenPayload } from "../helpers/jwt";
 
 // Main handler function for GET requests.
 const handler: Handler = async (
@@ -49,8 +50,8 @@ const handler: Handler = async (
   const handle = normalizeNFTHandle(headerHandle);
   const mintedHandles = await getMintedHandles();
 
-  const { phoneNumber } = decode(headerAccess);
-  const activeSessionsByPhone = await getActiveSessionsByPhoneNumber(phoneNumber);
+  const { emailAddress } = decode(headerAccess) as AccessTokenPayload;
+  const activeSessionsByPhone = await getActiveSessionsByEmail(emailAddress);
   if (activeSessionsByPhone.length > 3) {
     return {
       statusCode: 403,

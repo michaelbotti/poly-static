@@ -19,8 +19,10 @@ import { fetchNodeApp } from '../helpers/util';
 import { getRarityCost, isValid, normalizeNFTHandle } from "../../src/lib/helpers/nfts";
 import { getSecret } from "../helpers";
 import { verifyTwitterUser } from "../helpers";
-import { HandleResponseBody } from "../../src/lib/helpers/search";
-import { getActiveSessionsByPhoneNumber, getActiveSessionsByHandle, getReservedHandles, initFirebase } from "../helpers/firebase";
+import { getActiveSessionsByEmail, getActiveSessionsByHandle, getReservedHandles, initFirebase } from "../helpers/firebase";
+import { botResponse, responseWithMessage, unauthorizedResponse } from "../helpers/response";
+import { passesRecaptcha } from "../helpers/recaptcha";
+import { AccessTokenPayload } from "../helpers/jwt";
 
 export interface NodeSessionResponseBody {
   error: boolean,
@@ -34,18 +36,6 @@ export interface SessionResponseBody {
   address: string;
   token: string;
   data: JwtPayload
-}
-
-const unauthorizedResponse: HandlerResponse = {
-  statusCode: 401,
-  body: JSON.stringify({
-    error: true,
-    message: "Unauthorized.",
-  } as SessionResponseBody),
-};
-
-interface AccessTokenPayload extends JwtPayload {
-  phoneNumber: string;
 }
 
 const handler: Handler = async (
@@ -64,32 +54,20 @@ const handler: Handler = async (
   const validHandle = handle && isValid(handle);
 
   if (!headerRecaptcha || !accessToken) {
-    return {
-      statusCode: 401,
-      body: JSON.stringify({
-        error: true,
-        message: "Unauthorized.",
-      } as SessionResponseBody),
-    };
+    return unauthorizedResponse;
   }
 
   if (!handle || !validHandle) {
-    return {
-      statusCode: 400,
-      body: JSON.stringify({
-        error: true,
-        message: 'Invalid handle format.'
-      } as SessionResponseBody)
-    }
+    return responseWithMessage(400, 'Invalid handle format.', true);
   }
-
-  await initFirebase();
 
   // Anti-bot.
   const reCaptchaValidated = await passesRecaptcha(headerRecaptcha);
   if (!reCaptchaValidated) {
-    return unauthorizedResponse;
+    return botResponse;
   }
+
+  await initFirebase();
 
   // Verified Twitter user if needed.
   if (headerTwitter) {
@@ -99,8 +77,8 @@ const handler: Handler = async (
     }
   }
 
-  const { phoneNumber } = decode(accessToken) as AccessTokenPayload;
-  const activeSessionsByPhone = await getActiveSessionsByPhoneNumber(phoneNumber);
+  const { emailAddress } = decode(accessToken) as AccessTokenPayload;
+  const activeSessionsByPhone = await getActiveSessionsByEmail(emailAddress);
   const tooManySessions = activeSessionsByPhone.length > 3;
 
   if (tooManySessions) {
@@ -153,7 +131,7 @@ const handler: Handler = async (
 
   /**
    * We sign a session JWT tokent to authorize the purchase,
-   * and include the access phone number to limit request.
+   * and include the access email address to limit request.
    */
   const sessionSecret = await getSecret('session');
   const sessionToken = jwt.sign(
@@ -161,7 +139,7 @@ const handler: Handler = async (
       iat: Date.now(),
       handle,
       cost: getRarityCost(handle),
-      phoneNumber
+      emailAddress
     },
     sessionSecret,
     {
@@ -196,40 +174,6 @@ const handler: Handler = async (
     statusCode: 200,
     body: JSON.stringify(mutatedRes),
   }
-};
-
-/**
- * Verifies against ReCaptcha.
- * @param token
- * @param ip
- * @returns
- */
-const passesRecaptcha = async (
-  token: string
-): Promise<boolean | HandlerResponse> => {
-  const recaptcha_url = new URL(
-    "https://www.google.com/recaptcha/api/siteverify"
-  );
-  recaptcha_url.searchParams.set("secret", process.env.RECAPTCHA_SECRET || "");
-  recaptcha_url.searchParams.set("response", token);
-
-  const { success, score, action } = (await (
-    await fetch(recaptcha_url.toString(), {
-      method: "POST",
-    })
-  ).json()) as { success: boolean; score: Number; action: string };
-
-  if (!success || score < 0.8 || action !== "submit") {
-    return {
-      statusCode: 422,
-      body: JSON.stringify({
-        message:
-          "Hmm, we think you might be a bot but we hope we're wrong. Please try again.",
-      } as HandleResponseBody),
-    };
-  }
-
-  return true;
 };
 
 export { handler };

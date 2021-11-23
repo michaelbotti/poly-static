@@ -1,44 +1,64 @@
 import React, { useRef, useState, useContext, useEffect } from "react";
-import PhoneInput from "react-phone-number-input";
 import { Link } from "gatsby";
+import { useLocation } from '@reach/router';
+import { parse } from 'query-string';
 
-import { QueueResponseBody } from "../../../netlify/functions/queue";
 import { VerifyResponseBody } from "../../../netlify/functions/verify";
-import { HEADER_PHONE, HEADER_PHONE_AUTH } from "../../lib/constants";
-import { useAccessOpen } from "../../lib/hooks/access";
+import { HEADER_EMAIL, HEADER_EMAIL_AUTH, HEADER_RECAPTCHA } from "../../lib/constants";
 import Button from "../button";
-import { setAccessTokenCookie } from "../../lib/helpers/session";
+import { getRecaptchaToken, setAccessTokenCookie } from "../../lib/helpers/session";
 import { HandleMintContext } from "../../context/mint";
+import { buildClientAgentInfo } from "../../lib/helpers/clientInfo";
 
-import "react-phone-number-input/style.css";
 
-const getCachedPhoneNumber = (): string => {
-  const cache = window.localStorage.getItem('ADA_HANDLE_PHONE');
-  return typeof cache === 'string' ? atob(cache) : null;
-};
-const setCachedPhoneNumber = (phone: string): void => window.localStorage.setItem('ADA_HANDLE_PHONE', btoa(phone));
-const deleteCachedPhoneNumber = (): void => window.localStorage.removeItem('ADA_HANDLE_PHONE');
+const validateEmail = (email: string): boolean => {
+  const res = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+  return res.test(String(email).toLowerCase());
+}
+
+const getActiveEmail = (): string | null => {
+  let value = null;
+  if (typeof window !== undefined) {
+    const { search } = useLocation();
+    const { activeEmail } = parse(search) as { activeEmail: string };
+    if (activeEmail && validateEmail(activeEmail)) {
+      value = activeEmail;
+    }
+  }
+
+  return value;
+}
+
+const getActiveAuthCode = (): string | null => {
+  let value = null;
+  if (typeof window !== undefined) {
+    const { search } = useLocation();
+    const { activeAuthCode } = parse(search) as { activeAuthCode: string };
+    value = activeAuthCode || null;
+  }
+
+  return value;
+}
 
 export const HandleQueue = (): JSX.Element => {
   const { betaState } = useContext(HandleMintContext);
   const [savingSpot, setSavingSpot] = useState<boolean>(false);
   const [authenticating, setAuthenticating] = useState<boolean>(false);
-  const [action, setAction] = useState<"save" | "auth">("save");
   const [submitted, setSubmitted] = useState<boolean>(false);
   const [responseMessage, setResponseMessage] = useState<string>(null);
-  const [phoneInput, setPhoneInput] = useState<string>("");
+  const [emailInput, setEmailInput] = useState<string>("");
   const [authInput, setAuthInput] = useState<string>("");
+  const [emailChecked, setEmailChecked] = useState<boolean>(false);
   const [touChecked, setTouChecked] = useState<boolean>(false);
   const [refundsChecked, setRefundsChecked] = useState<boolean>(false);
-  const [locallyCachedPhone, setLocallyCachedPhone] = useState<string>(getCachedPhoneNumber());
 
+  const activeEmail = getActiveEmail();
+  const activeAuthCode = getActiveAuthCode();
   const form = useRef(null);
-  const [, setAccessOpen] = useAccessOpen();
 
   useEffect(() => {
-    console.log(locallyCachedPhone);
-    if (typeof locallyCachedPhone === 'string' && locallyCachedPhone.length > 0) {
-      setAction('auth');
+    if (activeAuthCode) {
+      setAuthInput(activeAuthCode);
     }
   }, []);
 
@@ -49,8 +69,16 @@ export const HandleQueue = (): JSX.Element => {
     }, 4000);
   };
 
+  const handleOnChange = (value: string) => {
+    if (value.includes('+')) {
+      return;
+    }
+
+    setEmailInput(value);
+  }
+
   /**
-   * Send the user's phone number to a queue.
+   * Send the user's email to a queue.
    * We set a cron on the backend to allow users
    * in via batches of 20, depending on current
    * chain load.
@@ -58,32 +86,51 @@ export const HandleQueue = (): JSX.Element => {
   const handleSaving = async (e: Event) => {
     e.preventDefault();
 
-    if (0 === phoneInput.length) {
-      setTimeoutResponseMessage("Phone number cannot be blank.");
+    if (0 === emailInput.length) {
+      setTimeoutResponseMessage("Email cannot be blank!");
+      return;
+    }
+
+    if (!validateEmail(emailInput)) {
+      setTimeoutResponseMessage("Sorry, that's not a valid email!");
+      return;
+    }
+
+    if (emailInput.includes('+')) {
+      setTimeoutResponseMessage("Sorry, we do not support email addresses with the (+) character. Try again!");
+      return;
+    }
+
+    if (!emailChecked) {
+      setTimeoutResponseMessage("Sorry, you must agree to receive email alerts!");
       return;
     }
 
     setSavingSpot(true);
-    setResponseMessage("Submitting phone number...");
-    const res: QueueResponseBody = await fetch(`/.netlify/functions/queue`, {
+    setResponseMessage("Submitting email...");
+
+    const recaptchaToken: string = await getRecaptchaToken();
+
+    const encodedClientAgentInfo = await buildClientAgentInfo();
+    const res = await fetch(`/.netlify/functions/queue`, {
       method: "POST",
       headers: {
-        [HEADER_PHONE]: phoneInput,
+        [HEADER_EMAIL]: emailInput || activeEmail,
+        [HEADER_RECAPTCHA]: recaptchaToken
       },
+      body: JSON.stringify({
+        clientAgent: encodedClientAgentInfo,
+      }),
     })
       .then((res) => res.json())
       .catch((e) => console.log(e));
 
+    // Clear the input field for email.
     if (res.updated) {
-      // We have to update local state as well as local storage.
-      setCachedPhoneNumber(phoneInput);
-      setLocallyCachedPhone(phoneInput);
-
-      // Clear the input field for phone.
-      setPhoneInput('');
+      setEmailInput('');
 
       // Update response state.
-      setResponseMessage(`Success! You'll receive a text once it's your turn. Remember, once you receive an auth code, it is ONLY valid for 10 minutes!`);
+      setResponseMessage(`You have successfully been entered into the queue! Check your email for further instructions about your access code.`);
       setSubmitted(true);
     } else {
       setTimeoutResponseMessage(res?.message || "That didn't work. Try again.");
@@ -94,7 +141,7 @@ export const HandleQueue = (): JSX.Element => {
 
   /**
    * Sends the authentication code along with the user's
-   * phone number to the backend, where we verify and
+   * email to the backend, where we verify and
    * sign an access JWT token in the case that they pass.
    * The JWT token expires automatically in 30 minutes
    * after generating.
@@ -113,8 +160,8 @@ export const HandleQueue = (): JSX.Element => {
         "/.netlify/functions/verify",
         {
           headers: {
-            [HEADER_PHONE]: phoneInput || locallyCachedPhone,
-            [HEADER_PHONE_AUTH]: authInput,
+            [HEADER_EMAIL]: emailInput || activeEmail,
+            [HEADER_EMAIL_AUTH]: authInput,
           },
         }
       )
@@ -123,7 +170,6 @@ export const HandleQueue = (): JSX.Element => {
 
       const { error, verified, message, token, data } = res;
       if (!error && verified && token && data) {
-        deleteCachedPhoneNumber();
         setAccessTokenCookie(res, data.exp);
         window.location.reload();
       }
@@ -166,54 +212,50 @@ export const HandleQueue = (): JSX.Element => {
           </span>
         </div>
       </div>
-      <h3 className="text-2xl text-white text-center mb-4">
-        {locallyCachedPhone ? <>Gain Access</> : <>Register Your Spot</>}
-      </h3>
-      {!submitted && (
+      {submitted ? (
+        <div className="bg-dark-100 rounded-lg shadow-lg p-8 block">
+          <h3 className="text-2xl text-white text-center mb-4 font-bold">
+            <div className="w-12 h-12 text-3xl bg-primary-200 text-white flex items-center justify-center rounded mx-auto mb-4">
+              &#10003;
+            </div>
+            Success!
+          </h3>
+          <p className="text-lg text-center text-dark-350">{responseMessage}</p>
+          <p className="text-center text-lg font-bold">You may close this window.</p>
+        </div>
+      ) : (
         <>
-          <div className="flex align-center justify-stretch bg-dark-200 rounded-t-lg border-2 border-b-0 border-dark-300">
-            {!locallyCachedPhone && (
-              <button
-                onClick={() => {
-                  setAuthInput("");
-                  setAction("save");
-                }}
-                className={`text-white text-center p-4 w-1/2 rounded-lg rounded-r-none rounded-bl-none border-b-4 ${
-                  "save" === action
-                    ? "border-primary-100"
-                    : "opacity-80 border-dark-200"
-                }`}
-              >
-                Enter Phone Number
-              </button>
+          <h3 className="text-2xl text-white text-center mb-4">
+            {activeEmail ? <>Submit Your Access Code!</> : <>Get an Access Code</>}
+          </h3>
+          <form onSubmit={(e) => e.preventDefault()} ref={form} className="bg-dark-100 border-dark-300 rounded-t-lg">
+            {!activeEmail && (
+              <>
+                <input
+                  name="email"
+                  disabled={savingSpot}
+                  placeholder={"Your email address..."}
+                  className={`focus:ring-0 focus:ring-opacity-0 border-2 outline-none form-input bg-dark-100 border-dark-300 rounded-t-lg px-6 py-4 text-xl w-full`}
+                  value={emailInput}
+                  // @ts-ignore
+                  onChange={(e) => handleOnChange(e.target.value)}
+                />
+                <div className="flex items-center text-sm bg-dark-100 border-dark-300 border-l-2 border-r-2 px-4 py-2">
+                  <input
+                    className="form-checkbox p-2 text-primary-200 rounded focus:ring-primary-200 cursor-pointer"
+                    id="acceptEmail"
+                    name="acceptEmail"
+                    type="checkbox"
+                    checked={emailChecked}
+                    onChange={() => setEmailChecked(!emailChecked)}
+                  />
+                  <label className="ml-2 text-white py-3 cursor-pointer" htmlFor="acceptEmail">
+                    I agree to receive email notifications.
+                  </label>
+                </div>
+              </>
             )}
-            <button
-              onClick={() => {
-                setAction("auth");
-              }}
-              className={`text-white text-center p-4 rounded-lg rounded-l-none rounded-br-none border-b-4 ${
-                "auth" === action
-                  ? "border-primary-100"
-                  : "opacity-80 border-dark-200"
-              } ${locallyCachedPhone ? 'w-full' : 'w-1/2'}`}
-            >
-              Enter Access Code
-            </button>
-          </div>
-          <form onSubmit={(e) => e.preventDefault()} ref={form} className="bg-dark-100 border-dark-300">
-            {action === 'save' && !locallyCachedPhone && (
-              <PhoneInput
-                name="phone"
-                disabled={savingSpot}
-                placeholder={"Your mobile number..."}
-                className={`focus:ring-0 focus:ring-opacity-0 border-2 outline-none form-input bg-dark-100 border-dark-300 px-6 py-4 text-xl w-full`}
-                defaultCountry="US"
-                value={phoneInput}
-                // @ts-ignore
-                onChange={setPhoneInput}
-              />
-            )}
-            {"auth" === action && (
+            {activeEmail && (
               <>
                 <input
                   name="auth"
@@ -223,9 +265,9 @@ export const HandleQueue = (): JSX.Element => {
                   type="number"
                   onChange={(e) => setAuthInput(e.target.value)}
                   value={authInput}
-                  className={`focus:ring-0 focus:ring-opacity-0 border-2 outline-none form-input bg-dark-100 border-dark-300 px-6 py-4 text-xl w-full appearance-none`}
+                  className={`focus:ring-0 focus:ring-opacity-0 border-2 outline-none form-input bg-dark-100 border-dark-300 px-6 py-4 text-xl w-full appearance-none rounded-t-lg`}
                 />
-                <div className="flex items-center text-sm bg-dark-100 border-dark-300 border-l-2 border-r-2 p-4 pb-0">
+                <div className="flex items-center text-sm bg-dark-100 border-dark-300 border-l-2 border-r-2 p-4 pt-2 pb-0">
                   <input
                     className="form-checkbox p-2 text-primary-200 rounded focus:ring-primary-200 cursor-pointer"
                     id="tou"
@@ -241,7 +283,7 @@ export const HandleQueue = (): JSX.Element => {
                     </Link>
                   </label>
                 </div>
-                <div className="flex items-center text-sm bg-dark-100 border-dark-300 border-l-2 border-r-2 p-4 pt-0">
+                <div className="flex items-center text-sm bg-dark-100 border-dark-300 border-l-2 border-r-2 p-4 pb-2 pt-0">
                   <input
                     className="form-checkbox p-2 text-primary-200 rounded focus:ring-primary-200 cursor-pointer"
                     id="refunds"
@@ -256,50 +298,32 @@ export const HandleQueue = (): JSX.Element => {
                 </div>
               </>
             )}
-            <Button
-              className={`w-full rounded-t-none`}
-              buttonStyle={"primary"}
-              type="submit"
-              disabled={authenticating || savingSpot || ("auth" === action && (!touChecked || !refundsChecked))}
-              onClick={
-                touChecked && refundsChecked && "auth" === action
-                  ? handleAuthenticating
-                  : handleSaving
-              }
-            >
-              {authenticating && "Authenticating..."}
-              {savingSpot && "Entering queue..."}
-              {!authenticating && !savingSpot && "Submit"}
-            </Button>
+            {activeEmail ? (
+              <Button
+                className={`w-full rounded-t-none`}
+                buttonStyle={"primary"}
+                type="submit"
+                disabled={authenticating || !touChecked || !refundsChecked}
+                onClick={handleAuthenticating}
+              >
+                {authenticating && "Authenticating..."}
+                {!authenticating && "Submit"}
+              </Button>
+            ) : (
+              <Button
+                className={`w-full rounded-t-none`}
+                buttonStyle={"primary"}
+                type="submit"
+                disabled={savingSpot || !emailChecked}
+                onClick={handleSaving}
+              >
+                {savingSpot && "Entering queue..."}
+                {!authenticating && !savingSpot && "Submit"}
+              </Button>
+            )}
           </form>
-        </>
-      )}
-      {locallyCachedPhone && !submitted && (
-        <p className="text-center mt-2">
-          Never submitted your phone number?<br/>
-          <button className="text-primary-100" onClick={() => {
-            setAction('save');
-
-            // Update local state and local storage.
-            deleteCachedPhoneNumber();
-            setLocallyCachedPhone(null);
-          }}>Reset Local Cache</button>
-        </p>
-      )}
-      {responseMessage && (
-        <>
-          <p className="my-2 text-center">{responseMessage}</p>
-          {!savingSpot && (
-            <p className="text-center">
-              {submitted && (
-                <Button size="small" className="mt-2" onClick={() => {
-                  setAction('auth');
-                  setSubmitted(false);
-                  setResponseMessage(null);
-                }}>Dismiss This Message</Button>
-              )}
-            </p>
-          )}
+          {(activeEmail || activeAuthCode) && <p className="text-center mt-2"><Link to={'/mint/'} className="text-primary-100">Back to Queue</Link></p>}
+          {responseMessage && <p className="my-2 text-center">{responseMessage}</p>}
         </>
       )}
     </>

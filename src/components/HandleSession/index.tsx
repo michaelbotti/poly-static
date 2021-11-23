@@ -138,7 +138,6 @@ export const HandleSession = ({
         {!validPayment && (
           <>
             <h4 className="text-xl mb-8">
-              Send <u>exaclty the amount shown</u>:<br/>
               <strong className="text-4xl mt-4 inline-block font-bold" style={{ color: getRarityHex(sessionData.data.handle)}}>{getRarityCost(sessionData.data.handle)} $ADA</strong>
             </h4>
             <div className="relative">
