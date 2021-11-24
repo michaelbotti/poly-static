@@ -1,5 +1,6 @@
 import { Link } from "gatsby";
 import React, { FC, useEffect, useState } from "react";
+import { useLocation } from "@reach/router";
 
 import Header from "../components/header";
 import Form from '../components/mailchimp';
@@ -7,13 +8,26 @@ import { HandleMintContextProvider } from '../context/mint';
 
 const Layout: FC = ({ children }): JSX.Element => {
   const [mintPage, setMintPage] = useState<boolean>(false);
+  const [isTestnet, setIsTestnet] = useState<boolean>(false);
+  const { hostname } = useLocation();
 
   useEffect(() => {
     setMintPage(window.location.pathname.includes('mint'));
-  });
+
+    if (hostname.includes('testnet') || hostname.includes('localhost')) {
+      setIsTestnet(true);
+    }
+  }, [hostname]);
 
   return (
     <HandleMintContextProvider>
+      {isTestnet && (
+        <div className="bg-primary-100 text-white px-8 py-4">
+          <div className="max-w-5xl mx-auto text-center">
+            <p className="mb-0"><strong><u>TESTNET!</u></strong> The environment you are using is on testnet!<br/> This means no transactions or Handles purchased are real, and are for testing purposes only.</p>
+          </div>
+        </div>
+      )}
       <Header showMint={!mintPage} className="bg-dark-100 text-dark-400 text-gray-900" />
       <div className="flex flex-col min-h-screen font-sans bg-dark-100 text-dark-400 text-gray-900 overflow-hidden">
 
