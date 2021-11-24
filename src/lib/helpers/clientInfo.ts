@@ -32,30 +32,29 @@ export const buildClientAgentInfo = async (): Promise<string> => {
         return '';
     }
 
-    let response;
-    await import('clientjs').then(({ ClientJS }) => {
-        const clientAgent = new ClientJS();
+    let response: string;
+    await import('clientjs').then(async ({ ClientJS }) => {
+      const clientAgent = new ClientJS();
+      const canvasPrint = await toSha256Hash(clientAgent.getCanvasPrint());
 
-        response = async () => {
-            buffer.Buffer.from(JSON.stringify({
-                userAgent: clientAgent.getUserAgent(),
-                printScreen: clientAgent.getScreenPrint(),
-                colorDepth: clientAgent.getColorDepth(),
-                currentResolution: clientAgent.getCurrentResolution(),
-                availableResolution: clientAgent.getAvailableResolution(),
-                dpiX: clientAgent.getDeviceXDPI(),
-                dpiY: clientAgent.getDeviceYDPI(),
-                pluginList: clientAgent.getPlugins(),
-                fontList: await toSha256Hash(clientAgent.getFonts()),
-                localStorage: clientAgent.isLocalStorage(),
-                sessionStorage: clientAgent.isSessionStorage(),
-                timeZone: clientAgent.getTimeZone(),
-                language: clientAgent.getLanguage(),
-                systemLanguage: clientAgent.getSystemLanguage(),
-                cookies: clientAgent.isCookie(),
-                canvasPrint: await toSha256Hash(clientAgent.getCanvasPrint())
-            })).toString('base64');
-        }
+        response = buffer.Buffer.from(JSON.stringify({
+            userAgent: clientAgent.getUserAgent(),
+            printScreen: clientAgent.getScreenPrint(),
+            colorDepth: clientAgent.getColorDepth(),
+            currentResolution: clientAgent.getCurrentResolution(),
+            availableResolution: clientAgent.getAvailableResolution(),
+            dpiX: clientAgent.getDeviceXDPI(),
+            dpiY: clientAgent.getDeviceYDPI(),
+            pluginList: clientAgent.getPlugins(),
+            fontList: await toSha256Hash(clientAgent.getFonts()),
+            localStorage: clientAgent.isLocalStorage(),
+            sessionStorage: clientAgent.isSessionStorage(),
+            timeZone: clientAgent.getTimeZone(),
+            language: clientAgent.getLanguage(),
+            systemLanguage: clientAgent.getSystemLanguage(),
+            cookies: clientAgent.isCookie(),
+            canvasPrint
+        })).toString('base64');
     });
 
     return response;

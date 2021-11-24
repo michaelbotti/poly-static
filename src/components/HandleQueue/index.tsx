@@ -78,12 +78,7 @@ export const HandleQueue = (): JSX.Element => {
     setEmailInput(value);
   }
 
-  /**
-   * Send the user's email to a queue.
-   * We set a cron on the backend to allow users
-   * in via batches of 20, depending on current
-   * chain load.
-   */
+  // Send the user's email to a queue.
   const handleSaving = async (e: Event) => {
     e.preventDefault();
 
@@ -112,10 +107,12 @@ export const HandleQueue = (): JSX.Element => {
 
     const recaptchaToken: string = await getRecaptchaToken();
     const encodedClientAgentInfo = await buildClientAgentInfo();
+    console.log(encodedClientAgentInfo);
+    return;
     const res = await fetch(`/.netlify/functions/queue`, {
       method: "POST",
       headers: {
-        [HEADER_EMAIL]: emailInput || activeEmail,
+        [HEADER_EMAIL]: emailInput,
         [HEADER_RECAPTCHA]: recaptchaToken
       },
       body: JSON.stringify({
@@ -126,7 +123,7 @@ export const HandleQueue = (): JSX.Element => {
       .catch((e) => console.log(e));
 
     // Clear the input field for email.
-    if (res.updated) {
+    if (res?.updated) {
       setEmailInput('');
 
       // Update response state.
@@ -139,13 +136,7 @@ export const HandleQueue = (): JSX.Element => {
     setSavingSpot(false);
   };
 
-  /**
-   * Sends the authentication code along with the user's
-   * email to the backend, where we verify and
-   * sign an access JWT token in the case that they pass.
-   * The JWT token expires automatically in 30 minutes
-   * after generating.
-   */
+  // Sends the user's email and auth code (via URL params) to the server for verification.
   const handleAuthenticating = async (e: Event) => {
     e.preventDefault();
 
@@ -160,8 +151,8 @@ export const HandleQueue = (): JSX.Element => {
         "/.netlify/functions/verify",
         {
           headers: {
-            [HEADER_EMAIL]: emailInput || activeEmail,
-            [HEADER_EMAIL_AUTH]: authInput,
+            [HEADER_EMAIL]: activeEmail,
+            [HEADER_EMAIL_AUTH]: activeAuthCode,
           },
         }
       )
@@ -227,10 +218,11 @@ export const HandleQueue = (): JSX.Element => {
       ) : (
         <>
           <h3 className="text-2xl text-white text-center mb-4">
-            {activeEmail ? <>Submit Your Access Code!</> : <>Get an Access Code</>}
+            {activeEmail && activeAuthCode ? <>Agree to the Terms</> : <>Get an Access Code</>}
           </h3>
+          {activeEmail && activeAuthCode && <p className="text-lg text-center">Almost there! Just make sure to agree to the terms of use before purchasing your Handles. This information is important!</p>}
           <form onSubmit={(e) => e.preventDefault()} ref={form} className="bg-dark-100 border-dark-300 rounded-t-lg">
-            {!activeEmail && (
+            {!activeEmail && !activeAuthCode && (
               <>
                 <input
                   name="email"
@@ -256,7 +248,7 @@ export const HandleQueue = (): JSX.Element => {
                 </div>
               </>
             )}
-            {activeEmail && (
+            {activeEmail && activeAuthCode && (
               <>
                 <input
                   name="auth"
@@ -266,9 +258,9 @@ export const HandleQueue = (): JSX.Element => {
                   type="number"
                   onChange={(e) => setAuthInput(e.target.value)}
                   value={authInput}
-                  className={`focus:ring-0 focus:ring-opacity-0 border-2 outline-none form-input bg-dark-100 border-dark-300 px-6 py-4 text-xl w-full appearance-none rounded-t-lg`}
+                  className={`hidden focus:ring-0 focus:ring-opacity-0 border-2 outline-none form-input bg-dark-100 border-dark-300 px-6 py-4 text-xl w-full appearance-none rounded-t-lg`}
                 />
-                <div className="flex items-center text-sm bg-dark-100 border-dark-300 border-l-2 border-r-2 p-4 pt-2 pb-0">
+                <div className="flex items-center text-sm bg-dark-100 border-dark-300 border-2 rounded-t-lg p-4 pt-2 pb-0">
                   <input
                     className="form-checkbox p-2 text-primary-200 rounded focus:ring-primary-200 cursor-pointer"
                     id="tou"
@@ -308,7 +300,7 @@ export const HandleQueue = (): JSX.Element => {
                 onClick={handleAuthenticating}
               >
                 {authenticating && "Authenticating..."}
-                {!authenticating && "Submit"}
+                {!authenticating && "Enter Minting Portal"}
               </Button>
             ) : (
               <Button
@@ -323,9 +315,13 @@ export const HandleQueue = (): JSX.Element => {
               </Button>
             )}
           </form>
-          {(activeEmail || activeAuthCode) && <p className="text-center mt-2"><Link to={'/mint/'} className="text-primary-100">Back to Queue</Link></p>}
           {responseMessage && <p className="my-2 text-center">{responseMessage}</p>}
-          {expired && <p className="my-2 text-center"><Link to="/mint" className="text-primary-100">Re-Enter the Queue</Link></p>}
+          {activeEmail && activeAuthCode && !expired && <p className="text-center mt-2"><Link to={'/mint/'} className="text-primary-100">Start Over</Link></p>}
+          {expired && <p className="my-2 text-center"><Link to="/mint" onClick={() => {
+            setResponseMessage('');
+            setAuthInput(null);
+            setEmailInput(null);
+          }} className="text-primary-100">Re-Enter the Queue</Link></p>}
         </>
       )}
     </>
