@@ -107,8 +107,7 @@ export const HandleQueue = (): JSX.Element => {
 
     const recaptchaToken: string = await getRecaptchaToken();
     const encodedClientAgentInfo = await buildClientAgentInfo();
-    console.log(encodedClientAgentInfo);
-    return;
+
     const res = await fetch(`/.netlify/functions/queue`, {
       method: "POST",
       headers: {
