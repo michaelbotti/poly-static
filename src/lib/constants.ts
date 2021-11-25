@@ -17,7 +17,7 @@ export const HEADER_EMAIL = 'x-email';
 export const HEADER_EMAIL_AUTH = 'x-email-authcode';
 export const HEADER_JWT_ACCESS_TOKEN = 'x-access-token';
 export const HEADER_JWT_SESSION_TOKEN = 'x-session-token';
-export const HEADER_CLIENT_IP = 'client-ip';
+export const HEADER_CLIENT_IP = 'x-nf-client-connection-ip';
 
 /**
  * a-z
