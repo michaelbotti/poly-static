@@ -21,8 +21,7 @@ import {
 } from "../../src/lib/constants";
 import { getActiveSessionByHandle, getActiveSessionsByEmail, getMintedHandles, getPaidSessionByHandle, getReservedHandles, initFirebase } from "../helpers/firebase";
 import { fetchNodeApp } from "../helpers/util";
-import { decode } from "querystring";
-import { AccessTokenPayload } from "../helpers/jwt";
+import { AccessTokenPayload, decodeAccessToken } from "../helpers/jwt";
 
 // Main handler function for GET requests.
 const handler: Handler = async (
@@ -50,7 +49,7 @@ const handler: Handler = async (
   const handle = normalizeNFTHandle(headerHandle);
   const mintedHandles = await getMintedHandles();
 
-  const { emailAddress } = decode(headerAccess) as AccessTokenPayload;
+  const { emailAddress } = decodeAccessToken(headerAccess) as AccessTokenPayload;
   const activeSessionsByPhone = await getActiveSessionsByEmail(emailAddress);
   if (activeSessionsByPhone.length > 3) {
     return {
