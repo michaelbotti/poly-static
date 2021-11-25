@@ -59,7 +59,8 @@ const handler: Handler = async (
   }
 
   const parsedBody = JSON.parse(body);
-  const requestBody = { ...parsedBody, clientIp: headers[HEADER_CLIENT_IP] }
+  const clientIp = headers[Object.keys(headers).find(key => key.toLowerCase() === HEADER_CLIENT_IP.toLowerCase())];
+  const requestBody = { ...parsedBody, clientIp: clientIp }
 
   try {
     const data: QueueResponseBody = await fetchNodeApp(`queue`, {
