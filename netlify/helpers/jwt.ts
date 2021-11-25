@@ -1,10 +1,14 @@
-import { JwtPayload, Secret } from 'jsonwebtoken';
+import { JwtPayload, Secret, decode } from 'jsonwebtoken';
 import { getS3 } from ".";
 
 type SecretContext = 'access' | 'session'
 
 export interface AccessTokenPayload extends JwtPayload {
   emailAddress: string;
+}
+
+export const decodeAccessToken = (token: string): string | JwtPayload => {
+  return decode(token);
 }
 
 export const getSecret = async (context: SecretContext = 'session'): Promise<Secret | null> => {
