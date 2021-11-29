@@ -139,9 +139,8 @@ export const HandleQueue = (): JSX.Element => {
         {
           sitekey: RECAPTCHA_SITE_KEY_FALLBACK,
           theme: 'dark',
-          callback: async (token: string) => {
+          callback: (token: string) => {
             setRecaptchaFallbackToken(token);
-            await handleSaving(null);
           }
         }
       )
