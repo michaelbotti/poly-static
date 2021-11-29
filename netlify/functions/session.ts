@@ -4,7 +4,6 @@ import {
   HandlerContext,
   HandlerResponse
 } from "@netlify/functions";
-import { fetch } from 'cross-fetch';
 import jwt, { decode, JwtPayload } from "jsonwebtoken";
 
 import {
@@ -20,8 +19,7 @@ import { getRarityCost, isValid, normalizeNFTHandle } from "../../src/lib/helper
 import { getSecret } from "../helpers";
 import { verifyTwitterUser } from "../helpers";
 import { getActiveSessionsByEmail, getActiveSessionByHandle, getReservedHandles, initFirebase } from "../helpers/firebase";
-import { botResponse, responseWithMessage, unauthorizedResponse } from "../helpers/response";
-import { passesRecaptcha } from "../helpers/recaptcha";
+import { responseWithMessage, unauthorizedResponse } from "../helpers/response";
 import { AccessTokenPayload } from "../helpers/jwt";
 
 export interface NodeSessionResponseBody {
@@ -59,12 +57,6 @@ const handler: Handler = async (
 
   if (!handle || !validHandle) {
     return responseWithMessage(400, 'Invalid handle format.', true);
-  }
-
-  // Anti-bot.
-  const reCaptchaValidated = await passesRecaptcha(headerRecaptcha);
-  if (!reCaptchaValidated) {
-    return botResponse;
   }
 
   await initFirebase();
