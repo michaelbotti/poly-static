@@ -325,7 +325,7 @@ export const HandleQueue = (): JSX.Element => {
                 className={`w-full rounded-t-none`}
                 buttonStyle={"primary"}
                 type="submit"
-                disabled={savingSpot || !emailChecked}
+                disabled={savingSpot || !emailChecked || verifyingRecaptcha}
                 onClick={handleSaving}
               >
                 {savingSpot && !verifyingRecaptcha && "Entering queue..."}
