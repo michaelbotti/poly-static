@@ -1,5 +1,5 @@
 import React, { useRef, useState, useContext, useEffect } from "react";
-import { Link } from "gatsby";
+import { Link, navigate } from "gatsby";
 import { useLocation } from '@reach/router';
 import { parse } from 'query-string';
 
@@ -161,7 +161,7 @@ export const HandleQueue = (): JSX.Element => {
       const { error, verified, message, token, data } = res;
       if (!error && verified && token && data) {
         setAccessTokenCookie(res, data.exp);
-        window.location.reload();
+        navigate('/mint', { replace: true });
       }
 
       if (!verified && error && message) {
