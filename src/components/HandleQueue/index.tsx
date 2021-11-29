@@ -107,7 +107,7 @@ export const HandleQueue = (): JSX.Element => {
         }
       );
     } else {
-      setTimeoutResponseMessage(res?.message || "That didn't work. Try again.");
+      setResponseMessage(res?.message || "That didn't work. Try again.");
     }
 
     setSavingSpot(false);
