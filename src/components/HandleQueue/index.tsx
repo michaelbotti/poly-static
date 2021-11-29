@@ -82,6 +82,58 @@ export const HandleQueue = (): JSX.Element => {
     setEmailInput(value);
   }
 
+  const handleSavingResponse = (res) => {
+    // Clear the input field for email.
+    if (res?.updated) {
+      setEmailInput('');
+
+      // Update response state.
+      setResponseMessage(`You have successfully been entered into the queue! Check your email for further instructions about your access link.`);
+      setSubmitted(true);
+    } else if (res?.bot && !recaptchaFallbackToken) {
+      setTimeoutResponseMessage('One more thing, we just need to confirm you are real:');
+      setVerifyingRecaptcha(true);
+      window.grecaptcha.render(
+        fallbackRecaptcha.current,
+        {
+          sitekey: RECAPTCHA_SITE_KEY_FALLBACK,
+          theme: 'dark',
+          callback: async (token: string) => {
+            setSavingSpot(true);
+            const res = await handleSubmitToQueue(token);
+            console.log(res);
+            handleSavingResponse(res);
+          }
+        }
+      );
+    } else {
+      setTimeoutResponseMessage(res?.message || "That didn't work. Try again.");
+    }
+
+    setSavingSpot(false);
+  }
+
+  const handleSubmitToQueue = async (token: string = null) => {
+    const recaptchaToken: string = await getRecaptchaToken();
+    const encodedClientAgentInfo = await buildClientAgentInfo();
+    console.log(recaptchaFallbackToken);
+    const res = await fetch(`/.netlify/functions/queue`, {
+      method: "POST",
+      headers: {
+        [HEADER_EMAIL]: emailInput,
+        [HEADER_RECAPTCHA]: recaptchaToken,
+        [HEADER_RECAPTCHA_FALLBACK]: token || recaptchaFallbackToken
+      },
+      body: JSON.stringify({
+        clientAgent: encodedClientAgentInfo,
+      }),
+    })
+      .then((res) => res.json())
+      .catch((e) => console.log(e));
+
+      return res;
+  }
+
   // Send the user's email to a queue.
   const handleSaving = async (e: Event | null) => {
     e && e.preventDefault();
@@ -108,50 +160,8 @@ export const HandleQueue = (): JSX.Element => {
 
     setSavingSpot(true);
     setResponseMessage("Submitting email...");
-
-    const recaptchaToken: string = await getRecaptchaToken();
-    const encodedClientAgentInfo = await buildClientAgentInfo();
-
-    const res = await fetch(`/.netlify/functions/queue`, {
-      method: "POST",
-      headers: {
-        [HEADER_EMAIL]: emailInput,
-        [HEADER_RECAPTCHA]: recaptchaToken,
-        [HEADER_RECAPTCHA_FALLBACK]: recaptchaFallbackToken
-      },
-      body: JSON.stringify({
-        clientAgent: encodedClientAgentInfo,
-      }),
-    })
-      .then((res) => res.json())
-      .catch((e) => console.log(e));
-
-    // Clear the input field for email.
-    if (res?.updated) {
-      setEmailInput('');
-
-      // Update response state.
-      setResponseMessage(`You have successfully been entered into the queue! Check your email for further instructions about your access link.`);
-      setSubmitted(true);
-    } else if (res?.bot && !recaptchaFallbackToken) {
-      setTimeoutResponseMessage('One more thing, we just need to confirm you are real:');
-      setVerifyingRecaptcha(true);
-      window.grecaptcha.render(
-        fallbackRecaptcha.current,
-        {
-          sitekey: RECAPTCHA_SITE_KEY_FALLBACK,
-          theme: 'dark',
-          callback: (token: string) => {
-            setVerifyingRecaptcha(false);
-            setRecaptchaFallbackToken(token);
-          }
-        }
-      )
-    } else {
-      setTimeoutResponseMessage(res?.message || "That didn't work. Try again.");
-    }
-
-    setSavingSpot(false);
+    const res = await handleSubmitToQueue();
+    handleSavingResponse(res);
   };
 
   // Sends the user's email and auth code (via URL params) to the server for verification.
@@ -180,7 +190,7 @@ export const HandleQueue = (): JSX.Element => {
       const { error, verified, message, token, data } = res;
       if (!error && verified && token && data) {
         setAccessTokenCookie(res, data.exp);
-        navigate('/mint', { replace: true });
+        window.location.href = '/mint';
       }
 
       if (!verified && error && message) {
@@ -328,7 +338,7 @@ export const HandleQueue = (): JSX.Element => {
                 disabled={savingSpot || !emailChecked || verifyingRecaptcha}
                 onClick={handleSaving}
               >
-                {savingSpot && !verifyingRecaptcha && "Entering queue..."}
+                {savingSpot && "Entering queue..."}
                 {!savingSpot && verifyingRecaptcha && "Waiting..."}
                 {!authenticating && !savingSpot && !verifyingRecaptcha && "Submit"}
               </Button>
