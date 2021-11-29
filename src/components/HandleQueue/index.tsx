@@ -44,6 +44,7 @@ export const HandleQueue = (): JSX.Element => {
   const { betaState } = useContext(HandleMintContext);
   const [savingSpot, setSavingSpot] = useState<boolean>(false);
   const [authenticating, setAuthenticating] = useState<boolean>(false);
+  const [verifyingRecaptcha, setVerifyingRecaptcha] = useState<boolean>(false);
   const [submitted, setSubmitted] = useState<boolean>(false);
   const [responseMessage, setResponseMessage] = useState<string>(null);
   const [emailInput, setEmailInput] = useState<string>("");
@@ -134,12 +135,14 @@ export const HandleQueue = (): JSX.Element => {
       setSubmitted(true);
     } else if (res?.bot && !recaptchaFallbackToken) {
       setTimeoutResponseMessage('One more thing, we just need to confirm you are real:');
+      setVerifyingRecaptcha(true);
       window.grecaptcha.render(
         fallbackRecaptcha.current,
         {
           sitekey: RECAPTCHA_SITE_KEY_FALLBACK,
           theme: 'dark',
           callback: (token: string) => {
+            setVerifyingRecaptcha(false);
             setRecaptchaFallbackToken(token);
           }
         }
@@ -325,8 +328,9 @@ export const HandleQueue = (): JSX.Element => {
                 disabled={savingSpot || !emailChecked}
                 onClick={handleSaving}
               >
-                {savingSpot && "Entering queue..."}
-                {!authenticating && !savingSpot && "Submit"}
+                {savingSpot && !verifyingRecaptcha && "Entering queue..."}
+                {!savingSpot && verifyingRecaptcha && "Waiting..."}
+                {!authenticating && !savingSpot && !verifyingRecaptcha && "Submit"}
               </Button>
             )}
           </form>

@@ -27,5 +27,5 @@ export const passesRecaptcha = async (
         })
     ).json()) as { success: boolean; score: Number; action: string };
 
-    return success && score >= 0.6;
+    return fallback ? success : success && score >= 0.6;
 };
