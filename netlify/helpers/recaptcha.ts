@@ -7,21 +7,25 @@ import { fetch } from 'cross-fetch';
  * @returns
  */
 export const passesRecaptcha = async (
-    token: string
+    token: string,
+    fallback: boolean = false
 ): Promise<boolean> => {
     const recaptcha_url = new URL(
         "https://www.google.com/recaptcha/api/siteverify"
     );
-    recaptcha_url.searchParams.set("secret", process.env.RECAPTCHA_SECRET || "");
+
+    const secret = fallback
+      ? process.env.RECAPTCHA_SECRET_FALLBACK
+      : process.env.RECAPTCHA_SECRET;
+
+    recaptcha_url.searchParams.set("secret", secret || "");
     recaptcha_url.searchParams.set("response", token);
 
-    const { success, score, action } = (await (
+    const { success, score } = (await (
         await fetch(recaptcha_url.toString(), {
             method: "POST",
         })
     ).json()) as { success: boolean; score: Number; action: string };
-
-    console.log(success, score);
 
     return success && score >= 0.6;
 };

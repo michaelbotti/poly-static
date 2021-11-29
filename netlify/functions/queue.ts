@@ -5,11 +5,10 @@ import {
   HandlerResponse,
 } from "@netlify/functions";
 
-import { HEADER_RECAPTCHA } from "../../src/lib/constants";
 import { passesRecaptcha } from "../helpers/recaptcha";
 import { botResponse, unauthorizedResponse } from "../helpers/response";
 import { fetchNodeApp } from "../helpers/util";
-import { HEADER_CLIENT_IP, HEADER_EMAIL } from "../../src/lib/constants";
+import { HEADER_CLIENT_IP, HEADER_EMAIL, HEADER_RECAPTCHA, HEADER_RECAPTCHA_FALLBACK } from "../../src/lib/constants";
 
 interface AppendAccessResponse {
   updated: boolean;
@@ -27,6 +26,7 @@ const handler: Handler = async (
 ): Promise<HandlerResponse> => {
   const { headers, body } = event;
   const headerRecaptcha = headers[HEADER_RECAPTCHA];
+  const headerRecaptchaFallback = headers[HEADER_RECAPTCHA_FALLBACK];
 
   if (!headers[HEADER_EMAIL]) {
     return {
@@ -43,7 +43,7 @@ const handler: Handler = async (
   }
 
   // Anti-bot.
-  const reCaptchaValidated = await passesRecaptcha(headerRecaptcha);
+  const reCaptchaValidated = await passesRecaptcha(headerRecaptchaFallback || headerRecaptcha, null !== headerRecaptchaFallback);
   if (!reCaptchaValidated) {
     return botResponse;
   }

@@ -11,6 +11,7 @@ export const unauthorizedResponse: HandlerResponse = {
 export const botResponse: HandlerResponse = {
     statusCode: 422,
     body: JSON.stringify({
+        bot: true,
         message:
             "Our system thinks you might be a bot but we hope we're wrong. Please try again.",
     }),

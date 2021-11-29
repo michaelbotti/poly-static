@@ -4,7 +4,7 @@ import { useLocation } from '@reach/router';
 import { parse } from 'query-string';
 
 import { VerifyResponseBody } from "../../../netlify/functions/verify";
-import { HEADER_EMAIL, HEADER_EMAIL_AUTH, HEADER_RECAPTCHA } from "../../lib/constants";
+import { HEADER_EMAIL, HEADER_EMAIL_AUTH, HEADER_RECAPTCHA, HEADER_RECAPTCHA_FALLBACK, RECAPTCHA_SITE_KEY_FALLBACK } from "../../lib/constants";
 import Button from "../button";
 import { getRecaptchaToken, setAccessTokenCookie } from "../../lib/helpers/session";
 import { HandleMintContext } from "../../context/mint";
@@ -52,6 +52,9 @@ export const HandleQueue = (): JSX.Element => {
   const [emailChecked, setEmailChecked] = useState<boolean>(false);
   const [touChecked, setTouChecked] = useState<boolean>(false);
   const [refundsChecked, setRefundsChecked] = useState<boolean>(false);
+  const [recaptchaFallbackToken, setRecaptchaFallbackToken] = useState<string>(null);
+
+  const fallbackRecaptcha = useRef(null);
 
   const activeEmail = getActiveEmail();
   const activeAuthCode = getActiveAuthCode();
@@ -79,8 +82,8 @@ export const HandleQueue = (): JSX.Element => {
   }
 
   // Send the user's email to a queue.
-  const handleSaving = async (e: Event) => {
-    e.preventDefault();
+  const handleSaving = async (e: Event | null) => {
+    e && e.preventDefault();
 
     if (0 === emailInput.length) {
       setTimeoutResponseMessage("Email cannot be blank!");
@@ -112,7 +115,8 @@ export const HandleQueue = (): JSX.Element => {
       method: "POST",
       headers: {
         [HEADER_EMAIL]: emailInput,
-        [HEADER_RECAPTCHA]: recaptchaToken
+        [HEADER_RECAPTCHA]: recaptchaToken,
+        [HEADER_RECAPTCHA_FALLBACK]: recaptchaFallbackToken
       },
       body: JSON.stringify({
         clientAgent: encodedClientAgentInfo,
@@ -128,6 +132,19 @@ export const HandleQueue = (): JSX.Element => {
       // Update response state.
       setResponseMessage(`You have successfully been entered into the queue! Check your email for further instructions about your access link.`);
       setSubmitted(true);
+    } else if (res?.bot && !recaptchaFallbackToken) {
+      setTimeoutResponseMessage('One more thing, we just need to confirm you are real:');
+      window.grecaptcha.render(
+        fallbackRecaptcha.current,
+        {
+          sitekey: RECAPTCHA_SITE_KEY_FALLBACK,
+          theme: 'dark',
+          callback: async (token: string) => {
+            setRecaptchaFallbackToken(token);
+            await handleSaving(null);
+          }
+        }
+      )
     } else {
       setTimeoutResponseMessage(res?.message || "That didn't work. Try again.");
     }
@@ -315,6 +332,7 @@ export const HandleQueue = (): JSX.Element => {
             )}
           </form>
           {responseMessage && <p className="my-2 text-center">{responseMessage}</p>}
+          <div className="flex items-center justify-center my-4" ref={fallbackRecaptcha} />
           {activeEmail && activeAuthCode && !expired && <p className="text-center mt-2"><Link to={'/mint/'} className="text-primary-100">Start Over</Link></p>}
           {expired && <p className="my-2 text-center"><Link to="/mint" onClick={() => {
             setResponseMessage('');
