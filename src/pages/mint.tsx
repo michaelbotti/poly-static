@@ -14,7 +14,11 @@ function MintPage() {
         <div className="grid grid-cols-12 gap-4 lg:gap-8 bg-dark-200 rounded-lg shadow-lg place-content-start p-4 lg:p-8 mb-16">
           <div className="col-span-12 h-full">
             <h2 className="font-bold text-primary-100 text-center">
-              <Countdown
+              <span className="text-dark-350 font-normal text-2xl uppercase inline-block mb-8 tracking-wider">Time Till Launch</span>
+              <span className="text-3xl my-2 lg:mt-0 lg:text-jumbo text-primary-200 block">
+                Coming Soon!
+              </span>
+              {/* <Countdown
                 date={targetDate}
                 zeroPadTime={2}
                 renderer={({
@@ -30,13 +34,13 @@ function MintPage() {
                     </span>
                   </>
                 )}
-              />
+              /> */}
             </h2>
             <hr className="w-12 border-dark-300 border-2 block my-8 mx-auto" />
-            <h4 className="text-white text-center text-lg lg:text-2xl uppercase tracking-wider">November 6th, 2pm UTC</h4>
+            {/* <h4 className="text-white text-center text-lg lg:text-2xl uppercase tracking-wider">November 6th, 2pm UTC</h4>
             <p className="text-center mt-4">
               <Button href="https://twitter.com/intent/tweet?url=https%3A%2F%2Fadahandle.com&text=@adahandle%20is%20launching%20on%20Saturday%20at%202pm%20UTC%21%20Can%27t%20wait%20to%20get%20my%20Handle%3A&hashtags=Cardano%20%24ADA" buttonStyle="primary">Share on Twitter!</Button>
-            </p>
+            </p> */}
           </div>
         </div>
       </section>
