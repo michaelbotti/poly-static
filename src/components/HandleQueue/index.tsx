@@ -251,7 +251,8 @@ export const HandleQueue = (): JSX.Element => {
             Success!
           </h3>
           <p className="text-lg text-center text-dark-350">{responseMessage}</p>
-          <p className="text-center text-lg font-bold">You may close this window.</p>
+          <p>Make sure to <strong className="underline">add adahandle.com to your safe-senders list, as well as check your spam folder!</strong></p>
+          <p className="text-center text-lg font-bold">You may close this window!</p>
         </div>
       ) : (
         <>
