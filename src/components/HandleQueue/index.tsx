@@ -54,6 +54,7 @@ export const HandleQueue = (): JSX.Element => {
   const [touChecked, setTouChecked] = useState<boolean>(false);
   const [refundsChecked, setRefundsChecked] = useState<boolean>(false);
   const [recaptchaFallbackToken, setRecaptchaFallbackToken] = useState<string>(null);
+  const [recaptchaRendered, setRecaptchaRendered] = useState<boolean>(false);
 
   const fallbackRecaptcha = useRef(null);
 
@@ -93,24 +94,29 @@ export const HandleQueue = (): JSX.Element => {
     } else if (res?.bot && !recaptchaFallbackToken) {
       setResponseMessage('One more thing, we just need to confirm you are real:');
       setVerifyingRecaptcha(true);
-      window.grecaptcha.render(
-        fallbackRecaptcha.current,
-        {
-          sitekey: RECAPTCHA_SITE_KEY_FALLBACK,
-          theme: 'dark',
-          callback: async (token: string) => {
-            setSavingSpot(true);
-            const res = await handleSubmitToQueue(token);
-            handleSavingResponse(res);
-          },
-          'expired-callback': () => {
-            fallbackRecaptcha.current?.firstElementChild.remove();
-            setVerifyingRecaptcha(false);
-            setRecaptchaFallbackToken(null);
-            setResponseMessage('Your ReCaptcha expired. Please try again.');
+      if (recaptchaRendered) {
+        window.grecaptcha.reset(fallbackRecaptcha.current);
+      } else {
+        window.grecaptcha.render(
+          fallbackRecaptcha.current,
+          {
+            sitekey: RECAPTCHA_SITE_KEY_FALLBACK,
+            theme: 'dark',
+            callback: async (token: string) => {
+              setSavingSpot(true);
+              const res = await handleSubmitToQueue(token);
+              handleSavingResponse(res);
+            },
+            'expired-callback': () => {
+              fallbackRecaptcha.current.firstElementChild.remove();
+              setVerifyingRecaptcha(false);
+              setRecaptchaFallbackToken(null);
+              setResponseMessage('Your ReCaptcha expired. Please try again.');
+            }
           }
-        }
-      );
+        );
+        setRecaptchaRendered(true);
+      }
     } else {
       setResponseMessage(res?.message || "That didn't work. Try again.");
     }
