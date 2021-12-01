@@ -45,7 +45,6 @@ const handler: Handler = async (
   // Anti-bot.
   const useFallback = null !== headerRecaptchaFallback;
   const token = headerRecaptchaFallback || headerRecaptcha;
-  console.log(useFallback, token);
   const reCaptchaValidated = await passesRecaptcha(token, useFallback);
   if (!reCaptchaValidated) {
     return botResponse;

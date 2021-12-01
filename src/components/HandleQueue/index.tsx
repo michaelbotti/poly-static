@@ -314,7 +314,7 @@ export const HandleQueue = (): JSX.Element => {
                     onChange={() => setRefundsChecked(!refundsChecked)}
                   />
                   <label className="ml-2 text-white py-3 cursor-pointer" htmlFor="refunds">
-                    I understand <strong className="underline">refunds will take up to 14 days to process!</strong>
+                    You agree to our <Link className="text-primary-100" to="/refund-policy">Refund Policy</Link> and <strong className="underline">14-day processing time!</strong>
                   </label>
                 </div>
               </>
