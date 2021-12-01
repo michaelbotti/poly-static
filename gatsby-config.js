@@ -10,7 +10,13 @@ module.exports = {
     author: `@adahandle`,
   },
   plugins: [
-    `gatsby-plugin-netlify`,
+    {
+      resolve: `gatsby-plugin-netlify`,
+      options: {
+        mergeLinkHeaders: false,
+        mergeCachingHeaders: false
+      }
+    },
     `gatsby-plugin-react-helmet`,
     `gatsby-plugin-layout`,
     {
