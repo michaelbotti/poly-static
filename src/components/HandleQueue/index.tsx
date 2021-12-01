@@ -105,7 +105,7 @@ export const HandleQueue = (): JSX.Element => {
           },
           'expired-callback': () => {
             fallbackRecaptcha.current.remove();
-            setSavingSpot(false);
+            setVerifyingRecaptcha(false);
             setRecaptchaFallbackToken(null);
             setResponseMessage('Your ReCaptcha expired. Please try again.');
           }
