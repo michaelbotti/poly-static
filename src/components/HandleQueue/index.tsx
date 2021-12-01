@@ -101,8 +101,13 @@ export const HandleQueue = (): JSX.Element => {
           callback: async (token: string) => {
             setSavingSpot(true);
             const res = await handleSubmitToQueue(token);
-            console.log(res);
             handleSavingResponse(res);
+          },
+          'expired-callback': () => {
+            fallbackRecaptcha.current.remove();
+            setSavingSpot(false);
+            setRecaptchaFallbackToken(null);
+            setResponseMessage('Your ReCaptcha expired. Please try again.');
           }
         }
       );
