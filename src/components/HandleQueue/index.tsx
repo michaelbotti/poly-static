@@ -91,7 +91,7 @@ export const HandleQueue = (): JSX.Element => {
       setResponseMessage(`You have successfully been entered into the queue! Check your email for further instructions about your access link.`);
       setSubmitted(true);
     } else if (res?.bot && !recaptchaFallbackToken) {
-      setTimeoutResponseMessage('One more thing, we just need to confirm you are real:');
+      setResponseMessage('One more thing, we just need to confirm you are real:');
       setVerifyingRecaptcha(true);
       window.grecaptcha.render(
         fallbackRecaptcha.current,
