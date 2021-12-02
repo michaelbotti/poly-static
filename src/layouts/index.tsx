@@ -9,7 +9,7 @@ import { HandleMintContextProvider } from '../context/mint';
 const Layout: FC = ({ children }): JSX.Element => {
   const [mintPage, setMintPage] = useState<boolean>(false);
   const [isTestnet, setIsTestnet] = useState<boolean>(false);
-  const { hostname } = useLocation();
+  const { hostname, pathname } = useLocation();
 
   useEffect(() => {
     setMintPage(window.location.pathname.includes('mint'));
@@ -17,7 +17,7 @@ const Layout: FC = ({ children }): JSX.Element => {
     if (hostname.includes('testnet') || hostname.includes('localhost')) {
       setIsTestnet(true);
     }
-  }, [hostname]);
+  }, [hostname, pathname]);
 
   return (
     <HandleMintContextProvider>
