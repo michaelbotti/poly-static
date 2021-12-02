@@ -10,6 +10,7 @@ import { Loader } from "../Loader";
 import Button from "../button";
 import { SessionResponseBody } from "../../../netlify/functions/session";
 import { Link } from "gatsby";
+import { useLocation } from '@reach/router';
 
 export const HandleSession = ({
   sessionData
@@ -21,6 +22,15 @@ export const HandleSession = ({
   const [fetchingPayment, setFetchingPayment] = useState<boolean>(true);
   const [copying, setCopying] = useState<boolean>(false);
   const [retry, setRetry] = useState<boolean>(true);
+  const [isTestnet, setIsTestnet] = useState<boolean>(false);
+
+  const { hostname } = useLocation();
+
+  useEffect(() => {
+    if (hostname.includes('testnet') || hostname.includes('localhost')) {
+      setIsTestnet(true);
+    }
+  }, [hostname]);
 
   // Reset on index change.
   useEffect(() => {
@@ -138,7 +148,7 @@ export const HandleSession = ({
         {!validPayment && (
           <>
             <h4 className="text-xl mb-8">
-              <strong className="text-4xl mt-4 inline-block font-bold" style={{ color: getRarityHex(sessionData.data.handle)}}>{getRarityCost(sessionData.data.handle)} $ADA</strong>
+              <strong className="text-4xl mt-4 inline-block font-bold" style={{ color: getRarityHex(sessionData.data.handle)}}>{getRarityCost(sessionData.data.handle)} ${isTestnet ? 'tADA' : 'ADA'}</strong>
             </h4>
             <div className="relative">
               <pre className="p-4 rounded-t-lg shadow-inner shadow-lg bg-dark-300 overflow-hidden overflow-scroll pr-24 border-2 border-b-0 border-primary-100">
