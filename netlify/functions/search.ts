@@ -9,6 +9,7 @@ import {
   getDefaultActiveSessionUnvailable,
   getDefaultResponseAvailable,
   getDefaultResponseUnvailable,
+  getPaidSessionUnavailable,
   getReservedUnavailable,
   getSPOUnavailable,
   getTwitterResponseUnvailable,
@@ -47,33 +48,16 @@ const handler: Handler = async (
   await initFirebase();
 
   const handle = normalizeNFTHandle(headerHandle);
-  const mintedHandles = await getMintedHandles();
 
   const { emailAddress } = decodeAccessToken(headerAccess) as AccessTokenPayload;
-  const activeSessionsByPhone = await getActiveSessionsByEmail(emailAddress);
-  if (activeSessionsByPhone.length > 3) {
+  const activeSessionsByEmail = await getActiveSessionsByEmail(emailAddress);
+  if (activeSessionsByEmail.length > 3) {
     return {
       statusCode: 403,
       body: JSON.stringify({
         message: "Too many sessions open! Try again after one expires.",
         available: false,
       } as HandleResponseBody),
-    };
-  }
-
-  const activeSessionsByHandle = await getActiveSessionByHandle(handle);
-  if (activeSessionsByHandle) {
-    return {
-      statusCode: 403,
-      body: JSON.stringify(getDefaultActiveSessionUnvailable()),
-    };
-  }
-
-  const paidSession = await getPaidSessionByHandle(handle);
-  if (paidSession) {
-    return {
-      statusCode: 403,
-      body: JSON.stringify(getDefaultActiveSessionUnvailable()),
     };
   }
 
@@ -92,6 +76,22 @@ const handler: Handler = async (
         message: "Handle already exists!",
         twitter: false,
       } as HandleResponseBody),
+    };
+  }
+
+  const activeSessionsByHandle = await getActiveSessionByHandle(handle);
+  if (activeSessionsByHandle) {
+    return {
+      statusCode: 403,
+      body: JSON.stringify(getDefaultActiveSessionUnvailable()),
+    };
+  }
+
+  const paidSession = await getPaidSessionByHandle(handle);
+  if (paidSession) {
+    return {
+      statusCode: 403,
+      body: JSON.stringify(getPaidSessionUnavailable()),
     };
   }
 
@@ -117,10 +117,7 @@ const handler: Handler = async (
     };
   }
 
-  if (
-    (reservedHandles && reservedHandles?.blacklist?.includes(handle)) ||
-    (mintedHandles && mintedHandles?.some(({ handleName }) => handleName === handle))
-  ) {
+  if (reservedHandles && reservedHandles?.blacklist?.includes(handle)) {
     return {
       statusCode: 403,
       body: JSON.stringify(getDefaultResponseUnvailable()),
