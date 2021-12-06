@@ -67,12 +67,12 @@ const handler: Handler = async (
   const { body } = await ensureHandleAvailable(handle);
   const data: HandleResponseBody = JSON.parse(body);
 
-  if (!data.available) {
+  if (!data.available && !data.twitter) {
     return responseWithMessage(403, 'That Handle is unavailable.', true);
   }
 
   // Verified Twitter user if needed.
-  if (headerTwitter) {
+  if (data.available && data.twitter && headerTwitter) {
     const exp = headerTwitter && (await verifyTwitterUser(headerTwitter));
     if (!exp || exp > Date.now()) {
       return unauthorizedResponse;
