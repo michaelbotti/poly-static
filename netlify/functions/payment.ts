@@ -60,8 +60,6 @@ const handler: Handler = async (
     };
   }
 
-  await initFirebase();
-
   const accessSecret = await getSecret('access');
   const sessionSecret = await getSecret('session');
 

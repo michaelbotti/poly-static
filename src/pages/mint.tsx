@@ -53,7 +53,7 @@ function MintPage() {
           className="grid grid-cols-12 gap-4 lg:gap-8 bg-dark-200 rounded-lg rounded-tl-none place-content-start p-4 lg:p-8 mb-16"
           style={{ minHeight: "60vh" }}
           >
-            {null === accessOpen || null === betaState && (
+            {primed && (null === accessOpen || null === betaState) && (
               <div className="col-span-12 md:col-span-6 md:col-start-4 relative z-10">
                 <div className="grid justify-center content-center h-full w-full p-8 flex-wrap">
                   <p className="w-full text-center">Fetching details...</p>

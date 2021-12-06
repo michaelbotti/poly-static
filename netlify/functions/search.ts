@@ -21,7 +21,7 @@ import {
   HEADER_JWT_ACCESS_TOKEN,
 } from "../../src/lib/constants";
 import { getActiveSessionByHandle, getActiveSessionsByEmail, getMintedHandles, getPaidSessionByHandle, getReservedHandles, initFirebase } from "../helpers/firebase";
-import { fetchNodeApp } from "../helpers/util";
+import { ensureHandleAvailable, fetchNodeApp } from "../helpers/util";
 import { AccessTokenPayload, decodeAccessToken } from "../helpers/jwt";
 
 // Main handler function for GET requests.
@@ -61,73 +61,7 @@ const handler: Handler = async (
     };
   }
 
-  const { exists, policyID, assetName } = await fetchNodeApp("/exists", {
-    headers: {
-      [HEADER_HANDLE]: handle,
-    },
-  }).then((res) => res.json());
-
-  if (exists) {
-    return {
-      statusCode: 200,
-      body: JSON.stringify({
-        available: false,
-        link: `https://${process.env.CARDANOSCAN_DOMAIN}/token/${policyID}.${assetName}`,
-        message: "Handle already exists!",
-        twitter: false,
-      } as HandleResponseBody),
-    };
-  }
-
-  const activeSessionsByHandle = await getActiveSessionByHandle(handle);
-  if (activeSessionsByHandle) {
-    return {
-      statusCode: 403,
-      body: JSON.stringify(getDefaultActiveSessionUnvailable()),
-    };
-  }
-
-  const paidSession = await getPaidSessionByHandle(handle);
-  if (paidSession) {
-    return {
-      statusCode: 403,
-      body: JSON.stringify(getPaidSessionUnavailable()),
-    };
-  }
-
-  const reservedHandles = await getReservedHandles();
-  if (reservedHandles && reservedHandles?.manual?.includes(handle)) {
-    return {
-      statusCode: 403,
-      body: JSON.stringify(getReservedUnavailable()),
-    };
-  }
-
-  if (reservedHandles && reservedHandles?.spos?.includes(handle)) {
-    return {
-      statusCode: 403,
-      body: JSON.stringify(getSPOUnavailable()),
-    };
-  }
-
-  if (reservedHandles && reservedHandles?.twitter?.includes(handle)) {
-    return {
-      statusCode: 403,
-      body: JSON.stringify(getTwitterResponseUnvailable()),
-    };
-  }
-
-  if (reservedHandles && reservedHandles?.blacklist?.includes(handle)) {
-    return {
-      statusCode: 403,
-      body: JSON.stringify(getDefaultResponseUnvailable()),
-    };
-  }
-
-  return {
-    statusCode: 200,
-    body: JSON.stringify(getDefaultResponseAvailable()),
-  };
+  return ensureHandleAvailable(handle);
 };
 
 export { handler };
