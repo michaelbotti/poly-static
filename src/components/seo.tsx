@@ -26,9 +26,7 @@ function SEO({ description = '', lang = 'en', meta = [], keywords = [], title })
         {
           rel: 'icon',
           type: 'image/png',
-          href: process.env.NODE_ENV === 'production'
-            ? 'https://adahandle.com/favicon.png'
-            : '/favicon.png'
+          href: 'https://adahandle.com/favicon.png'
         }
       ]}
       meta={[
