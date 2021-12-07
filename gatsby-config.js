@@ -5,8 +5,8 @@ module.exports = {
     LMDB_STORE: true
   },
   siteMetadata: {
-    title: `ADA Handle`,
-    description: `Introducing custom wallet addresses for the Cardano blockchain, secured on-chain.`,
+    title: process.env.NODE_ENV === 'production' ? `ADA Handle` : `TESTNET: ADA Handle`,
+    description: `Custom Cardano addresses for everyone.`,
     author: `@adahandle`,
   },
   plugins: [
@@ -31,7 +31,9 @@ module.exports = {
       resolve: `gatsby-plugin-google-gtag`,
       options: {
         trackingIds: [
-          "G-J6VN2WT0DT"
+          process.env.NODE_ENV === `production`
+            ? "G-J6VN2WT0DT"
+            : "G-PTJLRM9DZE"
         ],
         gtagConfig: {
           anonymize_ip: true,

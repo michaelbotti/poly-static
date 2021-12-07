@@ -50,7 +50,7 @@ function MintPage() {
         )}
         <HandleNavigation paymentSessions={paymentSessions} updatePaymentSessions={refreshPaymentSessions} />
         <div
-          className="grid grid-cols-12 gap-4 lg:gap-8 bg-dark-200 rounded-lg rounded-tl-none place-content-start p-4 lg:p-8 mb-16"
+          className="grid grid-cols-12 gap-4 lg:gap-8 bg-dark-200 rounded-lg rounded-tl-none place-content-start p-4 lg:p-8"
           style={{ minHeight: "60vh" }}
           >
             {primed && (null === accessOpen || null === betaState) && (
@@ -98,6 +98,9 @@ function MintPage() {
               </>
             )}
         </div>
+        {accessOpen && betaState && (
+          <p className="text-white mt-4 text-center">Current Chain Load: {`${(betaState.chainLoad * 100).toFixed(2)}%`}</p>
+        )}
       </section>
     </>
   );
