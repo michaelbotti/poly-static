@@ -5,11 +5,13 @@ module.exports = {
     LMDB_STORE: true
   },
   siteMetadata: {
-    title: process.env.NODE_ENV === 'production' ? `ADA Handle` : `TESTNET: ADA Handle`,
+    title: 'ADA Handle',
     description: `Custom Cardano addresses for everyone.`,
     author: `@adahandle`,
   },
   plugins: [
+    `gatsby-plugin-react-helmet`,
+    `gatsby-plugin-layout`,
     {
       resolve: `gatsby-plugin-netlify`,
       options: {
@@ -17,8 +19,6 @@ module.exports = {
         mergeCachingHeaders: false
       }
     },
-    `gatsby-plugin-react-helmet`,
-    `gatsby-plugin-layout`,
     {
       resolve: `gatsby-plugin-recaptcha`,
       options: {
@@ -31,9 +31,7 @@ module.exports = {
       resolve: `gatsby-plugin-google-gtag`,
       options: {
         trackingIds: [
-          process.env.NODE_ENV === `production`
-            ? "G-J6VN2WT0DT"
-            : "G-PTJLRM9DZE"
+          process.env.GTAG
         ],
         gtagConfig: {
           anonymize_ip: true,
