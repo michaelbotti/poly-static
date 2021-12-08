@@ -257,7 +257,7 @@ export const HandleQueue = (): JSX.Element => {
       ) : (
         <>
           <h3 className="text-2xl text-white text-center mb-4">
-            {activeEmail && activeAuthCode ? <>Agree to the Terms</> : <>Get an Access Code</>}
+            {activeEmail && activeAuthCode ? <>Agree to the Terms</> : <>Enter the Queue</>}
           </h3>
           {!activeEmail && !activeAuthCode && betaState?.chainLoad > 0.8 && <p className="text-center">You may experienced delayed delivery times while we wait for the blockchain load to fall below 80%.</p>}
           {activeEmail && activeAuthCode && <p className="text-lg text-center">Almost there! Just make sure to agree to the terms of use before purchasing your Handles. This information is important!</p>}
