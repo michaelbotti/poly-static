@@ -195,7 +195,7 @@ export const HandleSession = ({
                         <h2 className="text-2xl font-bold mb-2"><strong>Yay!</strong> Your payment was successful!</h2>
                         <p className="text-lg">We're minting your handle <strong>right now.</strong> Please allow up to a few hours to receive your NFT.</p>
                         <p className="text-lg">
-                          Your unique URL:
+                          Your unique URL:<br/>
                           <a className="text-primary-100" href={'undefined' !== typeof window && window.location.host !== 'adahandle.com' ? `https://testnet.handle.me/${sessionData.data.handle}` : `https://handle.me/${sessionData.data.handle}`} target="_blank">
                             {'undefined' !== typeof window && window.location.host !== 'adahandle.com'
                               ? `https://testnet.handle.me/${sessionData.data.handle}`
