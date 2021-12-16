@@ -120,9 +120,9 @@ const Header: FC<HeaderProps> = ({ className, showMint = true }) => {
               Beta Sale! &rarr;
             </Button>
           )}
-          {!showMint && betaState && !betaState.error && (
+          {/* {!showMint && betaState && !betaState.error && (
             <p className="text-lg m-0"><span className="text-dark-350">Handles Minted:</span> {betaState.totalHandles.toLocaleString()} / <strong className="text-primary-200">15,000</strong></p>
-          )}
+          )} */}
         </div>
       </header>
     </>
