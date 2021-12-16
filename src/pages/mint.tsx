@@ -70,7 +70,7 @@ function MintPage() {
                 <div className="col-span-12 md:col-span-6">
                   <div className="shadow-lg rounded-lg border-2 border-primary-100 p-4 md:p-8">
                     <h3 className="text-white text-3xl font-bold text-center mb-4">How it Works</h3>
-                    <p className="text-lg text-center text-dark-350">Purchasing a Handle during the Beta sale is a 3-step process, starting with:</p>
+                    <p className="text-lg text-center text-dark-350">Purchasing a Handle during the Beta sale is a 4-step process, starting with:</p>
                     <ol className="mb-4">
                       <li>Enter the queue to save your place in line.</li>
                       <li>Wait for an access code when it's your turn.</li>
