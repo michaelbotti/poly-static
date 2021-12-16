@@ -1,13 +1,14 @@
 import { useContext } from "react";
 
-// import { firebase } from "../firebase";
 import { AdditionalUserInfo } from "firebase/auth";
 import { HandleMintContext } from "../../context/mint";
+import { initializeFirebaseApp } from "../helpers/firebase";
 
 export const useTwitter = (): [
   () => Promise<boolean>
 ] => {
   const { setTwitterToken, handle } = useContext(HandleMintContext);
+  initializeFirebaseApp();
 
   const checkHandleAgainstUser = async () => {
     const {
@@ -25,7 +26,6 @@ export const useTwitter = (): [
         const user: AdditionalUserInfo | null = getAdditionalUserInfo(result);
 
         // If we match, proceed.
-        console.log(user, handle)
         if (user?.username?.toLowerCase() === handle.toLowerCase()) {
           const token = await result.user.getIdToken(true);
           setTwitterToken(token);

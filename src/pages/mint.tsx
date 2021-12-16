@@ -1,48 +1,99 @@
-import React from "react";
-import Countdown, { zeroPad } from 'react-countdown';
-import Button from "../components/button";
+import React, { useContext, useEffect, useMemo, useState } from "react";
+
+import { HandleMintContext } from "../context/mint";
+import { usePrimeMintingContext } from "../lib/hooks/primeMintingContext";
+import { useAccessOpen } from "../lib/hooks/access";
 
 import SEO from "../components/seo";
+import { HandleSearchReserveFlow } from "../components/HandleSearch";
+import { Loader } from "../components/Loader";
+import NFTPreview from "../components/NFTPreview";
+import { HandleQueue } from "../components/HandleQueue";
+import { getAccessTokenFromCookie, getAllCurrentSessionData, getSessionTokenFromCookie } from "../lib/helpers/session";
+import { HandleSession } from "../components/HandleSession";
+import { HandleNavigation } from "../components/HandleNavigation";
+import { SessionResponseBody } from "../../netlify/functions/session";
+import Countdown from "react-countdown";
+import { Link } from "gatsby";
 
 function MintPage() {
-  const targetDate = new Date('Tue Nov 06 2021 14:00:00 UTC');
+  const { primed, handle, currentIndex, betaState } = useContext(HandleMintContext);
+  const [paymentSessions, setPaymentSessions] = useState<(false | SessionResponseBody)[]>();
+  const [accessOpen, setAccessOpen] = useAccessOpen();
+
+  useEffect(() => {
+    setPaymentSessions(getAllCurrentSessionData());
+  }, [currentIndex, setPaymentSessions]);
+
+  usePrimeMintingContext();
+
+  const currentAccess = useMemo(() => getAccessTokenFromCookie(), [currentIndex]);
+  const currentSession = currentIndex > 0 ? getSessionTokenFromCookie(currentIndex) as SessionResponseBody : null;
+
+  const refreshPaymentSessions = () => {
+    setPaymentSessions(getAllCurrentSessionData());
+  }
 
   return (
     <>
       <SEO title="Mint" />
-      <section id="top" className="max-w-3xl mx-auto">
-        <div className="grid grid-cols-12 gap-4 lg:gap-8 bg-dark-200 rounded-lg shadow-lg place-content-start p-4 lg:p-8 mb-16">
-          <div className="col-span-12 h-full">
-            <h2 className="font-bold text-primary-100 text-center">
-              <span className="text-dark-350 font-normal text-2xl uppercase inline-block mb-8 tracking-wider">Time Till Launch</span>
-              <span className="text-3xl my-2 lg:mt-0 lg:text-jumbo text-primary-200 block">
-                Coming Soon!
-              </span>
-              {/* <Countdown
-                date={targetDate}
-                zeroPadTime={2}
-                renderer={({
-                  days,
-                  hours,
-                  minutes,
-                  seconds
-                }) => (
-                  <>
-                    <span className="text-dark-350 font-normal text-2xl uppercase inline-block mb-8 tracking-wider">Time Till Launch</span>
-                    <span className="text-3xl my-2 lg:mt-0 lg:text-jumbo text-primary-200 block">
-                      {zeroPad(hours)}h, {zeroPad(minutes)}m, {zeroPad(seconds)}s
-                    </span>
-                  </>
-                )}
-              /> */}
-            </h2>
-            <hr className="w-12 border-dark-300 border-2 block my-8 mx-auto" />
-            {/* <h4 className="text-white text-center text-lg lg:text-2xl uppercase tracking-wider">November 6th, 2pm UTC</h4>
-            <p className="text-center mt-4">
-              <Button href="https://twitter.com/intent/tweet?url=https%3A%2F%2Fadahandle.com&text=@adahandle%20is%20launching%20on%20Saturday%20at%202pm%20UTC%21%20Can%27t%20wait%20to%20get%20my%20Handle%3A&hashtags=Cardano%20%24ADA" buttonStyle="primary">Share on Twitter!</Button>
-            </p> */}
-          </div>
+      <section id="top" className="max-w-5xl mx-auto">
+        {currentAccess && (
+          <Countdown
+            onComplete={() => setAccessOpen(false)}
+            date={new Date(currentAccess.data.exp * 1000)}
+            renderer={({ formatted }) => {
+              return (
+                <p className="text-white text-right">Access Expires: {formatted.minutes}:{formatted.seconds}</p>
+              )
+            }}
+          />
+        )}
+        <HandleNavigation paymentSessions={paymentSessions} updatePaymentSessions={refreshPaymentSessions} />
+        <div
+          className="grid grid-cols-12 gap-4 lg:gap-8 bg-dark-200 rounded-lg rounded-tl-none place-content-start p-4 lg:p-8"
+          style={{ minHeight: "60vh" }}
+          >
+            {primed && (null === accessOpen || null === betaState) && (
+              <div className="col-span-12 md:col-span-6 md:col-start-4 relative z-10">
+                <div className="grid justify-center content-center h-full w-full p-8 flex-wrap">
+                  <p className="w-full text-center">Fetching details...</p>
+                  <Loader />
+                </div>
+              </div>
+            )}
+            {!accessOpen && betaState?.totalHandles <= 15000 && (
+              <>
+                <div className="col-span-12">
+                  <h2 className="text-primary-100 font-bold text-5xl text-center mb-8">Beta Sale!</h2>
+                </div>
+                <div className="col-span-12 md:col-span-6">
+                  <div className="shadow-lg rounded-lg border-2 border-primary-100 p-4 md:p-8">
+                    <h3 className="text-white text-3xl font-bold text-center mb-4">How it Works</h3>
+                    <p className="text-lg text-center text-dark-350">Purchasing a Handle during the Beta sale is a 4-step process, starting with:</p>
+                    <ol className="mb-4">
+                      <li>Enter the queue to save your place in line.</li>
+                      <li>Wait for an access code when it's your turn.</li>
+                      <li>Click the link when it arrives and agree to terms.</li>
+                      <li>Search and select an available Handle to purchase.</li>
+                    </ol>
+                    <p>Pricing for each Handle ranges from 10-500 $ADA, depending on the character length. You can see full details on <Link to="/faq" className="text-primary-100">our FAQ page</Link>!</p>
+                  </div>
+                </div>
+                <div className="col-span-12 md:col-span-6 relative z-10 flex flex-wrap">
+                  <h3 className="text-2xl text-center text-primary-200 mt-auto w-full">
+                    <span className="font-bold text-white">LAUNCH TIME:</span><br/>
+                    December 17th, 5PM UTC
+                  </h3>
+                  <p className="text-lg text-dark-350 text-center mt-4">We will open the Minting Portal soon. There is nothing you need to do to pre-register, and the Beta Sale will be publicly open to everyone.</p>
+                </div>
+              </>
+            )}
+
         </div>
+        {accessOpen && betaState && (
+          <p className="text-white mt-4 text-center">Current Chain Load: {`${(betaState.chainLoad * 100).toFixed(2)}%`}</p>
+        )}
       </section>
     </>
   );

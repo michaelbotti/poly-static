@@ -1,44 +1,72 @@
-import React, { useRef, useState, useContext } from "react";
-import PhoneInput from "react-phone-number-input";
+import React, { useRef, useState, useContext, useEffect } from "react";
+import { Link, navigate } from "gatsby";
+import { useLocation } from '@reach/router';
+import { parse } from 'query-string';
 
-import { QueueResponseBody } from "../../../netlify/functions/queue";
 import { VerifyResponseBody } from "../../../netlify/functions/verify";
-import { HEADER_PHONE, HEADER_PHONE_AUTH } from "../../lib/constants";
-import { useAccessOpen } from "../../lib/hooks/access";
+import { HEADER_EMAIL, HEADER_EMAIL_AUTH, HEADER_RECAPTCHA, HEADER_RECAPTCHA_FALLBACK, RECAPTCHA_SITE_KEY_FALLBACK } from "../../lib/constants";
 import Button from "../button";
-import { setAccessTokenCookie } from "../../lib/helpers/session";
-
-import "react-phone-number-input/style.css";
-import { Link } from "gatsby";
+import { getRecaptchaToken, setAccessTokenCookie } from "../../lib/helpers/session";
 import { HandleMintContext } from "../../context/mint";
+import { buildClientAgentInfo } from "../../lib/helpers/clientInfo";
 
-const getResponseMessage = (count: number): string => {
-  if (count < 50) {
-    return `Don't go anywhere, you are ${
-      count === 0 ? "first" : `#${count}`
-    } in line and part of the next batch! Auth codes can take up to 5 minutes to arrive.`;
+
+const validateEmail = (email: string): boolean => {
+  const res = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+  return res.test(String(email).toLowerCase());
+}
+
+const getActiveEmail = (): string | null => {
+  let value = null;
+  if (typeof window !== undefined) {
+    const { search } = useLocation();
+    const { activeEmail } = parse(search) as { activeEmail: string };
+    if (activeEmail && validateEmail(activeEmail)) {
+      value = activeEmail;
+    }
   }
 
-  if (count > 50 && count < 200) {
-    return `You are #${count} in line. Estimated wait time is between 30 minutes and 2 hours.`;
+  return value;
+}
+
+const getActiveAuthCode = (): string | null => {
+  let value = null;
+  if (typeof window !== undefined) {
+    const { search } = useLocation();
+    const { activeAuthCode } = parse(search) as { activeAuthCode: string };
+    value = activeAuthCode || null;
   }
 
-  return `You are #${count} in line. Estimated wait time is more than 2 hours.`;
-};
+  return value;
+}
 
 export const HandleQueue = (): JSX.Element => {
   const { betaState } = useContext(HandleMintContext);
   const [savingSpot, setSavingSpot] = useState<boolean>(false);
   const [authenticating, setAuthenticating] = useState<boolean>(false);
-  const [action, setAction] = useState<"save" | "auth">("save");
+  const [verifyingRecaptcha, setVerifyingRecaptcha] = useState<boolean>(false);
+  const [submitted, setSubmitted] = useState<boolean>(false);
   const [responseMessage, setResponseMessage] = useState<string>(null);
-  const [phoneInput, setPhoneInput] = useState<string>("");
+  const [emailInput, setEmailInput] = useState<string>("");
   const [authInput, setAuthInput] = useState<string>("");
+  const [expired, setExpired] = useState<boolean>(false);
+  const [emailChecked, setEmailChecked] = useState<boolean>(false);
   const [touChecked, setTouChecked] = useState<boolean>(false);
   const [refundsChecked, setRefundsChecked] = useState<boolean>(false);
+  const [recaptchaFallbackToken, setRecaptchaFallbackToken] = useState<string>(null);
+  const [recaptchaRendered, setRecaptchaRendered] = useState<boolean>(false);
 
+  const fallbackRecaptcha = useRef(null);
+
+  const activeEmail = getActiveEmail();
+  const activeAuthCode = getActiveAuthCode();
   const form = useRef(null);
-  const [, setAccessOpen] = useAccessOpen();
+
+  useEffect(() => {
+    if (activeAuthCode) {
+      setAuthInput(activeAuthCode);
+    }
+  }, []);
 
   const setTimeoutResponseMessage = (message: string) => {
     setResponseMessage(message);
@@ -47,54 +75,112 @@ export const HandleQueue = (): JSX.Element => {
     }, 4000);
   };
 
-  /**
-   * Send the user's phone number to a queue.
-   * We set a cron on the backend to allow users
-   * in via batches of 50, depending on current
-   * chain load.
-   */
-  const handleSaving = async (e: Event) => {
-    e.preventDefault();
-
-    if (0 === phoneInput.length) {
-      setTimeoutResponseMessage("Phone number cannot be blank.");
+  const handleOnChange = (value: string) => {
+    if (value.includes('+')) {
+      setTimeoutResponseMessage("Sorry, we do not support email addresses with the (+) character. Try again!");
       return;
     }
 
-    setSavingSpot(true);
-    setResponseMessage("Checking your place in line...");
-    const res: QueueResponseBody = await fetch(`/.netlify/functions/queue`, {
+    setEmailInput(value);
+  }
+
+  const handleSavingResponse = (res) => {
+    // Clear the input field for email.
+    if (res?.updated) {
+      setEmailInput('');
+
+      // Update response state.
+      setResponseMessage(`You have successfully been entered into the queue! Check your email for further instructions about your access link.`);
+      setSubmitted(true);
+    } else if (res?.bot && !recaptchaFallbackToken) {
+      setResponseMessage('One more thing, we just need to confirm you are real:');
+      setVerifyingRecaptcha(true);
+      if (recaptchaRendered) {
+        window.grecaptcha.reset(fallbackRecaptcha.current);
+      } else {
+        window.grecaptcha.render(
+          fallbackRecaptcha.current,
+          {
+            sitekey: RECAPTCHA_SITE_KEY_FALLBACK,
+            theme: 'dark',
+            callback: async (token: string) => {
+              setSavingSpot(true);
+              const res = await handleSubmitToQueue(token);
+              handleSavingResponse(res);
+            },
+            'expired-callback': () => {
+              fallbackRecaptcha.current.firstElementChild.remove();
+              setVerifyingRecaptcha(false);
+              setRecaptchaFallbackToken(null);
+              setResponseMessage('Your ReCaptcha expired. Please try again.');
+            }
+          }
+        );
+        setRecaptchaRendered(true);
+      }
+    } else {
+      setResponseMessage(res?.message || "That didn't work. Try again.");
+    }
+
+    setSavingSpot(false);
+  }
+
+  const handleSubmitToQueue = async (token: string = null) => {
+    const recaptchaToken: string = await getRecaptchaToken();
+    const encodedClientAgentInfo = await buildClientAgentInfo();
+    const res = await fetch(`/.netlify/functions/queue`, {
       method: "POST",
       headers: {
-        [HEADER_PHONE]: phoneInput,
+        [HEADER_EMAIL]: emailInput,
+        [HEADER_RECAPTCHA]: recaptchaToken,
+        [HEADER_RECAPTCHA_FALLBACK]: token || recaptchaFallbackToken
       },
+      body: JSON.stringify({
+        clientAgent: encodedClientAgentInfo,
+      }),
     })
       .then((res) => res.json())
       .catch((e) => console.log(e));
 
-    if (res.updated) {
-      const message = getResponseMessage(res.position);
-      res.position < 50 && setAction("auth");
-      setResponseMessage(message);
-    } else {
-      setTimeoutResponseMessage(res?.message || "That didn't work. Try again.");
+      return res;
+  }
+
+  // Send the user's email to a queue.
+  const handleSaving = async (e: Event | null) => {
+    e && e.preventDefault();
+
+    if (0 === emailInput.length) {
+      setTimeoutResponseMessage("Email cannot be blank!");
+      return;
     }
 
-    setSavingSpot(false);
+    if (!validateEmail(emailInput)) {
+      setTimeoutResponseMessage("Sorry, that's not a valid email!");
+      return;
+    }
+
+    if (emailInput.includes('+')) {
+      setTimeoutResponseMessage("Sorry, we do not support email addresses with the (+) character. Try again!");
+      return;
+    }
+
+    if (!emailChecked) {
+      setTimeoutResponseMessage("Sorry, you must agree to receive email alerts!");
+      return;
+    }
+
+    setSavingSpot(true);
+    setResponseMessage("Submitting email...");
+    const res = await handleSubmitToQueue();
+    handleSavingResponse(res);
   };
 
-  /**
-   * Sends the authentication code along with the user's
-   * phone number to the backend, where we verify and
-   * sign an access JWT token in the case that they pass.
-   * The JWT token expires automatically in 30 minutes
-   * after generating.
-   */
+  // Sends the user's email and auth code (via URL params) to the server for verification.
   const handleAuthenticating = async (e: Event) => {
     e.preventDefault();
 
-    if (authInput.length === 0 || phoneInput.length === 0) {
-      setResponseMessage("Inputs must not be empty...");
+    if (authInput.length !== 6) {
+      setResponseMessage("Auth code must be 6 digits.");
       return;
     }
 
@@ -104,8 +190,8 @@ export const HandleQueue = (): JSX.Element => {
         "/.netlify/functions/verify",
         {
           headers: {
-            [HEADER_PHONE]: phoneInput,
-            [HEADER_PHONE_AUTH]: authInput,
+            [HEADER_EMAIL]: activeEmail,
+            [HEADER_EMAIL_AUTH]: activeAuthCode,
           },
         }
       )
@@ -114,13 +200,13 @@ export const HandleQueue = (): JSX.Element => {
 
       const { error, verified, message, token, data } = res;
       if (!error && verified && token && data) {
-        setAccessTokenCookie(token, data.exp);
-        setAccessOpen(true);
-        window.location.reload();
+        setAccessTokenCookie(res, data.exp);
+        window.location.href = '/mint';
       }
 
       if (!verified && error && message) {
         setResponseMessage(message);
+        setExpired(true);
       }
     } catch (e) {
       setTimeoutResponseMessage("Hmm, try that again. Something went wrong.");
@@ -144,7 +230,7 @@ export const HandleQueue = (): JSX.Element => {
             }}
           >
             {null === betaState && "Loading..."}
-            {null !== betaState && !betaState.error && `${betaState.chainLoad.toFixed(3)}%`}
+            {null !== betaState && !betaState.error && `${(betaState.chainLoad * 100).toFixed(2)}%`}
             {null !== betaState && betaState.error && "N/A"}
           </span>
         </div>
@@ -157,108 +243,130 @@ export const HandleQueue = (): JSX.Element => {
           </span>
         </div>
       </div>
-      <h3 className="text-2xl text-white text-center mb-4">
-        Register Your Spot
-      </h3>
-      <div className="flex align-center justify-stretch bg-dark-200 rounded-t-lg border-2 border-b-0 border-dark-300">
-        <button
-          onClick={() => {
-            setAuthInput("");
-            setAction("save");
-          }}
-          className={`text-white text-center p-4 w-1/2 rounded-lg rounded-r-none rounded-bl-none border-b-4 ${
-            "save" === action
-              ? "border-primary-100"
-              : "opacity-80 border-dark-200"
-          }`}
-        >
-          Enter Queue
-        </button>
-        <button
-          onClick={() => {
-            setAction("auth");
-          }}
-          className={`text-white text-center p-4 w-1/2 rounded-lg rounded-l-none rounded-br-none border-b-4 ${
-            "auth" === action
-              ? "border-primary-100"
-              : "opacity-80 border-dark-200"
-          }`}
-        >
-          Authenticate
-        </button>
-      </div>
-      <form onSubmit={(e) => e.preventDefault()} ref={form} className="bg-dark-100 border-dark-300">
-        <PhoneInput
-          name="phone"
-          disabled={savingSpot}
-          placeholder={"Your mobile number..."}
-          className={`${
-            "auth" === action ? "rounded-none border-b-0" : ""
-          } focus:ring-0 focus:ring-opacity-0 border-2 outline-none form-input bg-dark-100 border-dark-300 px-6 py-4 text-xl w-full appearance-none`}
-          defaultCountry="US"
-          value={phoneInput}
-          onChange={setPhoneInput}
-        />
-        {"auth" === action && (
-          <>
-            <input
-              name="auth"
-              data-lpignore="true"
-              disabled={authenticating}
-              placeholder={"Your 6 digit code..."}
-              type="number"
-              onChange={(e) => setAuthInput(e.target.value)}
-              value={authInput}
-              className={`focus:ring-0 focus:ring-opacity-0 border-2 outline-none form-input bg-dark-100 border-dark-300 px-6 py-4 text-xl w-full appearance-none`}
-            />
-          </>
-        )}
-        <div className="flex items-center text-sm bg-dark-100 border-dark-300 border-l-2 border-r-2 p-4 pb-0">
-          <input
-            className="form-checkbox p-2 text-primary-200 rounded focus:ring-primary-200 cursor-pointer"
-            id="tou"
-            name="tou"
-            type="checkbox"
-            checked={touChecked}
-            onChange={() => setTouChecked(!touChecked)}
-          />
-          <label className="ml-2 text-white py-3 cursor-pointer" htmlFor="tou">
-            I have read and agree to the ADA Handle {" "}
-            <Link to="/tou" className="text-primary-100">
-              Terms of Use
-            </Link>
-          </label>
+      {submitted ? (
+        <div className="bg-dark-100 rounded-lg shadow-lg p-8 block">
+          <h3 className="text-2xl text-white text-center mb-4 font-bold">
+            <div className="w-12 h-12 text-3xl bg-primary-200 text-white flex items-center justify-center rounded mx-auto mb-4">
+              &#10003;
+            </div>
+            Success!
+          </h3>
+          <p className="text-lg text-center text-dark-350">{responseMessage}</p>
+          <p className="text-center text-lg">Make sure to <strong className="underline">add hello@adahandle.com to your safe-senders list, as well as check your spam folder!</strong></p>
+          <p className="text-center text-lg font-bold">You may close this window!</p>
         </div>
-        <div className="flex items-center text-sm bg-dark-100 border-dark-300 border-l-2 border-r-2 p-4 pt-0">
-          <input
-            className="form-checkbox p-2 text-primary-200 rounded focus:ring-primary-200 cursor-pointer"
-            id="refunds"
-            name="refunds"
-            type="checkbox"
-            checked={refundsChecked}
-            onChange={() => setRefundsChecked(!refundsChecked)}
-          />
-          <label className="ml-2 text-white py-3 cursor-pointer" htmlFor="refunds">
-            I understand <strong className="underline">refunds will take up to 14 days to process!</strong>
-          </label>
-        </div>
-        <Button
-          className={`w-full rounded-t-none`}
-          buttonStyle={"primary"}
-          type="submit"
-          disabled={authenticating || savingSpot || !touChecked || !refundsChecked}
-          onClick={
-            touChecked && refundsChecked && "auth" === action
-              ? handleAuthenticating
-              : handleSaving
-          }
-        >
-          {authenticating && "Authenticating..."}
-          {savingSpot && "Entering queue..."}
-          {!authenticating && !savingSpot && "Submit"}
-        </Button>
-      </form>
-      {responseMessage && <p className="my-2">{responseMessage}</p>}
+      ) : (
+        <>
+          <h3 className="text-2xl text-white text-center mb-4">
+            {activeEmail && activeAuthCode ? <>Agree to the Terms</> : <>Enter the Queue</>}
+          </h3>
+          {!activeEmail && !activeAuthCode && betaState?.chainLoad > 0.8 && <p className="text-center">You may experienced delayed delivery times while we wait for the blockchain load to fall below 80%.</p>}
+          {activeEmail && activeAuthCode && <p className="text-lg text-center">Almost there! Just make sure to agree to the terms of use before purchasing your Handles. This information is important!</p>}
+          <form onSubmit={(e) => e.preventDefault()} ref={form} className="bg-dark-100 border-dark-300 rounded-t-lg">
+            {!activeEmail && !activeAuthCode && (
+              <>
+                <input
+                  name="email"
+                  disabled={savingSpot}
+                  placeholder={"Your email address..."}
+                  className={`focus:ring-0 focus:ring-opacity-0 border-2 outline-none form-input bg-dark-100 border-dark-300 rounded-t-lg px-6 py-4 text-xl w-full`}
+                  value={emailInput}
+                  // @ts-ignore
+                  onChange={(e) => handleOnChange(e.target.value)}
+                />
+                <div className="flex items-center text-sm bg-dark-100 border-dark-300 border-l-2 border-r-2 px-4 py-2">
+                  <input
+                    className="form-checkbox p-2 text-primary-200 rounded focus:ring-primary-200 cursor-pointer"
+                    id="acceptEmail"
+                    name="acceptEmail"
+                    type="checkbox"
+                    checked={emailChecked}
+                    onChange={() => setEmailChecked(!emailChecked)}
+                  />
+                  <label className="ml-2 text-white py-3 cursor-pointer" htmlFor="acceptEmail">
+                    I agree to receive email notifications.
+                  </label>
+                </div>
+              </>
+            )}
+            {activeEmail && activeAuthCode && (
+              <>
+                <input
+                  name="auth"
+                  data-lpignore="true"
+                  disabled={authenticating}
+                  placeholder={"Your 6 digit code..."}
+                  type="number"
+                  onChange={(e) => setAuthInput(e.target.value)}
+                  value={authInput}
+                  className={`hidden focus:ring-0 focus:ring-opacity-0 border-2 outline-none form-input bg-dark-100 border-dark-300 px-6 py-4 text-xl w-full appearance-none rounded-t-lg`}
+                />
+                <div className="flex items-center text-sm bg-dark-100 border-dark-300 border-2 rounded-t-lg p-4 pt-2 pb-0">
+                  <input
+                    className="form-checkbox p-2 text-primary-200 rounded focus:ring-primary-200 cursor-pointer"
+                    id="tou"
+                    name="tou"
+                    type="checkbox"
+                    checked={touChecked}
+                    onChange={() => setTouChecked(!touChecked)}
+                  />
+                  <label className="ml-2 text-white py-3 cursor-pointer" htmlFor="tou">
+                    I have read and agree to the ADA Handle {" "}
+                    <Link to="/tou" className="text-primary-100">
+                      Terms of Use
+                    </Link>
+                  </label>
+                </div>
+                <div className="flex items-center text-sm bg-dark-100 border-dark-300 border-l-2 border-r-2 p-4 pb-2 pt-0">
+                  <input
+                    className="form-checkbox p-2 text-primary-200 rounded focus:ring-primary-200 cursor-pointer"
+                    id="refunds"
+                    name="refunds"
+                    type="checkbox"
+                    checked={refundsChecked}
+                    onChange={() => setRefundsChecked(!refundsChecked)}
+                  />
+                  <label className="ml-2 text-white py-3 cursor-pointer" htmlFor="refunds">
+                    You agree to our <Link className="text-primary-100" to="/refund-policy">Refund Policy</Link> and <strong className="underline">14-day processing time!</strong>
+                  </label>
+                </div>
+              </>
+            )}
+            {activeEmail ? (
+              <Button
+                className={`w-full rounded-t-none`}
+                buttonStyle={"primary"}
+                type="submit"
+                disabled={authenticating || !touChecked || !refundsChecked}
+                onClick={handleAuthenticating}
+              >
+                {authenticating && "Authenticating..."}
+                {!authenticating && "Enter Minting Portal"}
+              </Button>
+            ) : (
+              <Button
+                className={`w-full rounded-t-none`}
+                buttonStyle={"primary"}
+                type="submit"
+                disabled={savingSpot || !emailChecked || verifyingRecaptcha}
+                onClick={handleSaving}
+              >
+                {savingSpot && "Entering queue..."}
+                {!savingSpot && verifyingRecaptcha && "Waiting..."}
+                {!authenticating && !savingSpot && !verifyingRecaptcha && "Submit"}
+              </Button>
+            )}
+          </form>
+          {responseMessage && <p className="my-2 text-center">{responseMessage}</p>}
+          <div className="flex items-center justify-center my-4" ref={fallbackRecaptcha} />
+          {activeEmail && activeAuthCode && !expired && <p className="text-center mt-2"><Link to={'/mint/'} className="text-primary-100">Start Over</Link></p>}
+          {expired && <p className="my-2 text-center"><Link to="/mint" onClick={() => {
+            setResponseMessage('');
+            setAuthInput(null);
+            setEmailInput(null);
+          }} className="text-primary-100">Re-Enter the Queue</Link></p>}
+        </>
+      )}
     </>
   );
 };

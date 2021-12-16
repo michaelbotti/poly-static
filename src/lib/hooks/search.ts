@@ -1,11 +1,8 @@
 import { useEffect, useContext } from "react";
 
 import {
-  getDefaultActiveSessionUnvailable,
   getBetaPhaseResponseUnavailable,
-  getTwitterResponseUnvailable,
   getDefaultResponseUnvailable,
-  getDefaultResponseAvailable,
   getReservedUnavailable,
 } from "../helpers/search";
 import { HandleResponseBody } from "../helpers/search";
@@ -13,17 +10,29 @@ import {
   BETA_PHASE_MATCH,
   HEADER_HANDLE,
   HEADER_JWT_ACCESS_TOKEN,
+  MAX_SESSION_LENGTH,
 } from "../constants";
 import { HandleMintContext } from "../../context/mint";
 import { normalizeNFTHandle } from "../helpers/nfts";
 import { getAccessTokenFromCookie } from "../helpers/session";
 
 export const useSyncAvailableStatus = async (unsanitizedHandle: string) => {
+  const currentAccess = getAccessTokenFromCookie();
   const { setFetching, setHandleResponse, reservedHandles } =
     useContext(HandleMintContext);
 
   useEffect(() => {
     const handle = normalizeNFTHandle(unsanitizedHandle);
+
+    // Don't allow new sessions when their's 5 minutes left.
+    if (Date.now() + 300000 > (currentAccess ? currentAccess.data.exp * 1000 : 0) && !reservedHandles.twitter.includes(handle)) {
+      setHandleResponse({
+        available: true,
+        message: 'Less than 5 minutes! This attempt may be refunded.',
+        twitter: false
+      });
+      return;
+    }
 
     if (handle.length === 0) {
       setHandleResponse(null);
@@ -48,9 +57,14 @@ export const useSyncAvailableStatus = async (unsanitizedHandle: string) => {
     (async () => {
       setFetching(true);
       const accessToken = getAccessTokenFromCookie();
+
+      if (!accessToken) {
+        return;
+      }
+
       const headers: HeadersInit = {
         [HEADER_HANDLE]: handle,
-        [HEADER_JWT_ACCESS_TOKEN]: accessToken
+        [HEADER_JWT_ACCESS_TOKEN]: accessToken.token
       };
 
       // Search on-chain.

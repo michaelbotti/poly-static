@@ -12,7 +12,7 @@ export interface ReservedHandlesType {
 }
 
 export interface ActiveSessionType {
-  phoneNumber: string;
+  emailAddress: string;
   cost: number;
   handle: string;
   start: number;
@@ -92,7 +92,7 @@ export const HandleMintContextProvider = ({ children, ...rest }) => {
   const [betaState, setBetaState] = useState<StateResponseBody>(null);
 
   useEffect(() => {
-    (async () => {
+    const updateBetaState = async () => {
       await fetch("/.netlify/functions/state")
         .then(async (res) => {
           const data: StateResponseBody = await res.json();
@@ -102,7 +102,9 @@ export const HandleMintContextProvider = ({ children, ...rest }) => {
           setBetaState(null);
           console.log(e);
         });
-    })();
+    }
+
+    updateBetaState();
   }, []);
 
   return (

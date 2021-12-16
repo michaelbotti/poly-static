@@ -4,8 +4,8 @@ import {
   HandlerContext,
   HandlerResponse
 } from "@netlify/functions";
-import { fetch } from 'cross-fetch';
 import jwt, { decode, JwtPayload } from "jsonwebtoken";
+import { fetch } from 'cross-fetch';
 
 import {
   HEADER_HANDLE,
@@ -15,16 +15,14 @@ import {
   HEADER_JWT_ACCESS_TOKEN,
   HEADER_JWT_SESSION_TOKEN
 } from "../../src/lib/constants";
-import {
-  ActiveSessionType,
-  ReservedHandlesType,
-} from "../../src/context/mint";
-import { fetchNodeApp } from '../helpers/util';
+import { ensureHandleAvailable, fetchNodeApp } from '../helpers/util';
 import { getRarityCost, isValid, normalizeNFTHandle } from "../../src/lib/helpers/nfts";
 import { getSecret } from "../helpers";
 import { verifyTwitterUser } from "../helpers";
-import { getActiveSessionUnavailable, HandleResponseBody } from "../../src/lib/helpers/search";
-import { getActiveSessions, getReservedHandles, initFirebase } from "../helpers/firebase";
+import { getActiveSessionsByEmail, getActiveSessionByHandle, getReservedHandles, initFirebase } from "../helpers/firebase";
+import { responseWithMessage, unauthorizedResponse } from "../helpers/response";
+import { AccessTokenPayload } from "../helpers/jwt";
+import { HandleResponseBody } from "../../src/lib/helpers/search";
 
 export interface NodeSessionResponseBody {
   error: boolean,
@@ -38,18 +36,6 @@ export interface SessionResponseBody {
   address: string;
   token: string;
   data: JwtPayload
-}
-
-const unauthorizedResponse: HandlerResponse = {
-  statusCode: 401,
-  body: JSON.stringify({
-    error: true,
-    message: "Unauthorized.",
-  } as SessionResponseBody),
-};
-
-interface AccessTokenPayload extends JwtPayload {
-  phoneNumber: string;
 }
 
 const handler: Handler = async (
@@ -68,48 +54,34 @@ const handler: Handler = async (
   const validHandle = handle && isValid(handle);
 
   if (!headerRecaptcha || !accessToken) {
-    return {
-      statusCode: 401,
-      body: JSON.stringify({
-        error: true,
-        message: "Unauthorized.",
-      } as SessionResponseBody),
-    };
+    return unauthorizedResponse;
   }
 
   if (!handle || !validHandle) {
-    return {
-      statusCode: 400,
-      body: JSON.stringify({
-        error: true,
-        message: 'Invalid handle format.'
-      } as SessionResponseBody)
-    }
+    return responseWithMessage(400, 'Invalid handle format.', true);
   }
 
   await initFirebase();
 
-  // Anti-bot.
-  const reCaptchaValidated = await passesRecaptcha(headerRecaptcha);
-  if (!reCaptchaValidated) {
+  // Ensure no one is trying to force an existing Handle.
+  const { body } = await ensureHandleAvailable(handle);
+  const data: HandleResponseBody = JSON.parse(body);
+
+  if (!data.available && !data.twitter) {
     return unauthorizedResponse;
   }
 
   // Verified Twitter user if needed.
-  if (headerTwitter) {
+  if (data.available && data.twitter && headerTwitter) {
     const exp = headerTwitter && (await verifyTwitterUser(headerTwitter));
     if (!exp || exp > Date.now()) {
       return unauthorizedResponse;
     }
   }
 
-  const reservedhandles = await getReservedHandles();
-  const activeSessions = await getActiveSessions();
-
-  const { phoneNumber } = decode(accessToken) as AccessTokenPayload;
-  const tooManySessions = activeSessions && activeSessions?.filter(
-    ({ phoneNumber: existingPhoneNumber }) => existingPhoneNumber === phoneNumber
-  ).length > 3;
+  const { emailAddress } = decode(accessToken) as AccessTokenPayload;
+  const activeSessionsByPhone = await getActiveSessionsByEmail(emailAddress);
+  const tooManySessions = activeSessionsByPhone.length > 3;
 
   if (tooManySessions) {
     return {
@@ -121,11 +93,8 @@ const handler: Handler = async (
     }
   }
 
-  const handleBeingPurchased = activeSessions && activeSessions?.filter(({ handle }) =>
-    handle === headerHandle
-  ).length > 0;
-
-  if (handleBeingPurchased) {
+  const activeSessionsByHandle = await getActiveSessionByHandle(handle);
+  if (activeSessionsByHandle) {
     return {
       statusCode: 403,
       body: JSON.stringify({
@@ -135,8 +104,9 @@ const handler: Handler = async (
     }
   }
 
-  if (reservedhandles) {
-    const { manual, spos, blacklist } = reservedhandles;
+  const reservedHandles = await getReservedHandles();
+  if (reservedHandles) {
+    const { manual, spos, blacklist } = reservedHandles;
     if (blacklist?.includes(handle)) {
       return {
         statusCode: 403,
@@ -161,37 +131,9 @@ const handler: Handler = async (
     }
   }
 
-  // // Ping pending sessions.
-  // let pendingSessionCutLine = false;
-  // await database
-  //   .ref("/pendingSessions")
-  //     .transaction((snapshot: string[] | null) => {
-  //       if (!snapshot) {
-  //         return [handle];
-  //       }
-
-  //       if (snapshot.includes(handle)) {
-  //         pendingSessionCutLine = true;
-  //         return snapshot;
-  //       }
-
-  //       return [
-  //         ...snapshot,
-  //         handle
-  //       ];
-  //   });
-
-  // if (pendingSessionCutLine) {
-  //   return {
-  //     statusCode: 403,
-  //     body: JSON.stringify(getActiveSessionUnavailable())
-  //   }
-  // }
-
-
   /**
    * We sign a session JWT tokent to authorize the purchase,
-   * and include the access phone number to limit request.
+   * and include the access email address to limit request.
    */
   const sessionSecret = await getSecret('session');
   const sessionToken = jwt.sign(
@@ -199,7 +141,7 @@ const handler: Handler = async (
       iat: Date.now(),
       handle,
       cost: getRarityCost(handle),
-      phoneNumber
+      emailAddress
     },
     sessionSecret,
     {
@@ -234,40 +176,6 @@ const handler: Handler = async (
     statusCode: 200,
     body: JSON.stringify(mutatedRes),
   }
-};
-
-/**
- * Verifies against ReCaptcha.
- * @param token
- * @param ip
- * @returns
- */
- const passesRecaptcha = async (
-  token: string
-): Promise<boolean | HandlerResponse> => {
-  const recaptcha_url = new URL(
-    "https://www.google.com/recaptcha/api/siteverify"
-  );
-  recaptcha_url.searchParams.set("secret", process.env.RECAPTCHA_SECRET || "");
-  recaptcha_url.searchParams.set("response", token);
-
-  const { success, score, action } = (await (
-    await fetch(recaptcha_url.toString(), {
-      method: "POST",
-    })
-  ).json()) as { success: boolean; score: Number; action: string };
-
-  if (!success || score < 0.8 || action !== "submit") {
-    return {
-      statusCode: 422,
-      body: JSON.stringify({
-        message:
-          "Hmm, we think you might be a bot but we hope we're wrong. Please try again.",
-      } as HandleResponseBody),
-    };
-  }
-
-  return true;
 };
 
 export { handler };

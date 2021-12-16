@@ -17,6 +17,7 @@ import VyFi from '../images/vyfi.png';
 import NFTMaker from '../images/nft-maker.png';
 import Cardax from '../images/cardax.png';
 import WM from '../images/wm.png';
+import Indigo from '../images/Eye-white.png';
 import CC from '../images/ccw-logo-384.png';
 import Photochromic from '../images/photochromic.png';
 
@@ -84,6 +85,9 @@ function IndexPage() {
             </a>
             <a href="https://cardax.io/" className="block col-span-6 lg:col-span-4 shadow-lg rounded-lg bg-dark-100 p-8 lg:p-16 flex items-center justify-center transform hover:-translate-y-2" rel="nofollow noopener" target="_blank">
               <img className="w-36" src={Cardax} alt="Cardax" />
+            </a>
+            <a href="https://indigoprotocol.io/" className="block col-span-6 lg:col-span-4 shadow-lg rounded-lg bg-dark-100 p-8 lg:p-16 flex items-center justify-center transform hover:-translate-y-2" rel="nofollow noopener" target="_blank">
+              <img className="w-32" src={Indigo} alt="Indigo Protocol" />
             </a>
             <a href="https://ccvault.io/" className="block col-span-6 lg:col-span-4 shadow-lg rounded-lg bg-dark-100 p-8 lg:p-16 flex items-center justify-center transform hover:-translate-y-2" rel="nofollow noopener" target="_blank">
               <img className="w-36" src={CC} alt="CC Vault" />

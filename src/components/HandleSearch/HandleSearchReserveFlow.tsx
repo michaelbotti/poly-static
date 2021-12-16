@@ -22,7 +22,6 @@ import { HandleSearchConnectTwitter } from "./";
 import { Loader } from "../Loader";
 import { SessionResponseBody } from '../../../netlify/functions/session';
 import { getAccessTokenFromCookie, getAllCurrentSessionData, getRecaptchaToken, setSessionTokenCookie } from "../../lib/helpers/session";
-import { getActiveSessionUnavailable } from "../../lib/helpers/search";
 
 export const HandleSearchReserveFlow = ({ className = "", ...rest }) => {
   const {
@@ -31,7 +30,8 @@ export const HandleSearchReserveFlow = ({ className = "", ...rest }) => {
     setHandleResponse,
     handle,
     setHandle,
-    twitterToken
+    twitterToken,
+    setTwitterToken
   } = useContext(HandleMintContext);
   const { setCurrentIndex } = useContext(HandleMintContext);
   const [fetchingSession, setFetchingSession] = useState<boolean>(false);
@@ -76,7 +76,10 @@ export const HandleSearchReserveFlow = ({ className = "", ...rest }) => {
     const headers = new Headers();
     headers.append(HEADER_HANDLE, handle);
     headers.append(HEADER_RECAPTCHA, recaptchaToken);
-    headers.append(HEADER_JWT_ACCESS_TOKEN, getAccessTokenFromCookie());
+    const accessToken = getAccessTokenFromCookie();
+    if (accessToken) {
+      headers.append(HEADER_JWT_ACCESS_TOKEN, accessToken.token);
+    }
 
     /**
      * Add a Twitter auth token to verify on the server. This is
@@ -86,12 +89,6 @@ export const HandleSearchReserveFlow = ({ className = "", ...rest }) => {
     if (twitterToken) {
       headers.append(HEADER_TWITTER_ACCESS_TOKEN, twitterToken);
     }
-
-    // // Check pending sessions.
-    // if (pendingSessions && pendingSessions.includes(handle)) {
-    //   setHandleResponse(getActiveSessionUnavailable());
-    //   return;
-    // }
 
     try {
       setFetchingSession(true);
@@ -105,6 +102,7 @@ export const HandleSearchReserveFlow = ({ className = "", ...rest }) => {
           nextIndex
         );
 
+        setTwitterToken(null);
         setCurrentIndex(nextIndex);
         return;
       }
@@ -259,7 +257,7 @@ export const HandleSearchReserveFlow = ({ className = "", ...rest }) => {
             <strong>it will be active for approximately 10 minutes</strong>.{" "}
             We use several safeguards to ensure this is hard to get around.{" "}
             You get a max of up to 3 sessions at any one time. If you have questions,{" "}
-            <a className="text-primary-100" href="https://discord.gg/cWYA7xwmMp" target="_blank">ask in our Discord</a>.
+            <a className="text-primary-100" href="https://discord.gg/8b4a48DdgF" target="_blank">ask in our Discord</a>.
           </p>
         </>
       )}

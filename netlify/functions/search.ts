@@ -9,6 +9,7 @@ import {
   getDefaultActiveSessionUnvailable,
   getDefaultResponseAvailable,
   getDefaultResponseUnvailable,
+  getPaidSessionUnavailable,
   getReservedUnavailable,
   getSPOUnavailable,
   getTwitterResponseUnvailable,
@@ -19,10 +20,9 @@ import {
   HEADER_HANDLE,
   HEADER_JWT_ACCESS_TOKEN,
 } from "../../src/lib/constants";
-import { ReservedHandlesType } from "../../src/context/mint";
-import { getActiveSessions, getPaidSessions, getReservedHandles, initFirebase } from "../helpers/firebase";
-import { fetchNodeApp } from "../helpers/util";
-import { decode } from "querystring";
+import { getActiveSessionByHandle, getActiveSessionsByEmail, getMintedHandles, getPaidSessionByHandle, getReservedHandles, initFirebase } from "../helpers/firebase";
+import { ensureHandleAvailable, fetchNodeApp } from "../helpers/util";
+import { AccessTokenPayload, decodeAccessToken } from "../helpers/jwt";
 
 // Main handler function for GET requests.
 const handler: Handler = async (
@@ -45,16 +45,13 @@ const handler: Handler = async (
     };
   }
 
-  const firebase = await initFirebase();
+  await initFirebase();
 
   const handle = normalizeNFTHandle(headerHandle);
-  const activeSessions = await getActiveSessions();
 
-  const { phoneNumber } = decode(headerAccess);
-  if (
-    activeSessions &&
-    activeSessions.filter((data) => data?.phoneNumber === phoneNumber).length > 3
-  ) {
+  const { emailAddress } = decodeAccessToken(headerAccess) as AccessTokenPayload;
+  const activeSessionsByEmail = await getActiveSessionsByEmail(emailAddress);
+  if (activeSessionsByEmail.length > 3) {
     return {
       statusCode: 403,
       body: JSON.stringify({
@@ -64,80 +61,7 @@ const handler: Handler = async (
     };
   }
 
-  if (
-    activeSessions &&
-    activeSessions.filter(
-      (data) => data?.handle === handle
-    ).length > 0
-  ) {
-    return {
-      statusCode: 403,
-      body: JSON.stringify(getDefaultActiveSessionUnvailable()),
-    };
-  }
-
-  const paidSessions = await getPaidSessions();
-
-  if (
-    paidSessions &&
-    paidSessions.find((data) => data?.handle === handle)) {
-    return {
-      statusCode: 403,
-      body: JSON.stringify(getDefaultActiveSessionUnvailable()),
-    };
-  }
-
-  const { exists, policyID, assetName } = await fetchNodeApp("/exists", {
-    headers: {
-      [HEADER_HANDLE]: handle,
-    },
-  }).then((res) => res.json());
-
-  if (exists) {
-    return {
-      statusCode: 200,
-      body: JSON.stringify({
-        available: false,
-        link: `https://${process.env.CARDANOSCAN_DOMAIN}/token/${policyID}.${assetName}`,
-        message: "Handle already exists!",
-        twitter: false,
-      } as HandleResponseBody),
-    };
-  }
-
-  const reservedHandles = await getReservedHandles();
-  if (reservedHandles && reservedHandles?.manual?.includes(handle)) {
-    return {
-      statusCode: 403,
-      body: JSON.stringify(getReservedUnavailable()),
-    };
-  }
-
-  if (reservedHandles && reservedHandles?.spos?.includes(handle)) {
-    return {
-      statusCode: 403,
-      body: JSON.stringify(getSPOUnavailable()),
-    };
-  }
-
-  if (reservedHandles && reservedHandles?.twitter?.includes(handle)) {
-    return {
-      statusCode: 403,
-      body: JSON.stringify(getTwitterResponseUnvailable()),
-    };
-  }
-
-  if (reservedHandles && reservedHandles?.blacklist?.includes(handle)) {
-    return {
-      statusCode: 403,
-      body: JSON.stringify(getDefaultResponseUnvailable()),
-    };
-  }
-
-  return {
-    statusCode: 200,
-    body: JSON.stringify(getDefaultResponseAvailable()),
-  };
+  return ensureHandleAvailable(handle);
 };
 
 export { handler };

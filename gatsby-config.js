@@ -5,19 +5,33 @@ module.exports = {
     LMDB_STORE: true
   },
   siteMetadata: {
-    title: `ADA Handle`,
-    description: `Introducing custom wallet addresses for the Cardano blockchain, secured on-chain.`,
+    title: 'ADA Handle',
+    description: `Custom Cardano addresses for everyone.`,
     author: `@adahandle`,
   },
   plugins: [
-    `gatsby-plugin-netlify`,
     `gatsby-plugin-react-helmet`,
     `gatsby-plugin-layout`,
+    {
+      resolve: `gatsby-plugin-netlify`,
+      options: {
+        mergeLinkHeaders: false,
+        mergeCachingHeaders: false
+      }
+    },
+    {
+      resolve: `gatsby-plugin-recaptcha`,
+      options: {
+        async: true,
+        defer: false,
+        args: `?render=6Ld0QUkcAAAAAN-_KvCv8R_qke8OYxotNJzIg2RP`,
+      }
+    },
     {
       resolve: `gatsby-plugin-google-gtag`,
       options: {
         trackingIds: [
-          "G-J6VN2WT0DT"
+          process.env.GTAG
         ],
         gtagConfig: {
           anonymize_ip: true,

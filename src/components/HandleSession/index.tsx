@@ -10,6 +10,7 @@ import { Loader } from "../Loader";
 import Button from "../button";
 import { SessionResponseBody } from "../../../netlify/functions/session";
 import { Link } from "gatsby";
+import { useLocation } from '@reach/router';
 
 export const HandleSession = ({
   sessionData
@@ -21,6 +22,15 @@ export const HandleSession = ({
   const [fetchingPayment, setFetchingPayment] = useState<boolean>(true);
   const [copying, setCopying] = useState<boolean>(false);
   const [retry, setRetry] = useState<boolean>(true);
+  const [isTestnet, setIsTestnet] = useState<boolean>(false);
+
+  const { hostname } = useLocation();
+
+  useEffect(() => {
+    if (hostname.includes('testnet') || hostname.includes('localhost')) {
+      setIsTestnet(true);
+    }
+  }, [hostname]);
 
   // Reset on index change.
   useEffect(() => {
@@ -44,6 +54,12 @@ export const HandleSession = ({
 
   // Check current session payment status.
   useEffect(() => {
+    const accessToken = getAccessTokenFromCookie();
+
+    if (!accessToken) {
+      return;
+    }
+
     const controller = new AbortController();
     const updatePaymentStatus = async () => {
       await fetch(
@@ -51,7 +67,7 @@ export const HandleSession = ({
         {
           signal: controller.signal,
           headers: {
-            [HEADER_JWT_ACCESS_TOKEN]: getAccessTokenFromCookie(),
+            [HEADER_JWT_ACCESS_TOKEN]: accessToken.token,
             [HEADER_JWT_SESSION_TOKEN]: sessionData.token
           }
         }
@@ -116,7 +132,11 @@ export const HandleSession = ({
       <h2 className="font-bold text-3xl mb-2">
         Session Active
       </h2>
-      <p className="text-lg">Submit your payment <u>exactly</u> in the amount shown. Invalid payments will be refunded, but your session will remain till it expires!</p>
+      <p className="text-lg">Submit your payment <u>exactly</u> in the amount shown. Invalid payments will be refunded, but can take up to 14 days!</p>
+      <ul>
+        <li>Do NOT send from an exchange. Only use wallets you own the keys to (like Nami, Yoroi, Daedalus, etc).</li>
+        <li>Do NOT send more than one payment.</li>
+      </ul>
       <hr className="w-12 border-dark-300 border-2 block my-8" />
       {fetchingPayment ? (
         <div className="flex flex-col items-center justify-center">
@@ -128,8 +148,7 @@ export const HandleSession = ({
         {!validPayment && (
           <>
             <h4 className="text-xl mb-8">
-              Send <u>exaclty the amount shown</u>:<br/>
-              <strong className="text-4xl mt-4 inline-block font-bold" style={{ color: getRarityHex(sessionData.data.handle)}}>{getRarityCost(sessionData.data.handle)} $ADA</strong>
+              <strong className="text-4xl mt-4 inline-block font-bold" style={{ color: getRarityHex(sessionData.data.handle)}}>{getRarityCost(sessionData.data.handle)} ${isTestnet ? 'tADA' : 'ADA'}</strong>
             </h4>
             <div className="relative">
               <pre className="p-4 rounded-t-lg shadow-inner shadow-lg bg-dark-300 overflow-hidden overflow-scroll pr-24 border-2 border-b-0 border-primary-100">
@@ -175,7 +194,14 @@ export const HandleSession = ({
                       <div>
                         <h2 className="text-2xl font-bold mb-2"><strong>Yay!</strong> Your payment was successful!</h2>
                         <p className="text-lg">We're minting your handle <strong>right now.</strong> Please allow up to a few hours to receive your NFT.</p>
-                        <p className="text-lg">Your unique URL (pending Handle NFT delivery): <a className="text-primary-100" href={`https://test.handle.me/${sessionData.data.handle}`} target="_blank">https://handle.me/{sessionData.data.handle}</a></p>
+                        <p className="text-lg">
+                          Your unique URL:<br/>
+                          <a className="text-primary-100" href={'undefined' !== typeof window && window.location.host !== 'adahandle.com' ? `https://testnet.handle.me/${sessionData.data.handle}` : `https://handle.me/${sessionData.data.handle}`} target="_blank">
+                            {'undefined' !== typeof window && window.location.host !== 'adahandle.com'
+                              ? `https://testnet.handle.me/${sessionData.data.handle}`
+                              : `https://handle.me/${sessionData.data.handle}`}
+                          </a>
+                        </p>
                         <p className="text-lg">This session will close in: <strong>{formatted.minutes}:{formatted.seconds}</strong></p>
                       </div>
                     </>

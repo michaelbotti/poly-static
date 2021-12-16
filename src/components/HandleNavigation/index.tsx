@@ -44,7 +44,7 @@ export const HandleNavigation = ({
             className={`${index + 1 !== currentIndex ? `bg-dark-100 opacity-60` : `bg-dark-200`} flex-inline items-center justify-center px-8 lg:px-4 py-2 rounded-t-lg mr-4`}
           >
             <h4 className="hidden lg:block">${session.data.handle}</h4>
-            <h4 className="lg:hidden font-bold">{index}</h4>
+            <h4 className="lg:hidden font-bold">{index + 1}</h4>
           </button>
         )
       })}

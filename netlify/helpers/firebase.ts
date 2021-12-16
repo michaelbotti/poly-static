@@ -1,6 +1,9 @@
 import admin from "firebase-admin";
+
 import { ActiveSessionType, ReservedHandlesType } from "../../src/context/mint";
 import { getS3 } from "./aws";
+import { buildCollectionNameWithSuffix } from "./util";
+import { StateData } from '../functions/state';
 
 let firebase: admin.app.App;
 export const initFirebase = async (): Promise<admin.app.App> => {
@@ -41,10 +44,29 @@ export const verifyTwitterUser = async (token: string): Promise<number | false> 
   }
 }
 
+export const getMintedHandles = async (): Promise<{ handleName: string }[] | false> => {
+  return firebase
+    .firestore()
+    .collection(buildCollectionNameWithSuffix("/mintedHandles"))
+    .get()
+    .then(snapshot => {
+      if (snapshot.empty) {
+        return false;
+      }
+
+      const handles = snapshot?.docs?.map(doc => doc?.data() as { handleName: string });
+      if (handles.length === 0) {
+        return false;
+      }
+
+      return handles;
+    });
+}
+
 export const getReservedHandles = async (): Promise<ReservedHandlesType | false> => {
   return firebase
     .firestore()
-    .collection("/reservedHandles")
+    .collection("reservedHandles")
     .get()
     .then(snapshot => {
       if (snapshot.empty) {
@@ -60,14 +82,15 @@ export const getReservedHandles = async (): Promise<ReservedHandlesType | false>
     });
 }
 
-export const getActiveSessions = async (): Promise<ActiveSessionType[] | false> => {
+export const getActiveSessionsByEmail = async (emailAddress: string): Promise<ActiveSessionType[]> => {
   return firebase
     .firestore()
-    .collection("/activeSessions")
+    .collection(buildCollectionNameWithSuffix("/activeSessions"))
+    .where("emailAddress", "==", emailAddress)
     .get()
     .then(snapshot => {
       if (snapshot.empty) {
-        return false;
+        return [];
       }
 
       const sessions = snapshot?.docs?.map(doc => doc?.data() as ActiveSessionType);
@@ -75,17 +98,48 @@ export const getActiveSessions = async (): Promise<ActiveSessionType[] | false> 
     });
 }
 
-export const getPaidSessions = async (): Promise<ActiveSessionType[] | false> => {
+export const getActiveSessionByHandle = async (handle: string): Promise<ActiveSessionType | null> => {
   return firebase
     .firestore()
-    .collection("/paidSessions")
+    .collection(buildCollectionNameWithSuffix("/activeSessions"))
+    .where("handle", "==", handle)
     .get()
     .then(snapshot => {
       if (snapshot.empty) {
-        return false;
+        return null;
       }
 
-      const sessions = snapshot?.docs?.map(doc => doc?.data() as ActiveSessionType);
-      return sessions;
+      return snapshot?.docs[0]?.data() as ActiveSessionType;
     });
+}
+
+export const getPaidSessionByHandle = async (handle: string): Promise<ActiveSessionType | null> => {
+  return firebase
+    .firestore()
+    .collection(buildCollectionNameWithSuffix("/paidSessions"))
+    .where("handle", "==", handle).limit(1)
+    .get()
+    .then(snapshot => {
+      if (snapshot.empty) {
+        return null;
+      }
+
+      return snapshot?.docs[0]?.data() as ActiveSessionType;
+    });
+}
+
+export const getCachedState = async (): Promise<StateData | false> => {
+  const doc = await admin
+    .firestore()
+    .collection(buildCollectionNameWithSuffix("/stateData"))
+    .doc('state')
+    .get();
+
+
+  const state = doc.data() as StateData;
+  if (!state) {
+    return false;
+  }
+
+  return state;
 }
