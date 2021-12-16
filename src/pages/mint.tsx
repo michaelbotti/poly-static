@@ -80,41 +80,16 @@ function MintPage() {
                     <p>Pricing for each Handle ranges from 10 $ADA to 500 $ADA, depending on the character length. You can see full details on <Link to="/faq" className="text-primary-100">our FAQ page</Link>!</p>
                   </div>
                 </div>
-                <div className="col-span-12 md:col-span-6 relative z-10">
-                  <HandleQueue />
+                <div className="col-span-12 md:col-span-6 relative z-10 flex flex-wrap">
+                  <h3 className="text-2xl text-center text-primary-200 mt-auto w-full">
+                    <span className="font-bold text-white">LAUNCH TIME:</span><br/>
+                    December 17th, 5PM UTC
+                  </h3>
+                  <p className="text-lg text-dark-350 text-center mt-4">We will open the Minting Portal soon. There is nothing you need to do to pre-register, and the Beta Sale will be publicly open to everyone.</p>
                 </div>
               </>
             )}
-            {!accessOpen && betaState?.totalHandles > 15000 && (
-              <div className="col-span-12 md:col-span-6 md:col-start-4 relative z-10">
-                <h2 className="text-primary-100 font-bold text-5xl text-center mb-8">Beta Sale</h2>
-                <h2 className="text-white font-bold text-3xl text-center mb-8">Sold Out!</h2>
-                <p className="text-lg text-center">We have officially sold out of our first 15,000 public access Handles. We will re-open public minting as soon as possible!</p>
-              </div>
-            )}
-            {accessOpen && (
-              <>
-                <div className="col-span-12 lg:col-span-6 relative z-10">
-                  {primed && (
-                    <div className="p-8">
-                      {currentIndex === 0
-                        ? <HandleSearchReserveFlow />
-                        : <HandleSession sessionData={currentSession} />}
-                    </div>
-                  )}
 
-                  {!primed && (
-                    <div className="grid justify-center content-center h-full w-full p-8 flex-wrap">
-                      <p className="w-full text-center">Setting up...</p>
-                      <Loader />
-                    </div>
-                  )}
-                </div>
-                <div className="col-span-12 lg:col-span-6 py-8">
-                  <NFTPreview handle={currentIndex === 0 ? handle : currentSession.data.handle} />
-                </div>
-              </>
-            )}
         </div>
         {accessOpen && betaState && (
           <p className="text-white mt-4 text-center">Current Chain Load: {`${(betaState.chainLoad * 100).toFixed(2)}%`}</p>
