@@ -11,7 +11,6 @@ import {
   HEADER_HANDLE,
   HEADER_IS_SPO,
   HEADER_JWT_ACCESS_TOKEN,
-  MAX_SESSION_LENGTH,
 } from "../constants";
 import { HandleMintContext } from "../../context/mint";
 import { normalizeNFTHandle } from "../helpers/nfts";

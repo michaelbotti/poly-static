@@ -11,7 +11,7 @@ export const ensureHandleAvailable = async (handle: string, isSpo = false): Prom
   const paidSession = await getPaidSessionByHandle(handle);
   const reservedHandles = await getReservedHandles();
 
-  const { exists, policyID, assetName } = await fetchNodeApp("/exists", {
+  const { exists, policyID, assetName } = await fetchNodeApp("exists", {
     headers: {
       [HEADER_HANDLE]: handle,
     },

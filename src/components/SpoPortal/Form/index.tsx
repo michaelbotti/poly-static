@@ -20,6 +20,7 @@ interface Props {
 export const SpoEnterForm: FC<Props> = ({ setReCaptchaToken }): JSX.Element => {
   const [verifyingRecaptcha, setVerifyingRecaptcha] = useState<boolean>(false);
   const [responseMessage, setResponseMessage] = useState<string>(null);
+  const [touChecked, setTouChecked] = useState<boolean>(false);
 
   const fallbackRecaptcha = useRef(null);
 
@@ -32,7 +33,7 @@ export const SpoEnterForm: FC<Props> = ({ setReCaptchaToken }): JSX.Element => {
     }, 4000);
   };
 
-  const performVerification = async (token) => {
+  const performVerification = async (token: string): Promise<void> => {
     const recaptchaToken: string = await getRecaptchaToken();
 
     const headers = new Headers();
@@ -64,20 +65,19 @@ export const SpoEnterForm: FC<Props> = ({ setReCaptchaToken }): JSX.Element => {
   };
 
   // perform recatcha before allowing SPOs to enter
-  const performReCaptcha = () => {
+  const performReCaptcha = (): void => {
     setVerifyingRecaptcha(true);
     (window as any).grecaptcha.render(fallbackRecaptcha.current, {
       sitekey: RECAPTCHA_SITE_KEY_FALLBACK,
       theme: "dark",
       callback: async (token: string) => {
-        console.log(token);
         await performVerification(token);
         setReCaptchaToken(token);
       },
     });
   };
 
-  const handleSubmit = async (e: Event | null) => {
+  const handleSubmit = async (e: Event | null): Promise<void> => {
     e && e.preventDefault();
     performReCaptcha();
   };
@@ -120,11 +120,30 @@ export const SpoEnterForm: FC<Props> = ({ setReCaptchaToken }): JSX.Element => {
           </p>
         </div>
         <form onSubmit={(e) => e.preventDefault()} ref={form}>
+          <div className="flex items-center text-sm bg-dark-100 border-dark-300 border-2 rounded-t-lg p-4 pt-2 pb-0">
+            <input
+              className="form-checkbox p-2 text-primary-200 rounded focus:ring-primary-200 cursor-pointer"
+              id="tou"
+              name="tou"
+              type="checkbox"
+              checked={touChecked}
+              onChange={() => setTouChecked(!touChecked)}
+            />
+            <label
+              className="ml-2 text-white py-3 cursor-pointer"
+              htmlFor="tou"
+            >
+              I have read and agree to the ADA Handle{" "}
+              <Link to="/tou" className="text-primary-100">
+                Terms of Use
+              </Link>
+            </label>
+          </div>
           <Button
-            className={`w-full`}
+            className={`w-full rounded-t-none`}
             buttonStyle={"primary"}
             type="submit"
-            disabled={verifyingRecaptcha}
+            disabled={verifyingRecaptcha || !touChecked}
             onClick={handleSubmit}
           >
             {verifyingRecaptcha && "Waiting..."}

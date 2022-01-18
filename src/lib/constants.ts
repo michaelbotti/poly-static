@@ -1,5 +1,7 @@
 export const MAX_SESSION_LENGTH = 600000; // 10 minutes
+export const MAX_SESSION_LENGTH_SPO = 86400000; // 24 hours
 export const MAX_ACCESS_LENGTH = 1800000; // 30 minutes
+export const MAX_ACCESS_LENGTH_SPO = 86400000; // 24 hours
 export const STATE_INTERVAL = 60000 // 1 Minute
 export const MAX_CHAIN_LOAD = 0.8;
 export const RECAPTCHA_SITE_KEY = '6Ld0QUkcAAAAAN-_KvCv8R_qke8OYxotNJzIg2RP';

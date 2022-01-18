@@ -14,7 +14,8 @@ import {
   MAX_SESSION_LENGTH,
   HEADER_JWT_ACCESS_TOKEN,
   HEADER_JWT_SESSION_TOKEN,
-  HEADER_IS_SPO
+  HEADER_IS_SPO,
+  MAX_SESSION_LENGTH_SPO
 } from "../../src/lib/constants";
 import { ensureHandleAvailable, fetchNodeApp } from '../helpers/util';
 import { getRarityCost, isValid, normalizeNFTHandle } from "../../src/lib/helpers/nfts";
@@ -66,7 +67,7 @@ const handler: Handler = async (
   await initFirebase();
 
   // Ensure no one is trying to force an existing Handle.
-  const { body } = await ensureHandleAvailable(handle);
+  const { body } = await ensureHandleAvailable(handle, headerIsSpo);
   const data: HandleResponseBody = JSON.parse(body);
 
   if (!data.available && !data.twitter) {
@@ -148,7 +149,7 @@ const handler: Handler = async (
     },
     sessionSecret,
     {
-      expiresIn: (MAX_SESSION_LENGTH * 1000).toString() // 10 minutes
+      expiresIn: (headerIsSpo ? MAX_SESSION_LENGTH_SPO : MAX_SESSION_LENGTH * 1000).toString() // 10 minutes
     }
   );
 

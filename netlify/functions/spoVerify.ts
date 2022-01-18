@@ -9,7 +9,7 @@ import jwt, { JwtPayload } from "jsonwebtoken";
 
 import { passesRecaptcha } from "../helpers/recaptcha";
 import { botResponse, unauthorizedResponse } from "../helpers/response";
-import { HEADER_RECAPTCHA, HEADER_RECAPTCHA_FALLBACK, MAX_ACCESS_LENGTH } from "../../src/lib/constants";
+import { HEADER_RECAPTCHA, HEADER_RECAPTCHA_FALLBACK, MAX_ACCESS_LENGTH, MAX_ACCESS_LENGTH_SPO } from "../../src/lib/constants";
 import { getSecret } from "../helpers";
 
 export interface SpoVerifyResponseBody {
@@ -47,7 +47,7 @@ const handler: Handler = async (
         },
         secretKey,
         {
-            expiresIn: Math.floor(MAX_ACCESS_LENGTH / 1000)
+            expiresIn: Math.floor(MAX_ACCESS_LENGTH_SPO / 1000)
         }
     );
 

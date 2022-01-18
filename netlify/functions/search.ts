@@ -58,7 +58,7 @@ const handler: Handler = async (
     }
   }
 
-  return ensureHandleAvailable(handle);
+  return ensureHandleAvailable(handle, headerIsSpo);
 };
 
 export { handler };
