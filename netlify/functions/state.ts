@@ -12,6 +12,7 @@ export interface StateData {
   chainLoad?: number | null;
   position?: number;
   totalHandles?: number;
+  spoPageEnabled?: boolean;
 }
 
 export interface StateResponseBody extends StateData {
