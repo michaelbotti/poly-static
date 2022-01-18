@@ -99,7 +99,7 @@ const handler: Handler = async (
     }
   }
 
-  const res: GraphqlPaymentAddressesResponse = await fetchNodeApp(`/payment?addresses=${addresses}`, {
+  const res: GraphqlPaymentAddressesResponse = await fetchNodeApp(`payment?addresses=${addresses}`, {
     headers: {
       [HEADER_JWT_ACCESS_TOKEN]: accessToken,
       [HEADER_JWT_SESSION_TOKEN]: sessionToken

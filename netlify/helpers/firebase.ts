@@ -5,6 +5,13 @@ import { getS3 } from "./aws";
 import { buildCollectionNameWithSuffix } from "./util";
 import { StateData } from '../functions/state';
 
+interface StakePool {
+  id: string; // pool id e.g. pool1lvsa...
+  ticker: string;
+  stakeKey: string;
+  ownerHashes: string[];
+}
+
 let firebase: admin.app.App;
 export const initFirebase = async (): Promise<admin.app.App> => {
   if (firebase) {
@@ -142,4 +149,19 @@ export const getCachedState = async (): Promise<StateData | false> => {
   }
 
   return state;
+}
+
+export const getStakePoolsByTicker = async (ticker: string): Promise<StakePool[]> => {
+  const snapshot = await admin
+    .firestore()
+    .collection(buildCollectionNameWithSuffix("/stakePools"))
+    .where('ticker', '==', ticker)
+    .get();
+
+
+  if (snapshot.empty) {
+    return [];
+  }
+
+  return snapshot.docs.map(doc => doc.data() as StakePool);
 }

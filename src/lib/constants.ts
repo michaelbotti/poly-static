@@ -11,6 +11,7 @@ export const COOKIE_ACCESS_KEY = 'ADAHANDLE_HAS_ACCESS';
 
 // Headers.
 export const HEADER_HANDLE = 'x-handle';
+export const HEADER_IS_SPO = 'x-is-spo';
 export const HEADER_RECAPTCHA = 'x-recaptcha';
 export const HEADER_RECAPTCHA_FALLBACK = 'x-recaptcha-fallback';
 export const HEADER_TWITTER_ACCESS_TOKEN = 'x-twitter-token';

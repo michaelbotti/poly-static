@@ -12,7 +12,8 @@ import {
   HEADER_TWITTER_ACCESS_TOKEN,
   MAX_SESSION_LENGTH,
   HEADER_JWT_ACCESS_TOKEN,
-  HEADER_JWT_SESSION_TOKEN
+  HEADER_JWT_SESSION_TOKEN,
+  HEADER_IS_SPO
 } from "../../src/lib/constants";
 import { fetchNodeApp } from '../helpers/util';
 import { getRarityCost, isValid, normalizeNFTHandle } from "../../src/lib/helpers/nfts";
@@ -43,6 +44,7 @@ const handler: Handler = async (
   const { headers } = event;
 
   const headerHandle = headers[HEADER_HANDLE];
+  const headerIsSpo = headers[HEADER_IS_SPO] === 'true' ? true : false;
   const headerRecaptcha = headers[HEADER_RECAPTCHA];
   const headerTwitter = headers[HEADER_TWITTER_ACCESS_TOKEN];
   const accessToken = headers[HEADER_JWT_ACCESS_TOKEN];
@@ -70,16 +72,17 @@ const handler: Handler = async (
   }
 
   const { emailAddress } = decode(accessToken) as AccessTokenPayload;
-  const activeSessionsByPhone = await getActiveSessionsByEmail(emailAddress);
-  const tooManySessions = activeSessionsByPhone.length > 3;
-
-  if (tooManySessions) {
-    return {
-      statusCode: 403,
-      body: JSON.stringify({
-        error: true,
-        message: 'Sorry, too many open sessions!'
-      } as SessionResponseBody)
+  if (!headerIsSpo) {
+    const activeSessionsByPhone = await getActiveSessionsByEmail(emailAddress);
+    const tooManySessions = activeSessionsByPhone.length > 3;
+    if (tooManySessions) {
+      return {
+        statusCode: 403,
+        body: JSON.stringify({
+          error: true,
+          message: 'Sorry, too many open sessions!'
+        } as SessionResponseBody)
+      }
     }
   }
 
@@ -107,10 +110,9 @@ const handler: Handler = async (
       };
     }
 
-    if (
-      manual?.includes(handle) ||
-      spos?.includes(handle)
-    ) {
+    // If the incoming session is an SPO, we don't want to fail for reserved SPOs
+    const isManualOrSpo = !headerIsSpo ? (manual?.includes(handle) || spos?.includes(handle)) : manual?.includes(handle);
+    if (isManualOrSpo) {
       return {
         statusCode: 403,
         body: JSON.stringify({
@@ -131,7 +133,8 @@ const handler: Handler = async (
       iat: Date.now(),
       handle,
       cost: getRarityCost(handle),
-      emailAddress
+      emailAddress: headerIsSpo ? 'spos@adahandle.com' : emailAddress,
+      isSPO: headerIsSpo
     },
     sessionSecret,
     {
@@ -140,7 +143,7 @@ const handler: Handler = async (
   );
 
   // Get payment details from server.
-  const res: NodeSessionResponseBody = await fetchNodeApp('/session', {
+  const res: NodeSessionResponseBody = await fetchNodeApp('session', {
     headers: {
       [HEADER_JWT_ACCESS_TOKEN]: accessToken,
       [HEADER_JWT_SESSION_TOKEN]: sessionToken,

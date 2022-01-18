@@ -9,17 +9,20 @@ import {
   getDefaultActiveSessionUnvailable,
   getDefaultResponseAvailable,
   getDefaultResponseUnvailable,
+  getMultipleStakePoolResponse,
   getReservedUnavailable,
   getSPOUnavailable,
+  getStakePoolNotFoundResponse,
   getTwitterResponseUnvailable,
   HandleResponseBody,
 } from "../../src/lib/helpers/search";
 import { normalizeNFTHandle } from "../../src/lib/helpers/nfts";
 import {
   HEADER_HANDLE,
+  HEADER_IS_SPO,
   HEADER_JWT_ACCESS_TOKEN,
 } from "../../src/lib/constants";
-import { getActiveSessionByHandle, getActiveSessionsByEmail, getMintedHandles, getPaidSessionByHandle, getReservedHandles, initFirebase } from "../helpers/firebase";
+import { getActiveSessionByHandle, getActiveSessionsByEmail, getMintedHandles, getPaidSessionByHandle, getReservedHandles, getStakePoolsByTicker, initFirebase } from "../helpers/firebase";
 import { fetchNodeApp } from "../helpers/util";
 import { AccessTokenPayload, decodeAccessToken } from "../helpers/jwt";
 
@@ -32,6 +35,7 @@ const handler: Handler = async (
   const { headers } = event;
 
   const headerHandle = headers[HEADER_HANDLE];
+  const headerIsSpo = headers[HEADER_IS_SPO] === 'true' ? true : false;
   const headerAccess = headers[HEADER_JWT_ACCESS_TOKEN];
 
   if (!headerAccess || !headerHandle) {
@@ -49,16 +53,18 @@ const handler: Handler = async (
   const handle = normalizeNFTHandle(headerHandle);
   const mintedHandles = await getMintedHandles();
 
-  const { emailAddress } = decodeAccessToken(headerAccess) as AccessTokenPayload;
-  const activeSessionsByPhone = await getActiveSessionsByEmail(emailAddress);
-  if (activeSessionsByPhone.length > 3) {
-    return {
-      statusCode: 403,
-      body: JSON.stringify({
-        message: "Too many sessions open! Try again after one expires.",
-        available: false,
-      } as HandleResponseBody),
-    };
+  if (!headerIsSpo) {
+    const { emailAddress } = decodeAccessToken(headerAccess) as AccessTokenPayload;
+    const activeSessionsByPhone = await getActiveSessionsByEmail(emailAddress);
+    if (activeSessionsByPhone.length > 3) {
+      return {
+        statusCode: 403,
+        body: JSON.stringify({
+          message: "Too many sessions open! Try again after one expires.",
+          available: false,
+        } as HandleResponseBody),
+      };
+    }
   }
 
   const activeSessionsByHandle = await getActiveSessionByHandle(handle);
@@ -77,7 +83,7 @@ const handler: Handler = async (
     };
   }
 
-  const { exists, policyID, assetName } = await fetchNodeApp("/exists", {
+  const { exists, policyID, assetName } = await fetchNodeApp("exists", {
     headers: {
       [HEADER_HANDLE]: handle,
     },
@@ -103,7 +109,7 @@ const handler: Handler = async (
     };
   }
 
-  if (reservedHandles && reservedHandles?.spos?.includes(handle)) {
+  if (!headerIsSpo && reservedHandles && reservedHandles?.spos?.includes(handle)) {
     return {
       statusCode: 403,
       body: JSON.stringify(getSPOUnavailable()),
@@ -125,6 +131,25 @@ const handler: Handler = async (
       statusCode: 403,
       body: JSON.stringify(getDefaultResponseUnvailable()),
     };
+  }
+
+  if (headerIsSpo) {
+    const uppercaseHandle = handle.toUpperCase();
+    const stakePools = await getStakePoolsByTicker(uppercaseHandle);
+    if (stakePools.length === 0) {
+      return {
+        statusCode: 403,
+        body: JSON.stringify(getStakePoolNotFoundResponse()),
+      };
+    }
+
+    // Determine if the ticker has more than 1 result. If so, don't allow
+    if (stakePools.length > 1) {
+      return {
+        statusCode: 403,
+        body: JSON.stringify(getMultipleStakePoolResponse()),
+      };
+    }
   }
 
   return {
