@@ -5,6 +5,7 @@ import {
   HandlerResponse
 } from "@netlify/functions";
 import jwt, { decode, JwtPayload } from "jsonwebtoken";
+import { fetch } from 'cross-fetch';
 
 import {
   HEADER_HANDLE,
@@ -15,13 +16,14 @@ import {
   HEADER_JWT_SESSION_TOKEN,
   HEADER_IS_SPO
 } from "../../src/lib/constants";
-import { fetchNodeApp } from '../helpers/util';
+import { ensureHandleAvailable, fetchNodeApp } from '../helpers/util';
 import { getRarityCost, isValid, normalizeNFTHandle } from "../../src/lib/helpers/nfts";
 import { getSecret } from "../helpers";
 import { verifyTwitterUser } from "../helpers";
 import { getActiveSessionsByEmail, getActiveSessionByHandle, getReservedHandles, initFirebase } from "../helpers/firebase";
 import { responseWithMessage, unauthorizedResponse } from "../helpers/response";
 import { AccessTokenPayload } from "../helpers/jwt";
+import { HandleResponseBody } from "../../src/lib/helpers/search";
 
 export interface NodeSessionResponseBody {
   error: boolean,
@@ -63,8 +65,16 @@ const handler: Handler = async (
 
   await initFirebase();
 
+  // Ensure no one is trying to force an existing Handle.
+  const { body } = await ensureHandleAvailable(handle);
+  const data: HandleResponseBody = JSON.parse(body);
+
+  if (!data.available && !data.twitter) {
+    return unauthorizedResponse;
+  }
+
   // Verified Twitter user if needed.
-  if (headerTwitter) {
+  if (data.available && data.twitter && headerTwitter) {
     const exp = headerTwitter && (await verifyTwitterUser(headerTwitter));
     if (!exp || exp > Date.now()) {
       return unauthorizedResponse;

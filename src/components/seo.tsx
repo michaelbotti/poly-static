@@ -22,6 +22,13 @@ function SEO({ description = '', lang = 'en', meta = [], keywords = [], title })
       htmlAttributes={{
         lang,
       }}
+      link={[
+        {
+          rel: 'icon',
+          type: 'image/png',
+          href: 'https://adahandle.com/favicon.png'
+        }
+      ]}
       meta={[
         {
           name: `description`,

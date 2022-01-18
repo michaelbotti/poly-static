@@ -1,11 +1,8 @@
 import { useEffect, useContext } from "react";
 
 import {
-  getDefaultActiveSessionUnvailable,
   getBetaPhaseResponseUnavailable,
-  getTwitterResponseUnvailable,
   getDefaultResponseUnvailable,
-  getDefaultResponseAvailable,
   getReservedUnavailable,
 } from "../helpers/search";
 import { HandleResponseBody } from "../helpers/search";

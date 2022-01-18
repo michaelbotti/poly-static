@@ -6,14 +6,6 @@ import {
   HandlerResponse,
 } from "@netlify/functions";
 import {
-  getDefaultActiveSessionUnvailable,
-  getDefaultResponseAvailable,
-  getDefaultResponseUnvailable,
-  getMultipleStakePoolResponse,
-  getReservedUnavailable,
-  getSPOUnavailable,
-  getStakePoolNotFoundResponse,
-  getTwitterResponseUnvailable,
   HandleResponseBody,
 } from "../../src/lib/helpers/search";
 import { normalizeNFTHandle } from "../../src/lib/helpers/nfts";
@@ -22,8 +14,8 @@ import {
   HEADER_IS_SPO,
   HEADER_JWT_ACCESS_TOKEN,
 } from "../../src/lib/constants";
-import { getActiveSessionByHandle, getActiveSessionsByEmail, getMintedHandles, getPaidSessionByHandle, getReservedHandles, getStakePoolsByTicker, initFirebase } from "../helpers/firebase";
-import { fetchNodeApp } from "../helpers/util";
+import { getActiveSessionsByEmail, initFirebase } from "../helpers/firebase";
+import { ensureHandleAvailable } from "../helpers/util";
 import { AccessTokenPayload, decodeAccessToken } from "../helpers/jwt";
 
 // Main handler function for GET requests.
@@ -51,7 +43,6 @@ const handler: Handler = async (
   await initFirebase();
 
   const handle = normalizeNFTHandle(headerHandle);
-  const mintedHandles = await getMintedHandles();
 
   if (!headerIsSpo) {
     const { emailAddress } = decodeAccessToken(headerAccess) as AccessTokenPayload;
@@ -67,95 +58,7 @@ const handler: Handler = async (
     }
   }
 
-  const activeSessionsByHandle = await getActiveSessionByHandle(handle);
-  if (activeSessionsByHandle) {
-    return {
-      statusCode: 403,
-      body: JSON.stringify(getDefaultActiveSessionUnvailable()),
-    };
-  }
-
-  const paidSession = await getPaidSessionByHandle(handle);
-  if (paidSession) {
-    return {
-      statusCode: 403,
-      body: JSON.stringify(getDefaultActiveSessionUnvailable()),
-    };
-  }
-
-  const { exists, policyID, assetName } = await fetchNodeApp("exists", {
-    headers: {
-      [HEADER_HANDLE]: handle,
-    },
-  }).then((res) => res.json());
-
-  if (exists) {
-    return {
-      statusCode: 200,
-      body: JSON.stringify({
-        available: false,
-        link: `https://${process.env.CARDANOSCAN_DOMAIN}/token/${policyID}.${assetName}`,
-        message: "Handle already exists!",
-        twitter: false,
-      } as HandleResponseBody),
-    };
-  }
-
-  const reservedHandles = await getReservedHandles();
-  if (reservedHandles && reservedHandles?.manual?.includes(handle)) {
-    return {
-      statusCode: 403,
-      body: JSON.stringify(getReservedUnavailable()),
-    };
-  }
-
-  if (!headerIsSpo && reservedHandles && reservedHandles?.spos?.includes(handle)) {
-    return {
-      statusCode: 403,
-      body: JSON.stringify(getSPOUnavailable()),
-    };
-  }
-
-  if (reservedHandles && reservedHandles?.twitter?.includes(handle)) {
-    return {
-      statusCode: 403,
-      body: JSON.stringify(getTwitterResponseUnvailable()),
-    };
-  }
-
-  if (
-    (reservedHandles && reservedHandles?.blacklist?.includes(handle)) ||
-    (mintedHandles && mintedHandles?.some(({ handleName }) => handleName === handle))
-  ) {
-    return {
-      statusCode: 403,
-      body: JSON.stringify(getDefaultResponseUnvailable()),
-    };
-  }
-
-  if (headerIsSpo) {
-    const uppercaseHandle = handle.toUpperCase();
-    const stakePools = await getStakePoolsByTicker(uppercaseHandle);
-    if (stakePools.length === 0) {
-      return {
-        statusCode: 403,
-        body: JSON.stringify(getStakePoolNotFoundResponse()),
-      };
-    }
-
-    // Determine if the ticker has more than 1 result. If so, don't allow
-    if (stakePools.length > 1) {
-      return {
-        statusCode: 403,
-        body: JSON.stringify(getMultipleStakePoolResponse()),
-      };
-    }
-  }
-
-  return {
-    statusCode: 200,
-    body: JSON.stringify(getDefaultResponseAvailable()),
-  };
+  return ensureHandleAvailable(handle);
 };
 
 export { handler };

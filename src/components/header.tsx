@@ -1,4 +1,4 @@
-import { withPrefix, Link } from "gatsby";
+import { Link } from "gatsby";
 import React, { useState, FC, useContext } from "react";
 import { HandleMintContext } from "../context/mint";
 import Button from "./button";
@@ -30,6 +30,11 @@ const navItems: NavItem[] = [
   {
     route: '/contact',
     title: 'Contact'
+  },
+  {
+    route: 'https://github.com/adahandle',
+    title: 'GitHub',
+    external: true,
   },
   {
     route: 'https://medium.com/ada-handle',
@@ -116,7 +121,7 @@ const Header: FC<HeaderProps> = ({ className, showMint = true }) => {
             </Button>
           )}
           {!showMint && betaState && !betaState.error && (
-            <p className="text-lg"><strong>Handles Minted:</strong> {betaState.totalHandles}/15,000</p>
+            <p className="text-lg m-0"><span className="text-dark-350">Handles Minted:</span> {betaState.totalHandles.toLocaleString()} / <strong className="text-primary-200">15,000</strong></p>
           )}
         </div>
       </header>

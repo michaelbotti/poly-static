@@ -54,6 +54,7 @@ export const HandleQueue = (): JSX.Element => {
   const [touChecked, setTouChecked] = useState<boolean>(false);
   const [refundsChecked, setRefundsChecked] = useState<boolean>(false);
   const [recaptchaFallbackToken, setRecaptchaFallbackToken] = useState<string>(null);
+  const [recaptchaRendered, setRecaptchaRendered] = useState<boolean>(false);
 
   const fallbackRecaptcha = useRef(null);
 
@@ -91,21 +92,31 @@ export const HandleQueue = (): JSX.Element => {
       setResponseMessage(`You have successfully been entered into the queue! Check your email for further instructions about your access link.`);
       setSubmitted(true);
     } else if (res?.bot && !recaptchaFallbackToken) {
-      setTimeoutResponseMessage('One more thing, we just need to confirm you are real:');
+      setResponseMessage('One more thing, we just need to confirm you are real:');
       setVerifyingRecaptcha(true);
-      window.grecaptcha.render(
-        fallbackRecaptcha.current,
-        {
-          sitekey: RECAPTCHA_SITE_KEY_FALLBACK,
-          theme: 'dark',
-          callback: async (token: string) => {
-            setSavingSpot(true);
-            const res = await handleSubmitToQueue(token);
-            console.log(res);
-            handleSavingResponse(res);
+      if (recaptchaRendered) {
+        window.grecaptcha.reset(fallbackRecaptcha.current);
+      } else {
+        window.grecaptcha.render(
+          fallbackRecaptcha.current,
+          {
+            sitekey: RECAPTCHA_SITE_KEY_FALLBACK,
+            theme: 'dark',
+            callback: async (token: string) => {
+              setSavingSpot(true);
+              const res = await handleSubmitToQueue(token);
+              handleSavingResponse(res);
+            },
+            'expired-callback': () => {
+              fallbackRecaptcha.current.firstElementChild.remove();
+              setVerifyingRecaptcha(false);
+              setRecaptchaFallbackToken(null);
+              setResponseMessage('Your ReCaptcha expired. Please try again.');
+            }
           }
-        }
-      );
+        );
+        setRecaptchaRendered(true);
+      }
     } else {
       setResponseMessage(res?.message || "That didn't work. Try again.");
     }
@@ -116,7 +127,6 @@ export const HandleQueue = (): JSX.Element => {
   const handleSubmitToQueue = async (token: string = null) => {
     const recaptchaToken: string = await getRecaptchaToken();
     const encodedClientAgentInfo = await buildClientAgentInfo();
-    console.log(recaptchaFallbackToken);
     const res = await fetch(`/.netlify/functions/queue`, {
       method: "POST",
       headers: {
@@ -241,13 +251,15 @@ export const HandleQueue = (): JSX.Element => {
             Success!
           </h3>
           <p className="text-lg text-center text-dark-350">{responseMessage}</p>
-          <p className="text-center text-lg font-bold">You may close this window.</p>
+          <p className="text-center text-lg">Make sure to <strong className="underline">add hello@adahandle.com to your safe-senders list, as well as check your spam folder!</strong></p>
+          <p className="text-center text-lg font-bold">You may close this window!</p>
         </div>
       ) : (
         <>
           <h3 className="text-2xl text-white text-center mb-4">
-            {activeEmail && activeAuthCode ? <>Agree to the Terms</> : <>Get an Access Code</>}
+            {activeEmail && activeAuthCode ? <>Agree to the Terms</> : <>Enter the Queue</>}
           </h3>
+          {!activeEmail && !activeAuthCode && betaState?.chainLoad > 0.8 && <p className="text-center">You may experienced delayed delivery times while we wait for the blockchain load to fall below 80%.</p>}
           {activeEmail && activeAuthCode && <p className="text-lg text-center">Almost there! Just make sure to agree to the terms of use before purchasing your Handles. This information is important!</p>}
           <form onSubmit={(e) => e.preventDefault()} ref={form} className="bg-dark-100 border-dark-300 rounded-t-lg">
             {!activeEmail && !activeAuthCode && (
@@ -314,7 +326,7 @@ export const HandleQueue = (): JSX.Element => {
                     onChange={() => setRefundsChecked(!refundsChecked)}
                   />
                   <label className="ml-2 text-white py-3 cursor-pointer" htmlFor="refunds">
-                    I understand <strong className="underline">refunds will take up to 14 days to process!</strong>
+                    You agree to our <Link className="text-primary-100" to="/refund-policy">Refund Policy</Link> and <strong className="underline">14-day processing time!</strong>
                   </label>
                 </div>
               </>

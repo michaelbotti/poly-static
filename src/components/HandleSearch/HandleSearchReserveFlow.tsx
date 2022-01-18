@@ -30,7 +30,8 @@ export const HandleSearchReserveFlow = ({ className = "", ...rest }) => {
     setHandleResponse,
     handle,
     setHandle,
-    twitterToken
+    twitterToken,
+    setTwitterToken
   } = useContext(HandleMintContext);
   const { setCurrentIndex } = useContext(HandleMintContext);
   const [fetchingSession, setFetchingSession] = useState<boolean>(false);
@@ -101,6 +102,7 @@ export const HandleSearchReserveFlow = ({ className = "", ...rest }) => {
           nextIndex
         );
 
+        setTwitterToken(null);
         setCurrentIndex(nextIndex);
         return;
       }
@@ -255,7 +257,7 @@ export const HandleSearchReserveFlow = ({ className = "", ...rest }) => {
             <strong>it will be active for approximately 10 minutes</strong>.{" "}
             We use several safeguards to ensure this is hard to get around.{" "}
             You get a max of up to 3 sessions at any one time. If you have questions,{" "}
-            <a className="text-primary-100" href="https://discord.gg/cWYA7xwmMp" target="_blank">ask in our Discord</a>.
+            <a className="text-primary-100" href="https://discord.gg/8b4a48DdgF" target="_blank">ask in our Discord</a>.
           </p>
         </>
       )}
