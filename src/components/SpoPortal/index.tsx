@@ -1,4 +1,5 @@
 import React, { useContext, useEffect, useMemo, useState } from "react";
+import Countdown from "react-countdown";
 import { SessionResponseBody } from "../../../netlify/functions/session";
 import { HandleMintContext } from "../../context/mint";
 import {
@@ -6,6 +7,7 @@ import {
   getAllCurrentSessionData,
   getSessionTokenFromCookie,
 } from "../../lib/helpers/session";
+import { useAccessOpen } from "../../lib/hooks/access";
 import { usePrimeMintingContext } from "../../lib/hooks/primeMintingContext";
 import { HandleSession } from "../HandleSession";
 import { Loader } from "../Loader";
@@ -18,6 +20,7 @@ import { TabNavigation } from "./TabNavigation";
 export const SpoPortalPage = (): JSX.Element => {
   const { primed, betaState, stateLoading, handle, currentIndex } =
     useContext(HandleMintContext);
+  const [accessOpen, setAccessOpen] = useAccessOpen();
 
   const [reCaptchaToken, setReCaptchaToken] = useState<string | null>(null);
   const [paymentSessions, setPaymentSessions] = useState<
@@ -57,6 +60,19 @@ export const SpoPortalPage = (): JSX.Element => {
     <section id="top" className="max-w-5xl mx-auto">
       {spoPageEnabled && (
         <>
+          {currentAccess && (
+            <Countdown
+              onComplete={() => setAccessOpen(false)}
+              date={new Date(currentAccess.data.exp * 1000)}
+              renderer={({ formatted }) => {
+                return (
+                  <p className="text-white text-right">
+                    Access Expires: {formatted.minutes}:{formatted.seconds}
+                  </p>
+                );
+              }}
+            />
+          )}
           <TabNavigation
             reCaptchaToken={reCaptchaToken}
             paymentSessions={paymentSessions}
@@ -66,14 +82,14 @@ export const SpoPortalPage = (): JSX.Element => {
             className="grid grid-cols-12 gap-4 lg:gap-8 bg-dark-200 rounded-lg rounded-tl-none place-content-start p-4 lg:p-8 mb-16"
             style={{ minHeight: "10vh" }}
           >
-            {!reCaptchaToken && (
+            {!accessOpen && (
               <SpoEnterForm setReCaptchaToken={setReCaptchaToken} />
             )}
             {/*
         At this point, we have already searched and verified the pool name exists
         Next step is to display the wallet address and the NFT preview
     */}
-            {reCaptchaToken && (
+            {accessOpen && (
               <>
                 <div className="col-span-12 lg:col-span-6 relative z-10">
                   <div className="p-8">
@@ -89,11 +105,17 @@ export const SpoPortalPage = (): JSX.Element => {
                     handle={
                       currentIndex === 0 ? handle : currentSession.data.handle
                     }
+                    isSpo={true}
                   />
                 </div>
               </>
             )}
           </div>
+          {accessOpen && betaState && (
+            <p className="text-white mt-4 text-center">
+              Current Chain Load: {`${(betaState.chainLoad * 100).toFixed(2)}%`}
+            </p>
+          )}
         </>
       )}
       {!spoPageEnabled && <Closed />}

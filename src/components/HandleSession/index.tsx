@@ -10,6 +10,7 @@ import {
   COOKIE_SESSION_PREFIX,
   HEADER_JWT_ACCESS_TOKEN,
   HEADER_JWT_SESSION_TOKEN,
+  SPO_ADA_HANDLE_COST,
 } from "../../lib/constants";
 import { getRarityCost, getRarityHex } from "../../lib/helpers/nfts";
 import {
@@ -28,7 +29,7 @@ export const HandleSession = ({
   sessionData: SessionResponseBody;
 }) => {
   const {
-    data: { isSpo, handle, cost, exp },
+    data: { isSPO, handle, cost, exp },
     address,
     token,
   } = sessionData;
@@ -157,7 +158,7 @@ export const HandleSession = ({
       <h2 className="font-bold text-3xl mb-2">Session Active</h2>
       <p className="text-lg">
         Submit your payment <u>exactly</u> in the amount shown.{" "}
-        {isSpo ? (
+        {isSPO ? (
           <span>
             Invalid payments will be refunded, minus a 50 ADA processing, but
             can take up to 14 days!
@@ -169,7 +170,7 @@ export const HandleSession = ({
         )}
       </p>
       <ul>
-        {isSpo ? (
+        {isSPO ? (
           <li>
             Do NOT send from an exchange. Only use a STAKE POOL wallet you own
             the keys to (like Nami, Yoroi, Daedalus, etc).
@@ -197,7 +198,8 @@ export const HandleSession = ({
                   className="text-4xl mt-4 inline-block font-bold"
                   style={{ color: getRarityHex(handle) }}
                 >
-                  {getRarityCost(handle)} ${isTestnet ? "tADA" : "ADA"}
+                  {isSPO ? SPO_ADA_HANDLE_COST : getRarityCost(handle)} $
+                  {isTestnet ? "tADA" : "ADA"}
                 </strong>
               </h4>
               <div className="relative">

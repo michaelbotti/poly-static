@@ -15,7 +15,8 @@ import {
   HEADER_JWT_ACCESS_TOKEN,
   HEADER_JWT_SESSION_TOKEN,
   HEADER_IS_SPO,
-  MAX_SESSION_LENGTH_SPO
+  MAX_SESSION_LENGTH_SPO,
+  SPO_ADA_HANDLE_COST
 } from "../../src/lib/constants";
 import { ensureHandleAvailable, fetchNodeApp } from '../helpers/util';
 import { getRarityCost, isValid, normalizeNFTHandle } from "../../src/lib/helpers/nfts";
@@ -138,18 +139,19 @@ const handler: Handler = async (
    * We sign a session JWT tokent to authorize the purchase,
    * and include the access email address to limit request.
    */
+  const expiresIn = headerIsSpo ? MAX_SESSION_LENGTH_SPO : MAX_SESSION_LENGTH;
   const sessionSecret = await getSecret('session');
   const sessionToken = jwt.sign(
     {
       iat: Date.now(),
       handle,
-      cost: getRarityCost(handle),
+      cost: headerIsSpo ? SPO_ADA_HANDLE_COST : getRarityCost(handle),
       emailAddress: headerIsSpo ? 'spos@adahandle.com' : emailAddress,
       isSPO: headerIsSpo
     },
     sessionSecret,
     {
-      expiresIn: (headerIsSpo ? MAX_SESSION_LENGTH_SPO : MAX_SESSION_LENGTH * 1000).toString() // 10 minutes
+      expiresIn: (expiresIn / 1000).toString() // 10 minutes or 24 hours for SPOs
     }
   );
 

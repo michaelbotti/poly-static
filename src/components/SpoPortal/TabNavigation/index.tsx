@@ -1,6 +1,7 @@
 import React, { useContext } from "react";
 import { HandleMintContext } from "../../../context/mint";
 import { getSessionTokenFromCookie } from "../../../lib/helpers/session";
+import { useAccessOpen } from "../../../lib/hooks/access";
 
 export const TabNavigation = ({
   paymentSessions,
@@ -8,8 +9,9 @@ export const TabNavigation = ({
   reCaptchaToken,
 }) => {
   const { setCurrentIndex, currentIndex } = useContext(HandleMintContext);
+  const [accessOpen] = useAccessOpen();
 
-  if (!reCaptchaToken) {
+  if (!accessOpen) {
     return null;
   }
 
