@@ -13,7 +13,6 @@ import {
   HEADER_IS_SPO,
   HEADER_JWT_ACCESS_TOKEN,
   HEADER_RECAPTCHA,
-  HEADER_TWITTER_ACCESS_TOKEN,
 } from "../../../../src/lib/constants";
 import { HandleMintContext } from "../../../context/mint";
 import { isValid } from "../../../lib/helpers/nfts";
