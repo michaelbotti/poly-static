@@ -13,6 +13,8 @@ import {
   HEADER_HANDLE,
   HEADER_IS_SPO,
   HEADER_JWT_ACCESS_TOKEN,
+  MAX_TOTAL_SESSIONS,
+  SPO_MAX_TOTAL_SESSIONS,
 } from "../../src/lib/constants";
 import { getActiveSessionsByEmail, initFirebase } from "../helpers/firebase";
 import { ensureHandleAvailable } from "../helpers/util";
@@ -47,7 +49,8 @@ const handler: Handler = async (
   if (!headerIsSpo) {
     const { emailAddress } = decodeAccessToken(headerAccess) as AccessTokenPayload;
     const activeSessionsByPhone = await getActiveSessionsByEmail(emailAddress);
-    if (activeSessionsByPhone.length > 3) {
+    const totalSessions = headerIsSpo ? SPO_MAX_TOTAL_SESSIONS : MAX_TOTAL_SESSIONS;
+    if (activeSessionsByPhone.length > totalSessions) {
       return {
         statusCode: 403,
         body: JSON.stringify({

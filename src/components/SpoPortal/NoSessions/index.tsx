@@ -21,7 +21,7 @@ import LogoMark from "../../../images/logo-single.svg";
 import { Loader } from "../../Loader";
 import {
   getAccessTokenFromCookie,
-  getAllCurrentSessionData,
+  getAllCurrentSPOSessionData,
   getRecaptchaToken,
   setSessionTokenCookie,
 } from "../../../lib/helpers/session";
@@ -36,7 +36,7 @@ export const NoSessions = ({ className = "", ...rest }) => {
   const [debouncedHandle] = useDebounce(handle, 600);
   const handleInputRef = useRef(null);
 
-  const currentSessions = getAllCurrentSessionData();
+  const currentSessions = getAllCurrentSPOSessionData();
 
   const nextIndex =
     currentSessions.findIndex((session) => session === false) + 1;

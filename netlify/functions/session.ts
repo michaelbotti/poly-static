@@ -16,7 +16,9 @@ import {
   HEADER_JWT_SESSION_TOKEN,
   HEADER_IS_SPO,
   MAX_SESSION_LENGTH_SPO,
-  SPO_ADA_HANDLE_COST
+  SPO_ADA_HANDLE_COST,
+  SPO_MAX_TOTAL_SESSIONS,
+  MAX_TOTAL_SESSIONS
 } from "../../src/lib/constants";
 import { ensureHandleAvailable, fetchNodeApp } from '../helpers/util';
 import { getRarityCost, isValid, normalizeNFTHandle } from "../../src/lib/helpers/nfts";
@@ -85,8 +87,10 @@ const handler: Handler = async (
 
   const { emailAddress } = decode(accessToken) as AccessTokenPayload;
   if (!headerIsSpo) {
+    // TODO: Since Email is always the same, figure out how to track the amount of sessions
     const activeSessionsByPhone = await getActiveSessionsByEmail(emailAddress);
-    const tooManySessions = activeSessionsByPhone.length > 3;
+    const totalSessions = headerIsSpo ? SPO_MAX_TOTAL_SESSIONS : MAX_TOTAL_SESSIONS
+    const tooManySessions = activeSessionsByPhone.length > totalSessions;
     if (tooManySessions) {
       return {
         statusCode: 403,
@@ -151,7 +155,7 @@ const handler: Handler = async (
     },
     sessionSecret,
     {
-      expiresIn: (expiresIn / 1000).toString() // 10 minutes or 24 hours for SPOs
+      expiresIn: (expiresIn * 1000).toString() // 10 minutes or 24 hours for SPOs
     }
   );
 

@@ -4,7 +4,7 @@ import { SessionResponseBody } from "../../../netlify/functions/session";
 import { HandleMintContext } from "../../context/mint";
 import {
   getAccessTokenFromCookie,
-  getAllCurrentSessionData,
+  getAllCurrentSPOSessionData,
   getSessionTokenFromCookie,
 } from "../../lib/helpers/session";
 import { useAccessOpen } from "../../lib/hooks/access";
@@ -28,7 +28,7 @@ export const SpoPortalPage = (): JSX.Element => {
   >([]);
 
   useEffect(() => {
-    setPaymentSessions(getAllCurrentSessionData());
+    setPaymentSessions(getAllCurrentSPOSessionData());
   }, [currentIndex, setPaymentSessions]);
 
   usePrimeMintingContext();
@@ -43,7 +43,7 @@ export const SpoPortalPage = (): JSX.Element => {
       : null;
 
   const refreshPaymentSessions = () => {
-    setPaymentSessions(getAllCurrentSessionData());
+    setPaymentSessions(getAllCurrentSPOSessionData());
   };
 
   const spoPageEnabled = betaState?.spoPageEnabled ?? false;

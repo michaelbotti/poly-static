@@ -15,6 +15,17 @@ export const getAllCurrentSessionData = (): (SessionResponseBody | false)[] => {
   }, []);
 }
 
+export const getAllCurrentSPOSessionData = (): (SessionResponseBody | false)[] => {
+  return [1, 2, 3, 4, 5, 6, 7, 8, 9, 10].reduce((sessions, index) => {
+    const data = getSessionTokenFromCookie(index);
+    if (null !== data) {
+      sessions.push(data);
+    }
+
+    return sessions;
+  }, []);
+}
+
 export const getAccessTokenFromCookie = (): VerifyResponseBody | false => {
   const data = Cookie.get(COOKIE_ACCESS_KEY);
   if (!data || data.length === 0) {
