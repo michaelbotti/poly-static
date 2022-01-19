@@ -95,14 +95,14 @@ export const SpoEnterForm: FC<Props> = ({ setReCaptchaToken }): JSX.Element => {
             How it Works
           </h3>
           <p className="text-lg text-center text-dark-350">
-            Purchasing a Handle during for SPOs is a 4-step process, starting
+            Purchasing a Handle during for SPOs is a 3-step process, starting
             with:
           </p>
           <ol className="mb-4">
             <li>Search and select an available Handle to purchase.</li>
             <li>
-              Once you have started your session, you must use your STAKE POOL
-              operators wallet for the purchase
+              Once you have started your session, you <b>must</b> use your STAKE
+              POOL operators wallet for the purchase
             </li>
             <li>
               If you make a payment using a wallet other than the wallet
@@ -111,12 +111,23 @@ export const SpoEnterForm: FC<Props> = ({ setReCaptchaToken }): JSX.Element => {
             </li>
           </ol>
           <p>
-            Pricing for each Handle ranges from 10-500 $ADA, depending on the
-            character length. You can see full details on{" "}
+            Pricing for each Handle is 250 ADA. You can see full details on{" "}
             <Link to="/faq" className="text-primary-100">
               our FAQ page
             </Link>
             !
+          </p>
+          <p>
+            For security reasons, we have taken a snapshot of all existing pools
+            on 1/20/2022 and for this initial phase will only allow minting of
+            those tickers. All pools created after this date will need to await
+            public sale.
+          </p>
+          <p>
+            All pools that reserved their tickers via the Google Form in
+            September 2021 will get their corresponding Handles via paying only
+            the minting and transaction costs. You will receive a 2 ADA payment
+            request (instead of 250 ADA).
           </p>
         </div>
         <form onSubmit={(e) => e.preventDefault()} ref={form}>
