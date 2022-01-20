@@ -1,14 +1,14 @@
 export const MAX_SESSION_LENGTH = 600000; // 10 minutes
-export const MAX_SESSION_LENGTH_SPO = 86400000; // 24 hours
+export const MAX_SESSION_LENGTH_SPO = 3600000; // 24 hours
 export const MAX_ACCESS_LENGTH = 1800000; // 30 minutes
-export const MAX_ACCESS_LENGTH_SPO = 86400000; // 24 hours
+export const MAX_ACCESS_LENGTH_SPO = 3600000; // 24 hours
 export const STATE_INTERVAL = 60000 // 1 Minute
 export const MAX_CHAIN_LOAD = 0.8;
 export const SPO_ADA_HANDLE_COST = 250;
 export const RECAPTCHA_SITE_KEY = '6Ld0QUkcAAAAAN-_KvCv8R_qke8OYxotNJzIg2RP';
 export const RECAPTCHA_SITE_KEY_FALLBACK = '6LejHmcdAAAAAG2537Bd-_uM2f-hazWd-Q8rFO_L';
 export const MAX_TOTAL_SESSIONS = 3;
-export const SPO_MAX_TOTAL_SESSIONS = 10;
+export const SPO_MAX_TOTAL_SESSIONS = 1;
 
 // Keys
 export const COOKIE_SESSION_PREFIX = 'CURRENT_HANDLE_SESSION';

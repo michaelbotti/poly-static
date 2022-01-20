@@ -2,7 +2,7 @@ import Cookie from 'js-cookie';
 
 import { SessionResponseBody } from "../../../netlify/functions/session";
 import { VerifyResponseBody } from '../../../netlify/functions/verify';
-import { COOKIE_ACCESS_KEY, COOKIE_SESSION_PREFIX, RECAPTCHA_SITE_KEY } from '../constants';
+import { COOKIE_ACCESS_KEY, COOKIE_SESSION_PREFIX, RECAPTCHA_SITE_KEY, SPO_MAX_TOTAL_SESSIONS } from '../constants';
 
 export const getAllCurrentSessionData = (): (SessionResponseBody | false)[] => {
   return [1, 2, 3].reduce((sessions, index) => {
@@ -16,14 +16,14 @@ export const getAllCurrentSessionData = (): (SessionResponseBody | false)[] => {
 }
 
 export const getAllCurrentSPOSessionData = (): (SessionResponseBody | false)[] => {
-  return [1, 2, 3, 4, 5, 6, 7, 8, 9, 10].reduce((sessions, index) => {
-    const data = getSessionTokenFromCookie(index);
+  const sessions = [];
+  Array.from({ length: SPO_MAX_TOTAL_SESSIONS }, (_, index) => {
+    const data = getSessionTokenFromCookie(index + 1);
     if (null !== data) {
       sessions.push(data);
     }
-
-    return sessions;
-  }, []);
+  });
+  return sessions;
 }
 
 export const getAccessTokenFromCookie = (): VerifyResponseBody | false => {

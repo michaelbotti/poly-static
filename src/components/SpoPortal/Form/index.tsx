@@ -14,10 +14,10 @@ import {
 import Button from "../../button";
 
 interface Props {
-  setReCaptchaToken: React.Dispatch<React.SetStateAction<string>>;
+  setAccessOpen: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-export const SpoEnterForm: FC<Props> = ({ setReCaptchaToken }): JSX.Element => {
+export const SpoEnterForm: FC<Props> = ({ setAccessOpen }): JSX.Element => {
   const [verifyingRecaptcha, setVerifyingRecaptcha] = useState<boolean>(false);
   const [responseMessage, setResponseMessage] = useState<string>(null);
   const [touChecked, setTouChecked] = useState<boolean>(false);
@@ -52,6 +52,7 @@ export const SpoEnterForm: FC<Props> = ({ setReCaptchaToken }): JSX.Element => {
 
       const { error, verified, message, token, data } = res;
       if (!error && verified && token && data) {
+        setAccessOpen(true);
         setAccessTokenCookie(res, data.exp);
       }
 
@@ -72,7 +73,6 @@ export const SpoEnterForm: FC<Props> = ({ setReCaptchaToken }): JSX.Element => {
       theme: "dark",
       callback: async (token: string) => {
         await performVerification(token);
-        setReCaptchaToken(token);
       },
     });
   };

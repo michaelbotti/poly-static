@@ -3,11 +3,7 @@ import { HandleMintContext } from "../../../context/mint";
 import { getSessionTokenFromCookie } from "../../../lib/helpers/session";
 import { useAccessOpen } from "../../../lib/hooks/access";
 
-export const TabNavigation = ({
-  paymentSessions,
-  updatePaymentSessions,
-  reCaptchaToken,
-}) => {
+export const TabNavigation = ({ paymentSessions, updatePaymentSessions }) => {
   const { setCurrentIndex, currentIndex } = useContext(HandleMintContext);
   const [accessOpen] = useAccessOpen();
 

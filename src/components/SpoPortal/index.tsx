@@ -22,7 +22,6 @@ export const SpoPortalPage = (): JSX.Element => {
     useContext(HandleMintContext);
   const [accessOpen, setAccessOpen] = useAccessOpen();
 
-  const [reCaptchaToken, setReCaptchaToken] = useState<string | null>(null);
   const [paymentSessions, setPaymentSessions] = useState<
     (false | SessionResponseBody)[]
   >([]);
@@ -31,16 +30,22 @@ export const SpoPortalPage = (): JSX.Element => {
     setPaymentSessions(getAllCurrentSPOSessionData());
   }, [currentIndex, setPaymentSessions]);
 
+  console.log(paymentSessions);
+
   usePrimeMintingContext();
 
   const currentAccess = useMemo(
     () => getAccessTokenFromCookie(),
     [currentIndex]
   );
-  const currentSession =
-    currentIndex > 0
-      ? (getSessionTokenFromCookie(currentIndex) as SessionResponseBody)
-      : null;
+
+  const currentSession = useMemo(
+    () =>
+      currentIndex > 0
+        ? (getSessionTokenFromCookie(currentIndex) as SessionResponseBody)
+        : null,
+    [currentIndex]
+  );
 
   const refreshPaymentSessions = () => {
     setPaymentSessions(getAllCurrentSPOSessionData());
@@ -74,7 +79,6 @@ export const SpoPortalPage = (): JSX.Element => {
             />
           )}
           <TabNavigation
-            reCaptchaToken={reCaptchaToken}
             paymentSessions={paymentSessions}
             updatePaymentSessions={refreshPaymentSessions}
           />
@@ -82,9 +86,7 @@ export const SpoPortalPage = (): JSX.Element => {
             className="grid grid-cols-12 gap-4 lg:gap-8 bg-dark-200 rounded-lg rounded-tl-none place-content-start p-4 lg:p-8 mb-16"
             style={{ minHeight: "10vh" }}
           >
-            {!accessOpen && (
-              <SpoEnterForm setReCaptchaToken={setReCaptchaToken} />
-            )}
+            {!accessOpen && <SpoEnterForm setAccessOpen={setAccessOpen} />}
             {/*
         At this point, we have already searched and verified the pool name exists
         Next step is to display the wallet address and the NFT preview

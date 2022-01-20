@@ -17,11 +17,11 @@ import { normalizeNFTHandle } from "../helpers/nfts";
 import { getAccessTokenFromCookie } from "../helpers/session";
 
 export const useSyncAvailableStatus = async (unsanitizedHandle: string, isSpo = false) => {
-  const currentAccess = getAccessTokenFromCookie();
   const { setFetching, setHandleResponse, reservedHandles } =
     useContext(HandleMintContext);
 
   useEffect(() => {
+    const currentAccess = getAccessTokenFromCookie();
     const handle = normalizeNFTHandle(unsanitizedHandle);
 
     // Don't allow new sessions when their's 5 minutes left.
