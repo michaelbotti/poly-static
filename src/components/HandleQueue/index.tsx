@@ -77,6 +77,7 @@ export const HandleQueue = (): JSX.Element => {
 
   const handleOnChange = (value: string) => {
     if (value.includes('+')) {
+      setTimeoutResponseMessage("Sorry, we do not support email addresses with the (+) character. Try again!");
       return;
     }
 
