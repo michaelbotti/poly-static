@@ -30,8 +30,6 @@ export const SpoPortalPage = (): JSX.Element => {
     setPaymentSessions(getAllCurrentSPOSessionData());
   }, [currentIndex, setPaymentSessions]);
 
-  console.log(paymentSessions);
-
   usePrimeMintingContext();
 
   const currentAccess = useMemo(
