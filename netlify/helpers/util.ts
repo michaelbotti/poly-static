@@ -1,17 +1,17 @@
 import { HandlerResponse } from '@netlify/functions';
 import { fetch } from 'cross-fetch';
 import { HEADER_HANDLE } from '../../src/lib/constants';
-import { getDefaultActiveSessionUnvailable, getDefaultResponseAvailable, getDefaultResponseUnvailable, getPaidSessionUnavailable, getReservedUnavailable, getSPOUnavailable, getTwitterResponseUnvailable, HandleResponseBody } from '../../src/lib/helpers/search';
-import { getActiveSessionByHandle, getPaidSessionByHandle, getReservedHandles } from './firebase';
+import { getDefaultActiveSessionUnvailable, getDefaultResponseAvailable, getDefaultResponseUnvailable, getMultipleStakePoolResponse, getPaidSessionUnavailable, getReservedUnavailable, getSPOUnavailable, getStakePoolNotFoundResponse, getTwitterResponseUnvailable, HandleResponseBody } from '../../src/lib/helpers/search';
+import { getActiveSessionByHandle, getPaidSessionByHandle, getReservedHandles, getStakePoolsByTicker } from './firebase';
 
 export const getNodeEndpointUrl = () => process.env.NODEJS_APP_ENDPOINT;
 
-export const ensureHandleAvailable = async (handle: string): Promise<HandlerResponse> => {
+export const ensureHandleAvailable = async (handle: string, isSpo = false): Promise<HandlerResponse> => {
   const activeSessionsByHandle = await getActiveSessionByHandle(handle);
   const paidSession = await getPaidSessionByHandle(handle);
   const reservedHandles = await getReservedHandles();
 
-  const { exists, policyID, assetName } = await fetchNodeApp("/exists", {
+  const { exists, policyID, assetName } = await fetchNodeApp("exists", {
     headers: {
       [HEADER_HANDLE]: handle,
     },
@@ -50,7 +50,7 @@ export const ensureHandleAvailable = async (handle: string): Promise<HandlerResp
     };
   }
 
-  if (reservedHandles && reservedHandles?.spos?.includes(handle)) {
+  if (!isSpo && reservedHandles && reservedHandles?.spos?.includes(handle)) {
     return {
       statusCode: 403,
       body: JSON.stringify(getSPOUnavailable()),
@@ -69,6 +69,25 @@ export const ensureHandleAvailable = async (handle: string): Promise<HandlerResp
       statusCode: 403,
       body: JSON.stringify(getDefaultResponseUnvailable()),
     };
+  }
+
+  if (isSpo) {
+    const uppercaseHandle = handle.toUpperCase();
+    const stakePools = await getStakePoolsByTicker(uppercaseHandle);
+    if (stakePools.length === 0) {
+      return {
+        statusCode: 403,
+        body: JSON.stringify(getStakePoolNotFoundResponse()),
+      };
+    }
+
+    // Determine if the ticker has more than 1 result. If so, don't allow
+    if (stakePools.length > 1) {
+      return {
+        statusCode: 403,
+        body: JSON.stringify(getMultipleStakePoolResponse()),
+      };
+    }
   }
 
   return {

@@ -6,22 +6,18 @@ import {
   HandlerResponse,
 } from "@netlify/functions";
 import {
-  getDefaultActiveSessionUnvailable,
-  getDefaultResponseAvailable,
-  getDefaultResponseUnvailable,
-  getPaidSessionUnavailable,
-  getReservedUnavailable,
-  getSPOUnavailable,
-  getTwitterResponseUnvailable,
   HandleResponseBody,
 } from "../../src/lib/helpers/search";
 import { normalizeNFTHandle } from "../../src/lib/helpers/nfts";
 import {
   HEADER_HANDLE,
+  HEADER_IS_SPO,
   HEADER_JWT_ACCESS_TOKEN,
+  MAX_TOTAL_SESSIONS,
+  SPO_MAX_TOTAL_SESSIONS,
 } from "../../src/lib/constants";
-import { getActiveSessionByHandle, getActiveSessionsByEmail, getMintedHandles, getPaidSessionByHandle, getReservedHandles, initFirebase } from "../helpers/firebase";
-import { ensureHandleAvailable, fetchNodeApp } from "../helpers/util";
+import { getActiveSessionsByEmail, initFirebase } from "../helpers/firebase";
+import { ensureHandleAvailable } from "../helpers/util";
 import { AccessTokenPayload, decodeAccessToken } from "../helpers/jwt";
 
 // Main handler function for GET requests.
@@ -33,6 +29,7 @@ const handler: Handler = async (
   const { headers } = event;
 
   const headerHandle = headers[HEADER_HANDLE];
+  const headerIsSpo = headers[HEADER_IS_SPO] === 'true' ? true : false;
   const headerAccess = headers[HEADER_JWT_ACCESS_TOKEN];
 
   if (!headerAccess || !headerHandle) {
@@ -49,19 +46,22 @@ const handler: Handler = async (
 
   const handle = normalizeNFTHandle(headerHandle);
 
-  const { emailAddress } = decodeAccessToken(headerAccess) as AccessTokenPayload;
-  const activeSessionsByEmail = await getActiveSessionsByEmail(emailAddress);
-  if (activeSessionsByEmail.length > 3) {
-    return {
-      statusCode: 403,
-      body: JSON.stringify({
-        message: "Too many sessions open! Try again after one expires.",
-        available: false,
-      } as HandleResponseBody),
-    };
+  if (!headerIsSpo) {
+    const { emailAddress } = decodeAccessToken(headerAccess) as AccessTokenPayload;
+    const activeSessionsByPhone = await getActiveSessionsByEmail(emailAddress);
+    const totalSessions = headerIsSpo ? SPO_MAX_TOTAL_SESSIONS : MAX_TOTAL_SESSIONS;
+    if (activeSessionsByPhone.length > totalSessions) {
+      return {
+        statusCode: 403,
+        body: JSON.stringify({
+          message: "Too many sessions open! Try again after one expires.",
+          available: false,
+        } as HandleResponseBody),
+      };
+    }
   }
 
-  return ensureHandleAvailable(handle);
+  return ensureHandleAvailable(handle, headerIsSpo);
 };
 
 export { handler };

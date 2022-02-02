@@ -1,5 +1,5 @@
 import { Dispatch, SetStateAction, useEffect, useState } from "react";
-import { MAX_ACCESS_LENGTH, MAX_SESSION_LENGTH } from "../constants";
+import { MAX_ACCESS_LENGTH } from "../constants";
 
 import { getAccessTokenFromCookie } from "../helpers/session";
 

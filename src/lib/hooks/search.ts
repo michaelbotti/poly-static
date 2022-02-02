@@ -9,23 +9,23 @@ import { HandleResponseBody } from "../helpers/search";
 import {
   BETA_PHASE_MATCH,
   HEADER_HANDLE,
+  HEADER_IS_SPO,
   HEADER_JWT_ACCESS_TOKEN,
-  MAX_SESSION_LENGTH,
 } from "../constants";
 import { HandleMintContext } from "../../context/mint";
 import { normalizeNFTHandle } from "../helpers/nfts";
 import { getAccessTokenFromCookie } from "../helpers/session";
 
-export const useSyncAvailableStatus = async (unsanitizedHandle: string) => {
-  const currentAccess = getAccessTokenFromCookie();
+export const useSyncAvailableStatus = async (unsanitizedHandle: string, isSpo = false) => {
   const { setFetching, setHandleResponse, reservedHandles } =
     useContext(HandleMintContext);
 
   useEffect(() => {
+    const currentAccess = getAccessTokenFromCookie();
     const handle = normalizeNFTHandle(unsanitizedHandle);
 
     // Don't allow new sessions when their's 5 minutes left.
-    if (Date.now() + 300000 > (currentAccess ? currentAccess.data.exp * 1000 : 0) && !reservedHandles.twitter.includes(handle)) {
+    if (Date.now() + 300000 > (currentAccess ? currentAccess.data.exp * 1000 : 0) && !reservedHandles?.twitter?.includes(handle)) {
       setHandleResponse({
         available: true,
         message: 'Less than 5 minutes! This attempt may be refunded.',
@@ -44,7 +44,8 @@ export const useSyncAvailableStatus = async (unsanitizedHandle: string) => {
       return;
     }
 
-    if (reservedHandles?.manual.includes(handle) || reservedHandles?.spos.includes(handle)) {
+    const isReserved = isSpo ? reservedHandles?.manual.includes(handle) : reservedHandles?.manual.includes(handle) || reservedHandles?.spos.includes(handle)
+    if (isReserved) {
       setHandleResponse(getReservedUnavailable());
       return;
     }
@@ -64,6 +65,7 @@ export const useSyncAvailableStatus = async (unsanitizedHandle: string) => {
 
       const headers: HeadersInit = {
         [HEADER_HANDLE]: handle,
+        [HEADER_IS_SPO]: isSpo ? 'true' : 'false',
         [HEADER_JWT_ACCESS_TOKEN]: accessToken.token
       };
 

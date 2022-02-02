@@ -1,11 +1,17 @@
-import React, { createContext, Dispatch, SetStateAction, useEffect, useState } from "react";
+import React, {
+  createContext,
+  Dispatch,
+  SetStateAction,
+  useEffect,
+  useState,
+} from "react";
 
 import { SessionResponseBody } from "../../netlify/functions/session";
 import { StateResponseBody } from "../../netlify/functions/state";
 import { HandleResponseBody } from "../lib/helpers/search";
 
 export interface ReservedHandlesType {
-  blacklist: string[],
+  blacklist: string[];
   twitter: string[];
   manual: string[];
   spos: string[];
@@ -39,6 +45,7 @@ export interface HandleMintContextType {
   betaState: StateResponseBody;
   primed: boolean;
   isPurchasing: boolean;
+  stateLoading: boolean;
   setPrimed: Dispatch<SetStateAction<boolean>>;
   setReservedHandles: Dispatch<SetStateAction<ReservedHandlesType>>;
   setHandleResponse: Dispatch<SetStateAction<HandleResponseBody>>;
@@ -62,6 +69,7 @@ export const defaultState: HandleMintContextType = {
   primed: false,
   currentIndex: 0,
   betaState: null,
+  stateLoading: false,
   setHandleResponse: () => {},
   setFetching: () => {},
   setHandle: () => {},
@@ -72,7 +80,7 @@ export const defaultState: HandleMintContextType = {
   setPendingSessions: () => {},
   setPaymentSessions: () => {},
   setCurrentIndex: () => {},
-  setBetaState: () => {}
+  setBetaState: () => {},
 };
 
 export const HandleMintContext =
@@ -81,15 +89,18 @@ export const HandleMintContext =
 export const HandleMintContextProvider = ({ children, ...rest }) => {
   const [handle, setHandle] = useState<string>("");
   const [fetching, setFetching] = useState<boolean>(false);
-  const [handleResponse, setHandleResponse] = useState<HandleResponseBody|null>(null);
-  const [twitterToken, setTwitterToken] = useState<string|null>(null);
+  const [handleResponse, setHandleResponse] =
+    useState<HandleResponseBody | null>(null);
+  const [twitterToken, setTwitterToken] = useState<string | null>(null);
   const [isPurchasing, setIsPurchasing] = useState<boolean>(false);
-  const [reservedHandles, setReservedHandles] = useState<ReservedHandlesType|null>(null);
+  const [reservedHandles, setReservedHandles] =
+    useState<ReservedHandlesType | null>(null);
   const [pendingSessions, setPendingSessions] = useState<string[]>(null);
   const [paymentSessions, setPaymentSessions] = useState<PaymentSession[]>([]);
   const [primed, setPrimed] = useState<boolean>(false);
   const [currentIndex, setCurrentIndex] = useState<number>(0);
   const [betaState, setBetaState] = useState<StateResponseBody>(null);
+  const [stateLoading, setStateLoading] = useState<boolean>(false);
 
   useEffect(() => {
     const updateBetaState = async () => {
@@ -101,39 +112,46 @@ export const HandleMintContextProvider = ({ children, ...rest }) => {
         .catch((e) => {
           setBetaState(null);
           console.log(e);
+        })
+        .finally(() => {
+          setStateLoading(false);
         });
-    }
+    };
 
+    setStateLoading(true);
     updateBetaState();
   }, []);
 
   return (
-    <HandleMintContext.Provider value={{
-      ...defaultState,
-      fetching,
-      handle,
-      handleResponse,
-      twitterToken,
-      isPurchasing,
-      reservedHandles,
-      pendingSessions,
-      paymentSessions,
-      currentIndex,
-      betaState,
-      primed,
-      setFetching,
-      setHandle,
-      setHandleResponse,
-      setTwitterToken,
-      setIsPurchasing,
-      setReservedHandles,
-      setPrimed,
-      setPendingSessions,
-      setPaymentSessions,
-      setCurrentIndex,
-      setBetaState
-    }}>
+    <HandleMintContext.Provider
+      value={{
+        ...defaultState,
+        fetching,
+        handle,
+        handleResponse,
+        twitterToken,
+        isPurchasing,
+        reservedHandles,
+        pendingSessions,
+        paymentSessions,
+        currentIndex,
+        betaState,
+        primed,
+        setFetching,
+        setHandle,
+        setHandleResponse,
+        setTwitterToken,
+        setIsPurchasing,
+        setReservedHandles,
+        setPrimed,
+        setPendingSessions,
+        setPaymentSessions,
+        setCurrentIndex,
+        setBetaState,
+        stateLoading,
+      }}
+    >
       {children}
     </HandleMintContext.Provider>
-  )
-}
+  );
+};

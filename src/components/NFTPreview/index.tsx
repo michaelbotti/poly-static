@@ -11,14 +11,17 @@ interface NFTPreviewProps {
   handle: string;
   showPrice?: boolean;
   showHeader?: boolean;
+  isSpo?: boolean;
 }
 
 const NFTPreview: FC<NFTPreviewProps> = ({
   handle,
   showPrice = true,
   showHeader = true,
+  isSpo = false,
 }) => {
-  const { isPurchasing, reservedHandles, primed } = useContext(HandleMintContext);
+  const { isPurchasing, reservedHandles, primed } =
+    useContext(HandleMintContext);
 
   const textSize = () => {
     if (handle.length < 3) {
@@ -39,15 +42,16 @@ const NFTPreview: FC<NFTPreviewProps> = ({
           {showHeader && <p className="m-0 text-center">Your NFT Preview</p>}
           {showPrice && (
             <div className="text-center mt-2 mb-8">
-              <HandleDetails handle={handle} />
+              <HandleDetails handle={handle} isSpo={isSpo} />
             </div>
           )}
         </>
       )}
       <div className="flex justify-center h-full w-full">
         <div
-          className={`${handle.length > 0 ? "" : "opacity-50"
-            } bg-dark-100 text-white relative overflow-hidden mx-auto w-96 h-96 max-w-full max-h-full border border-2 border-dark-200 shadow-xl rounded-lg`}
+          className={`${
+            handle.length > 0 ? "" : "opacity-50"
+          } bg-dark-100 text-white relative overflow-hidden mx-auto w-96 h-96 max-w-full max-h-full border border-2 border-dark-200 shadow-xl rounded-lg`}
         >
           <img
             src={Background}
@@ -64,11 +68,18 @@ const NFTPreview: FC<NFTPreviewProps> = ({
             <p className="m-0 text-xs font-bold absolute bottom-6 right-6">
               handle.me/{handle}
             </p>
-            {primed && reservedHandles?.twitter.includes(normalizeNFTHandle(handle)) && (
-              <p className="m-0 text-xs font-bold absolute bottom-6 left-6" style={{
-                color: '#FFCD59'
-              }}>OG {primed && reservedHandles?.twitter.indexOf(handle)}/{primed && reservedHandles?.twitter.length}</p>
-            )}
+            {primed &&
+              reservedHandles?.twitter.includes(normalizeNFTHandle(handle)) && (
+                <p
+                  className="m-0 text-xs font-bold absolute bottom-6 left-6"
+                  style={{
+                    color: "#FFCD59",
+                  }}
+                >
+                  OG {primed && reservedHandles?.twitter.indexOf(handle)}/
+                  {primed && reservedHandles?.twitter.length}
+                </p>
+              )}
           </div>
         </div>
       </div>

@@ -13,7 +13,12 @@ import {
   HEADER_TWITTER_ACCESS_TOKEN,
   MAX_SESSION_LENGTH,
   HEADER_JWT_ACCESS_TOKEN,
-  HEADER_JWT_SESSION_TOKEN
+  HEADER_JWT_SESSION_TOKEN,
+  HEADER_IS_SPO,
+  MAX_SESSION_LENGTH_SPO,
+  SPO_ADA_HANDLE_COST,
+  SPO_MAX_TOTAL_SESSIONS,
+  MAX_TOTAL_SESSIONS
 } from "../../src/lib/constants";
 import { ensureHandleAvailable, fetchNodeApp } from '../helpers/util';
 import { getRarityCost, isValid, normalizeNFTHandle } from "../../src/lib/helpers/nfts";
@@ -45,6 +50,7 @@ const handler: Handler = async (
   const { headers } = event;
 
   const headerHandle = headers[HEADER_HANDLE];
+  const headerIsSpo = headers[HEADER_IS_SPO] === 'true' ? true : false;
   const headerRecaptcha = headers[HEADER_RECAPTCHA];
   const headerTwitter = headers[HEADER_TWITTER_ACCESS_TOKEN];
   const accessToken = headers[HEADER_JWT_ACCESS_TOKEN];
@@ -64,7 +70,7 @@ const handler: Handler = async (
   await initFirebase();
 
   // Ensure no one is trying to force an existing Handle.
-  const { body } = await ensureHandleAvailable(handle);
+  const { body } = await ensureHandleAvailable(handle, headerIsSpo);
   const data: HandleResponseBody = JSON.parse(body);
 
   if (!data.available && !data.twitter) {
@@ -80,16 +86,19 @@ const handler: Handler = async (
   }
 
   const { emailAddress } = decode(accessToken) as AccessTokenPayload;
-  const activeSessionsByPhone = await getActiveSessionsByEmail(emailAddress);
-  const tooManySessions = activeSessionsByPhone.length > 3;
-
-  if (tooManySessions) {
-    return {
-      statusCode: 403,
-      body: JSON.stringify({
-        error: true,
-        message: 'Sorry, too many open sessions!'
-      } as SessionResponseBody)
+  if (!headerIsSpo) {
+    // TODO: Since Email is always the same, figure out how to track the amount of sessions
+    const activeSessionsByPhone = await getActiveSessionsByEmail(emailAddress);
+    const totalSessions = headerIsSpo ? SPO_MAX_TOTAL_SESSIONS : MAX_TOTAL_SESSIONS
+    const tooManySessions = activeSessionsByPhone.length > totalSessions;
+    if (tooManySessions) {
+      return {
+        statusCode: 403,
+        body: JSON.stringify({
+          error: true,
+          message: 'Sorry, too many open sessions!'
+        } as SessionResponseBody)
+      }
     }
   }
 
@@ -117,10 +126,9 @@ const handler: Handler = async (
       };
     }
 
-    if (
-      manual?.includes(handle) ||
-      spos?.includes(handle)
-    ) {
+    // If the incoming session is an SPO, we don't want to fail for reserved SPOs
+    const isManualOrSpo = !headerIsSpo ? (manual?.includes(handle) || spos?.includes(handle)) : manual?.includes(handle);
+    if (isManualOrSpo) {
       return {
         statusCode: 403,
         body: JSON.stringify({
@@ -135,22 +143,24 @@ const handler: Handler = async (
    * We sign a session JWT tokent to authorize the purchase,
    * and include the access email address to limit request.
    */
+  const expiresIn = headerIsSpo ? MAX_SESSION_LENGTH_SPO : MAX_SESSION_LENGTH;
   const sessionSecret = await getSecret('session');
   const sessionToken = jwt.sign(
     {
       iat: Date.now(),
       handle,
-      cost: getRarityCost(handle),
-      emailAddress
+      cost: headerIsSpo ? SPO_ADA_HANDLE_COST : getRarityCost(handle),
+      emailAddress: headerIsSpo ? 'spos@adahandle.com' : emailAddress,
+      isSPO: headerIsSpo
     },
     sessionSecret,
     {
-      expiresIn: (MAX_SESSION_LENGTH * 1000).toString() // 10 minutes
+      expiresIn: (expiresIn * 1000).toString() // 10 minutes or 24 hours for SPOs
     }
   );
 
   // Get payment details from server.
-  const res: NodeSessionResponseBody = await fetchNodeApp('/session', {
+  const res: NodeSessionResponseBody = await fetchNodeApp('session', {
     headers: {
       [HEADER_JWT_ACCESS_TOKEN]: accessToken,
       [HEADER_JWT_SESSION_TOKEN]: sessionToken,

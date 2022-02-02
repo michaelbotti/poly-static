@@ -2,10 +2,10 @@ import Cookie from 'js-cookie';
 
 import { SessionResponseBody } from "../../../netlify/functions/session";
 import { VerifyResponseBody } from '../../../netlify/functions/verify';
-import { COOKIE_ACCESS_KEY, COOKIE_SESSION_PREFIX, RECAPTCHA_SITE_KEY } from '../constants';
+import { COOKIE_ACCESS_KEY, COOKIE_SESSION_PREFIX, RECAPTCHA_SITE_KEY, SPO_MAX_TOTAL_SESSIONS } from '../constants';
 
 export const getAllCurrentSessionData = (): (SessionResponseBody | false)[] => {
-  return [1,2,3].reduce((sessions, index) => {
+  return [1, 2, 3].reduce((sessions, index) => {
     const data = getSessionTokenFromCookie(index);
     if (null !== data) {
       sessions.push(data);
@@ -13,6 +13,17 @@ export const getAllCurrentSessionData = (): (SessionResponseBody | false)[] => {
 
     return sessions;
   }, []);
+}
+
+export const getAllCurrentSPOSessionData = (): (SessionResponseBody | false)[] => {
+  const sessions = [];
+  Array.from({ length: SPO_MAX_TOTAL_SESSIONS }, (_, index) => {
+    const data = getSessionTokenFromCookie(index + 1);
+    if (null !== data) {
+      sessions.push(data);
+    }
+  });
+  return sessions;
 }
 
 export const getAccessTokenFromCookie = (): VerifyResponseBody | false => {
@@ -56,7 +67,7 @@ export const setSessionTokenCookie = (data: SessionResponseBody, exp: Date, inde
 }
 
 export const getRecaptchaToken = async (): Promise<string> => {
-  return await window.grecaptcha.execute(
+  return await (window as any).grecaptcha.execute(
     RECAPTCHA_SITE_KEY,
     { action: "submit" },
     (token: string) => {
