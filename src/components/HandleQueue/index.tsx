@@ -179,11 +179,6 @@ export const HandleQueue = (): JSX.Element => {
   const handleAuthenticating = async (e: Event) => {
     e.preventDefault();
 
-    if (authInput.length !== 6) {
-      setResponseMessage("Auth code must be 6 digits.");
-      return;
-    }
-
     setAuthenticating(true);
     try {
       const res: VerifyResponseBody = await fetch(
