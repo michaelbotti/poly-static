@@ -238,7 +238,7 @@ export const HandleQueue = (): JSX.Element => {
           <h4 className="text-lg text-dark-350 mb-4">Current Waitlist</h4>
           <span className={`font-bold text-4xl text-primary-100`}>
             {null === betaState && "Loading..."}
-            {null !== betaState && !betaState.error && betaState.position.toLocaleString('en-US')}
+            {null !== betaState && !betaState.error && betaState.position?.toLocaleString('en-US')}
             {null !== betaState && betaState.error && "N/A"}
           </span>
         </div>

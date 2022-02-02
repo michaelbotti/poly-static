@@ -38,22 +38,87 @@ function MintPage() {
     <>
       <SEO title="Mint" />
       <section id="top" className="max-w-5xl mx-auto">
+        {currentAccess && (
+          <Countdown
+            onComplete={() => setAccessOpen(false)}
+            date={new Date(currentAccess.data.exp * 1000)}
+            renderer={({ formatted }) => {
+              return (
+                <p className="text-white text-right">Access Expires: {formatted.minutes}:{formatted.seconds}</p>
+              )
+            }}
+          />
+        )}
+        <HandleNavigation paymentSessions={paymentSessions} updatePaymentSessions={refreshPaymentSessions} />
         <div
-          className="grid grid-cols-12 gap-4 lg:gap-8 bg-dark-200 rounded-lg rounded-tl-none place-content-center p-4 lg:p-8"
+          className="grid grid-cols-12 gap-4 lg:gap-8 bg-dark-200 rounded-lg rounded-tl-none place-content-start p-4 lg:p-8"
           style={{ minHeight: "60vh" }}
           >
-            <div className="col-span-12 md:col-span-6 md:col-start-4 relative z-10">
-              <h2 className="text-5xl text-center text-primary-200 mt-auto w-full">
-                <span className="font-bold text-white">SOLD OUT!</span><br/>
-              </h2>
-              <p className="text-lg text-dark-350 text-center mt-4">
-                The beta sale has successfully finished with ~15,000 Handles purchased! If you sent an incorrect payment, you will receive your refund within 14 days.
-              </p>
-              <p className="text-lg text-dark-350 text-center mt-4">
-                We will re-open minting at a later date!
-              </p>
-            </div>
-          </div>
+            {primed && (null === accessOpen || null === betaState) && (
+              <div className="col-span-12 md:col-span-6 md:col-start-4 relative z-10">
+                <div className="grid justify-center content-center h-full w-full p-8 flex-wrap">
+                  <p className="w-full text-center">Fetching details...</p>
+                  <Loader />
+                </div>
+              </div>
+            )}
+            {!accessOpen && betaState?.totalHandles <= 15000 && (
+              <>
+                <div className="col-span-12">
+                  <h2 className="text-primary-100 font-bold text-5xl text-center mb-8">Beta Sale!</h2>
+                </div>
+                <div className="col-span-12 md:col-span-6">
+                  <div className="shadow-lg rounded-lg border-2 border-primary-100 p-4 md:p-8">
+                    <h3 className="text-white text-3xl font-bold text-center mb-4">How it Works</h3>
+                    <p className="text-lg text-center text-dark-350">Purchasing a Handle during the Beta sale is a 4-step process, starting with:</p>
+                    <ol className="mb-4">
+                      <li>Enter the queue to save your place in line.</li>
+                      <li>Wait for an access code when it's your turn.</li>
+                      <li>Click the link when it arrives and agree to terms.</li>
+                      <li>Search and select an available Handle to purchase.</li>
+                    </ol>
+                    <p>Pricing for each Handle ranges from 10-500 $ADA, depending on the character length. You can see full details on <Link to="/faq" className="text-primary-100">our FAQ page</Link>!</p>
+                  </div>
+                </div>
+                <div className="col-span-12 md:col-span-6 relative z-10">
+                  <HandleQueue />
+                </div>
+              </>
+            )}
+            {!accessOpen && betaState?.totalHandles > 15000 && (
+              <div className="col-span-12 md:col-span-6 md:col-start-4 relative z-10">
+                <h2 className="text-primary-100 font-bold text-5xl text-center mb-8">Beta Sale</h2>
+                <h2 className="text-white font-bold text-3xl text-center mb-8">Sold Out!</h2>
+                <p className="text-lg text-center">We have officially sold out of our first 15,000 public access Handles. We will re-open public minting as soon as possible!</p>
+              </div>
+            )}
+            {accessOpen && (
+              <>
+                <div className="col-span-12 lg:col-span-6 relative z-10">
+                  {primed && (
+                    <div className="p-8">
+                      {currentIndex === 0
+                        ? <HandleSearchReserveFlow />
+                        : <HandleSession sessionData={currentSession} />}
+                    </div>
+                  )}
+
+                  {!primed && (
+                    <div className="grid justify-center content-center h-full w-full p-8 flex-wrap">
+                      <p className="w-full text-center">Setting up...</p>
+                      <Loader />
+                    </div>
+                  )}
+                </div>
+                <div className="col-span-12 lg:col-span-6 py-8">
+                  <NFTPreview handle={currentIndex === 0 ? handle : currentSession.data.handle} />
+                </div>
+              </>
+            )}
+        </div>
+        {accessOpen && betaState && (
+          <p className="text-white mt-4 text-center">Current Chain Load: {`${(betaState.chainLoad * 100).toFixed(2)}%`}</p>
+        )}
       </section>
     </>
   );

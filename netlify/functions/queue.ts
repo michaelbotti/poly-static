@@ -24,13 +24,13 @@ const handler: Handler = async (
   event: HandlerEvent,
   context: HandlerContext
 ): Promise<HandlerResponse> => {
-  return {
-    statusCode: 400,
-    body: JSON.stringify({
-      error: true,
-      message: 'Beta Sale has ended!'
-    } as QueueResponseBody)
-  }
+  // return {
+  //   statusCode: 400,
+  //   body: JSON.stringify({
+  //     error: true,
+  //     message: 'Beta Sale has ended!'
+  //   } as QueueResponseBody)
+  // }
 
   const { headers, body } = event;
   const headerRecaptcha = headers[HEADER_RECAPTCHA];
