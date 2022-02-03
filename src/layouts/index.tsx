@@ -10,7 +10,6 @@ import { useCardanoscanDomain, usePolicyID, useIsProduction } from "../lib/helpe
 const Layout: FC = ({ children }): JSX.Element => {
   const [mintPage, setMintPage] = useState<boolean>(false);
   const { hostname, pathname } = useLocation();
-  const isProduction = useIsProduction();
   const policyID = usePolicyID();
   const cardanoscanDomain = useCardanoscanDomain();
 
@@ -20,13 +19,6 @@ const Layout: FC = ({ children }): JSX.Element => {
 
   return (
     <HandleMintContextProvider>
-      {!isProduction && (
-        <div className="bg-primary-100 text-white px-8 py-4">
-          <div className="max-w-5xl mx-auto text-center">
-            <p className="mb-0"><strong><u>TESTNET!</u></strong> The environment you are using is on testnet!<br/> This means no transactions or Handles purchased are real, and are for testing purposes only.</p>
-          </div>
-        </div>
-      )}
       <Header showMint={!mintPage} className="bg-dark-100 text-dark-400 text-gray-900" />
       <div className="flex flex-col min-h-screen font-sans bg-dark-100 text-dark-400 text-gray-900 overflow-hidden">
 

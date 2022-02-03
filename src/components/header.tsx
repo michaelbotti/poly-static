@@ -5,6 +5,7 @@ import Button from "./button";
 
 import Logo from "./logo";
 import { Twitter } from "../pages/team";
+import { useIsProduction } from "../lib/helpers/env";
 
 interface HeaderProps {
   className?: string;
@@ -45,10 +46,67 @@ const navItems: NavItem[] = [
 
 const Header: FC<HeaderProps> = ({ className, showMint = true }) => {
   const [isExpanded, toggleExpansion] = useState<boolean>(false);
+  const [noticeHidden, setNoticeHidden] = useState<boolean>(false);
   const { betaState } = useContext(HandleMintContext);
+  const isProduction = useIsProduction();
 
   return (
     <>
+      {!isProduction && (
+        <div className="bg-dark-200 text-white px-8 py-4">
+          <div className="max-w-5xl mx-auto text-center">
+            <p className="mb-0">
+              This domain uses Cardano's{" "}
+              <a
+                href="https://testnets.cardano.org/en/testnets/cardano/overview/"
+                target="_blank"
+              >
+                <u>TESTNET environment</u>
+              </a>
+              . No transactions are real!
+            </p>
+          </div>
+        </div>
+      )}
+
+      {betaState &&
+        !betaState.error &&
+        betaState.chainLoad > 0.8 &&
+        !noticeHidden && (
+          <div
+            className="fixed w-full bottom-0 left-0 px-8"
+            style={{ background: "#FFCD59", zIndex: 999999 }}
+          >
+            <div className="max-w-5xl mx-auto text-center relative py-4">
+              <button
+                className="m-2 pt-1 pb-3 px-3 absolute top-0 right-0 font-bold rounded-t-lg"
+                style={{
+                  background: "#FFCD59",
+                  transform: "translateY(-100%)",
+                }}
+                onClick={() => setNoticeHidden(true)}
+              >
+                X
+              </button>
+              <p className="mb-0">
+                <strong>
+                  NOTICE: The Cardano network is currently at{" "}
+                  {(betaState.chainLoad * 100).toFixed(1)}% capacity.
+                </strong>
+                <br /> You may experience slow transaction times, and we cannot
+                guarantee immediate Handle delivery. This is a limitation of the
+                Cardano protocol, and is{" "}
+                <a
+                  href="https://iohk.io/en/blog/posts/2022/01/14/how-we-re-scaling-cardano-in-2022/"
+                  target="_blank"
+                >
+                  <u>actively being upgraded</u>
+                </a>
+                . Thank you for your patience!
+              </p>
+            </div>
+          </div>
+        )}
       <header
         className={`bg-dark-100 p-4 md:p-8 ${className}`}
         style={{ minHeight: 120 }}

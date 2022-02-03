@@ -87,6 +87,9 @@ export const HandleQueue = (): JSX.Element => {
 
   const handleOnChange = (value: string) => {
     if (value.includes("+")) {
+      setTimeoutResponseMessage(
+        "Sorry, we do not support email addresses with the (+) character. Try again!"
+      );
       return;
     }
 
@@ -192,11 +195,6 @@ export const HandleQueue = (): JSX.Element => {
   // Sends the user's email and auth code (via URL params) to the server for verification.
   const handleAuthenticating = async (e: Event) => {
     e.preventDefault();
-
-    // if (authInput.length !== 6) {
-    //   setResponseMessage("Auth code must be 6 digits.");
-    //   return;
-    // }
 
     setAuthenticating(true);
     try {
