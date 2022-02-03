@@ -6,8 +6,6 @@ import {
 } from "@netlify/functions";
 import { getCachedState, initFirebase } from "../helpers/firebase";
 
-import { fetchNodeApp } from "../helpers/util";
-
 export interface StateData {
   chainLoad?: number | null;
   position?: number;

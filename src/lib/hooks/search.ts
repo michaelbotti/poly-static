@@ -50,7 +50,7 @@ export const useSyncAvailableStatus = async (unsanitizedHandle: string, isSpo = 
       return;
     }
 
-    if (reservedHandles?.blacklist.includes(handle)) {
+    if (reservedHandles?.blacklist?.includes(handle)) {
       setHandleResponse(getDefaultResponseUnvailable());
       return;
     }

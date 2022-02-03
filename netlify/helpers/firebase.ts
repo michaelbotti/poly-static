@@ -12,6 +12,11 @@ interface StakePool {
   ownerHashes: string[];
 }
 
+interface RefundableSession {
+  amount: number;
+  handle: string;
+}
+
 let firebase: admin.app.App;
 export const initFirebase = async (): Promise<admin.app.App> => {
   if (firebase) {
@@ -49,25 +54,6 @@ export const verifyTwitterUser = async (token: string): Promise<number | false> 
     console.log(e);
     return false;
   }
-}
-
-export const getMintedHandles = async (): Promise<{ handleName: string }[] | false> => {
-  return firebase
-    .firestore()
-    .collection(buildCollectionNameWithSuffix("/mintedHandles"))
-    .get()
-    .then(snapshot => {
-      if (snapshot.empty) {
-        return false;
-      }
-
-      const handles = snapshot?.docs?.map(doc => doc?.data() as { handleName: string });
-      if (handles.length === 0) {
-        return false;
-      }
-
-      return handles;
-    });
 }
 
 export const getReservedHandles = async (): Promise<ReservedHandlesType | false> => {
@@ -123,7 +109,8 @@ export const getActiveSessionByHandle = async (handle: string): Promise<ActiveSe
 export const getPaidSessionByHandle = async (handle: string): Promise<ActiveSessionType | null> => {
   return firebase
     .firestore()
-    .collection(buildCollectionNameWithSuffix("/paidSessions"))
+    .collection(buildCollectionNameWithSuffix("/activeSessions"))
+    .where("status", "==", "paid")
     .where("handle", "==", handle).limit(1)
     .get()
     .then(snapshot => {
@@ -132,6 +119,22 @@ export const getPaidSessionByHandle = async (handle: string): Promise<ActiveSess
       }
 
       return snapshot?.docs[0]?.data() as ActiveSessionType;
+    });
+}
+
+export const getRefundedSessionByHandle = async (handle: string): Promise<RefundableSession | null> => {
+  return firebase
+    .firestore()
+    .collection(buildCollectionNameWithSuffix("/activeSessions"))
+    .where("status", "==", "refundable")
+    .where("handle", "==", handle).limit(1)
+    .get()
+    .then(snapshot => {
+      if (snapshot.empty) {
+        return null;
+      }
+
+      return snapshot?.docs[0]?.data() as RefundableSession;
     });
 }
 

@@ -2,13 +2,27 @@ import { HandlerResponse } from '@netlify/functions';
 import { fetch } from 'cross-fetch';
 import { HEADER_HANDLE } from '../../src/lib/constants';
 import { getDefaultActiveSessionUnvailable, getDefaultResponseAvailable, getDefaultResponseUnvailable, getMultipleStakePoolResponse, getPaidSessionUnavailable, getReservedUnavailable, getSPOUnavailable, getStakePoolNotFoundResponse, getTwitterResponseUnvailable, HandleResponseBody } from '../../src/lib/helpers/search';
-import { getActiveSessionByHandle, getPaidSessionByHandle, getReservedHandles, getStakePoolsByTicker } from './firebase';
+import { getActiveSessionByHandle, getReservedHandles, getStakePoolsByTicker } from './firebase';
 
 export const getNodeEndpointUrl = () => process.env.NODEJS_APP_ENDPOINT;
 
+export enum Status {
+  REFUNDABLE = "refundable",
+  PAID = "paid",
+  PENDING = "pending",
+  DLQ = "dlq",
+}
+
+export enum WorkflowStatus {
+  PENDING = "pending",
+  PROCESSING = "processing",
+  SUBMITTED = "submitted",
+  CONFIRMED = "confirmed",
+  EXPIRED = "expired",
+}
+
 export const ensureHandleAvailable = async (handle: string, isSpo = false): Promise<HandlerResponse> => {
   const activeSessionsByHandle = await getActiveSessionByHandle(handle);
-  const paidSession = await getPaidSessionByHandle(handle);
   const reservedHandles = await getReservedHandles();
 
   const { exists, policyID, assetName } = await fetchNodeApp("exists", {
@@ -29,14 +43,14 @@ export const ensureHandleAvailable = async (handle: string, isSpo = false): Prom
     };
   }
 
-  if (activeSessionsByHandle) {
+  if (activeSessionsByHandle && activeSessionsByHandle.status === Status.PENDING) {
     return {
       statusCode: 403,
       body: JSON.stringify(getDefaultActiveSessionUnvailable()),
     };
   }
 
-  if (paidSession) {
+  if (activeSessionsByHandle && activeSessionsByHandle.status === Status.PAID && activeSessionsByHandle.workflowStatus === WorkflowStatus.PENDING) {
     return {
       statusCode: 403,
       body: JSON.stringify(getPaidSessionUnavailable()),
@@ -119,8 +133,21 @@ export const fetchNodeApp = async (
   )
 }
 
-export const isProduction = () =>
-  process.env.APP_ENV === 'production';
+export const isProduction = (): boolean => {
+  // currently NODE_ENV is not set to 'master' in buddy
+  return process.env.NODE_ENV?.trim() === 'production' || process.env.NODE_ENV?.trim() === 'master';
+}
 
-export const buildCollectionNameWithSuffix = (collectionName: string): string =>
-  isProduction() ? collectionName : `${collectionName}_dev`;
+export const isTesting = (): boolean => {
+  return process.env.NODE_ENV?.trim() === 'test';
+}
+
+export const isLocal = (): boolean => {
+  return process.env.NODE_ENV?.trim() === 'local';
+}
+
+export const buildCollectionNameWithSuffix = (collectionName: string): string => {
+  if (isProduction()) return collectionName
+  else if (isTesting() || isLocal()) return `${collectionName}_test`;
+  return `${collectionName}_dev`;
+}

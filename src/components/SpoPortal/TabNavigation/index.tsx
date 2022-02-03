@@ -1,13 +1,15 @@
 import React, { useContext } from "react";
 import { HandleMintContext } from "../../../context/mint";
 import { getSessionTokenFromCookie } from "../../../lib/helpers/session";
-import { useAccessOpen } from "../../../lib/hooks/access";
 
-export const TabNavigation = ({ paymentSessions, updatePaymentSessions }) => {
+export const TabNavigation = ({
+  paymentSessions,
+  updatePaymentSessions,
+  agreedToTerms,
+}) => {
   const { setCurrentIndex, currentIndex } = useContext(HandleMintContext);
-  const [accessOpen] = useAccessOpen();
 
-  if (!accessOpen) {
+  if (!agreedToTerms) {
     return null;
   }
 
