@@ -21,37 +21,21 @@ export const useSyncAvailableStatus = async (unsanitizedHandle: string, isSpo = 
     useContext(HandleMintContext);
 
   useEffect(() => {
-    const currentAccess = getAccessTokenFromCookie();
     const handle = normalizeNFTHandle(unsanitizedHandle);
 
     // Don't allow new sessions when their's 5 minutes left.
-    if (Date.now() + 300000 > (currentAccess ? currentAccess.data.exp * 1000 : 0) && !reservedHandles?.twitter?.includes(handle)) {
-      setHandleResponse({
-        available: true,
-        message: 'Less than 5 minutes! This attempt may be refunded.',
-        twitter: false
-      });
-      return;
-    }
+    // TODO: Figure out where to say this.
+    // if (Date.now() + 300000 > (currentAccess ? currentAccess.data.exp * 1000 : 0) && !reservedHandles?.twitter?.includes(handle)) {
+    //   setHandleResponse({
+    //     available: true,
+    //     message: 'Less than 5 minutes! This attempt may be refunded.',
+    //     twitter: false
+    //   });
+    //   return;
+    // }
 
     if (handle.length === 0) {
       setHandleResponse(null);
-      return;
-    }
-
-    if (!handle.match(BETA_PHASE_MATCH)) {
-      setHandleResponse(getBetaPhaseResponseUnavailable());
-      return;
-    }
-
-    const isReserved = isSpo ? reservedHandles?.manual.includes(handle) : reservedHandles?.manual.includes(handle) || reservedHandles?.spos.includes(handle)
-    if (isReserved) {
-      setHandleResponse(getReservedUnavailable());
-      return;
-    }
-
-    if (reservedHandles?.blacklist?.includes(handle)) {
-      setHandleResponse(getDefaultResponseUnvailable());
       return;
     }
 

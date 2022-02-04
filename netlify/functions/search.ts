@@ -13,12 +13,8 @@ import {
   HEADER_HANDLE,
   HEADER_IS_SPO,
   HEADER_JWT_ACCESS_TOKEN,
-  MAX_TOTAL_SESSIONS,
-  SPO_MAX_TOTAL_SESSIONS,
 } from "../../src/lib/constants";
-import { getActiveSessionsByEmail, initFirebase } from "../helpers/firebase";
 import { ensureHandleAvailable } from "../helpers/util";
-import { AccessTokenPayload, decodeAccessToken } from "../helpers/jwt";
 
 // Main handler function for GET requests.
 const handler: Handler = async (
@@ -42,26 +38,8 @@ const handler: Handler = async (
     };
   }
 
-  await initFirebase();
-
   const handle = normalizeNFTHandle(headerHandle);
-
-  if (!headerIsSpo) {
-    const { emailAddress } = decodeAccessToken(headerAccess) as AccessTokenPayload;
-    const activeSessionsByPhone = await getActiveSessionsByEmail(emailAddress);
-    const totalSessions = headerIsSpo ? SPO_MAX_TOTAL_SESSIONS : MAX_TOTAL_SESSIONS;
-    if (activeSessionsByPhone.length > totalSessions) {
-      return {
-        statusCode: 403,
-        body: JSON.stringify({
-          message: "Too many sessions open! Try again after one expires.",
-          available: false,
-        } as HandleResponseBody),
-      };
-    }
-  }
-
-  return ensureHandleAvailable(handle, headerIsSpo);
+  return ensureHandleAvailable(headerAccess, handle, headerIsSpo);
 };
 
 export { handler };

@@ -3,16 +3,19 @@ import React, {
   useContext,
   useRef,
   useEffect,
-  useState
+  useState,
 } from "react";
 import { useDebounce } from "use-debounce";
 import { Link } from "gatsby";
+
+import HelpIcon from "@mui/icons-material/Help";
+import Tooltip, { tooltipClasses } from "@mui/material/Tooltip";
 
 import {
   HEADER_HANDLE,
   HEADER_JWT_ACCESS_TOKEN,
   HEADER_RECAPTCHA,
-  HEADER_TWITTER_ACCESS_TOKEN
+  HEADER_TWITTER_ACCESS_TOKEN,
 } from "../../../src/lib/constants";
 import { HandleMintContext } from "../../context/mint";
 import { isValid } from "../../lib/helpers/nfts";
@@ -20,8 +23,14 @@ import { useSyncAvailableStatus } from "../../lib/hooks/search";
 import LogoMark from "../../images/logo-single.svg";
 import { HandleSearchConnectTwitter } from "./";
 import { Loader } from "../Loader";
-import { SessionResponseBody } from '../../../netlify/functions/session';
-import { getAccessTokenFromCookie, getAllCurrentSessionData, getRecaptchaToken, setSessionTokenCookie } from "../../lib/helpers/session";
+import { SessionResponseBody } from "../../../netlify/functions/session";
+import {
+  getAccessTokenFromCookie,
+  getAllCurrentSessionData,
+  getRecaptchaToken,
+  setSessionTokenCookie,
+} from "../../lib/helpers/session";
+import { styled } from "@mui/material/styles";
 
 export const HandleSearchReserveFlow = ({ className = "", ...rest }) => {
   const {
@@ -31,7 +40,7 @@ export const HandleSearchReserveFlow = ({ className = "", ...rest }) => {
     handle,
     setHandle,
     twitterToken,
-    setTwitterToken
+    setTwitterToken,
   } = useContext(HandleMintContext);
   const { setCurrentIndex } = useContext(HandleMintContext);
   const [fetchingSession, setFetchingSession] = useState<boolean>(false);
@@ -39,15 +48,18 @@ export const HandleSearchReserveFlow = ({ className = "", ...rest }) => {
   const handleInputRef = useRef(null);
 
   const currentSessions = getAllCurrentSessionData();
-  const currentActiveSessions = currentSessions.filter(session => session !== false);
-  const nextIndex = currentSessions.findIndex(session => session === false) + 1;
+  const currentActiveSessions = currentSessions.filter(
+    (session) => session !== false
+  );
+  const nextIndex =
+    currentSessions.findIndex((session) => session === false) + 1;
 
   useSyncAvailableStatus(debouncedHandle);
 
   // Warm server.
   useEffect(() => {
-    fetch('/.netlify/functions/search').catch();
-    fetch('/.netlify/functions/session').catch();
+    fetch("/.netlify/functions/search").catch();
+    fetch("/.netlify/functions/session").catch();
   }, []);
 
   // Handles the input validation and updates.
@@ -110,20 +122,36 @@ export const HandleSearchReserveFlow = ({ className = "", ...rest }) => {
       setHandleResponse({
         available: false,
         twitter: !!twitterToken,
-        message: sessionResponse.message
+        message: sessionResponse.message,
       });
       setFetchingSession(false);
     } catch (e) {
       console.log(e);
-      setHandle('');
+      setHandle("");
       setHandleResponse({
         available: false,
-        message: 'Something went wrong. Please refresh the page.',
+        message: "Something went wrong. Please refresh the page.",
         twitter: false,
-      })
+      });
       setFetchingSession(false);
     }
   };
+
+  const HtmlTooltip = styled(
+    ({
+      className,
+      ...props
+    }: {
+      className: string;
+      title: any;
+      children: any;
+    }) => <Tooltip {...props} classes={{ popper: className }} />
+  )(({ theme }) => ({
+    [`& .${tooltipClasses.tooltip}`]: {
+      backgroundColor: "#0B132B",
+      border: "1px solid #999",
+    },
+  }));
 
   // Autofocus the input field on load.
   useEffect(() => {
@@ -144,38 +172,39 @@ export const HandleSearchReserveFlow = ({ className = "", ...rest }) => {
       <h2 className="font-bold text-3xl text-primary-100 mb-2">
         Securing Your Handle
       </h2>
-      {currentActiveSessions.length > 0
-        ? (
-          <>
-            <p className="text-lg">
-              You have {currentActiveSessions.length} active sessions in progress! In order to make distributing handles as fair as possible, we're limiting{" "}
-              how many you can purchase at a time. Don't worry, it goes fast.
-            </p>
-          </>
-        ) : (
-          <>
-            <p className="text-lg">
-              Purchasing your own handle allows you to easily receive Cardano payments
-              just by sharing your handle name, or by sharing your unique link.
-            </p>
-            <p className="text-lg">
-              For more information, see{" "}
-              <Link className="text-primary-100" to={"/#how-it-works"}>
-                How it Works
-              </Link>
-              .
-            </p>
-          </>
-        )
-      }
+      {currentActiveSessions.length > 0 ? (
+        <>
+          <p className="text-lg">
+            You have {currentActiveSessions.length} active sessions in progress!
+            In order to make distributing handles as fair as possible, we're
+            limiting how many you can purchase at a time. Don't worry, it goes
+            fast.
+          </p>
+        </>
+      ) : (
+        <>
+          <p className="text-lg">
+            Purchasing your own handle allows you to easily receive Cardano
+            payments just by sharing your handle name, or by sharing your unique
+            link.
+          </p>
+          <p className="text-lg">
+            For more information, see{" "}
+            <Link className="text-primary-100" to={"/#how-it-works"}>
+              How it Works
+            </Link>
+            .
+          </p>
+        </>
+      )}
 
       <hr className="w-12 border-dark-300 border-2 block my-8" />
 
       {currentActiveSessions.length === 3 ? (
         <>
           <p className="text-lg">
-            <strong>Wow, you got speed!</strong> You're clearly a pro,{" "}
-            but let's slow down. Try again when one of your open sessions expire!
+            <strong>Wow, you got speed!</strong> You're clearly a pro, but let's
+            slow down. Try again when one of your open sessions expire!
           </p>
         </>
       ) : (
@@ -183,7 +212,10 @@ export const HandleSearchReserveFlow = ({ className = "", ...rest }) => {
           <form {...rest} onSubmit={handleOnSubmit}>
             {currentActiveSessions.length !== 3 && (
               <p className="text-lg">
-                <strong>You have {3 - currentActiveSessions.length} session{2 === currentActiveSessions.length ? '' : 's'} left.</strong>
+                <strong>
+                  You have {3 - currentActiveSessions.length} session
+                  {2 === currentActiveSessions.length ? "" : "s"} left.
+                </strong>
               </p>
             )}
             <div className="relative mb-2">
@@ -213,14 +245,41 @@ export const HandleSearchReserveFlow = ({ className = "", ...rest }) => {
                     </span>
                   )}
                   {!fetching && handleResponse?.message && (
-                    <span className="block text-right">
-                      {handleResponse?.message && (
-                        <span
-                          dangerouslySetInnerHTML={{
-                            __html: handleResponse.message,
-                          }}
-                        ></span>
-                      )}
+                    <span className="block flex items-center text-right">
+                      {handleResponse?.message ? (
+                        <span>
+                          {handleResponse.message}
+                          {handleResponse?.reason ? (
+                            <HtmlTooltip
+                              arrow
+                              placement="top"
+                              title={
+                                <>
+                                  <p className="text-sm">
+                                    You're handle is not allowed for the
+                                    following reason: <br />{" "}
+                                    {handleResponse.reason}
+                                  </p>
+                                  <p className="text-sm">
+                                    Click below for more information.{" "}
+                                    <Link
+                                      className="text-primary-100"
+                                      to={"/faq#faq_12"}
+                                    >
+                                      FAQ
+                                    </Link>
+                                    .
+                                  </p>
+                                </>
+                              }
+                            >
+                              <span>
+                                <HelpIcon fontSize="small" />
+                              </span>
+                            </HtmlTooltip>
+                          ) : null}
+                        </span>
+                      ) : null}
                       {!handleResponse?.available && handleResponse?.link && (
                         <a
                           href={handleResponse?.link}
@@ -254,10 +313,17 @@ export const HandleSearchReserveFlow = ({ className = "", ...rest }) => {
           </form>
           <p className="text-sm mt-8">
             Once you start a session,{" "}
-            <strong>it will be active for approximately 10 minutes</strong>.{" "}
-            We use several safeguards to ensure this is hard to get around.{" "}
-            You get a max of up to 3 sessions at any one time. If you have questions,{" "}
-            <a className="text-primary-100" href="https://discord.gg/8b4a48DdgF" target="_blank">ask in our Discord</a>.
+            <strong>it will be active for approximately 10 minutes</strong>. We
+            use several safeguards to ensure this is hard to get around. You get
+            a max of up to 3 sessions at any one time. If you have questions,{" "}
+            <a
+              className="text-primary-100"
+              href="https://discord.gg/8b4a48DdgF"
+              target="_blank"
+            >
+              ask in our Discord
+            </a>
+            .
           </p>
         </>
       )}

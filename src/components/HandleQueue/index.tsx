@@ -112,9 +112,9 @@ export const HandleQueue = (): JSX.Element => {
       );
       setVerifyingRecaptcha(true);
       if (recaptchaRendered) {
-        window.grecaptcha.reset(fallbackRecaptcha.current);
+        (window as any).grecaptcha.reset(fallbackRecaptcha.current);
       } else {
-        window.grecaptcha.render(fallbackRecaptcha.current, {
+        (window as any).grecaptcha.render(fallbackRecaptcha.current, {
           sitekey: RECAPTCHA_SITE_KEY_FALLBACK,
           theme: "dark",
           callback: async (token: string) => {

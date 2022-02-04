@@ -2,22 +2,23 @@ const tailwindConfig = require("./tailwind.config.js");
 
 module.exports = {
   flags: {
-    LMDB_STORE: true
+    LMDB_STORE: true,
   },
   siteMetadata: {
-    title: 'ADA Handle',
+    title: "ADA Handle",
     description: `Custom Cardano addresses for everyone.`,
     author: `@adahandle`,
   },
   plugins: [
+    `gatsby-plugin-material-ui`,
     `gatsby-plugin-react-helmet`,
     `gatsby-plugin-layout`,
     {
       resolve: `gatsby-plugin-netlify`,
       options: {
         mergeLinkHeaders: false,
-        mergeCachingHeaders: false
-      }
+        mergeCachingHeaders: false,
+      },
     },
     {
       resolve: `gatsby-plugin-recaptcha`,
@@ -25,14 +26,12 @@ module.exports = {
         async: true,
         defer: false,
         args: `?render=6Ld0QUkcAAAAAN-_KvCv8R_qke8OYxotNJzIg2RP`,
-      }
+      },
     },
     {
       resolve: `gatsby-plugin-google-gtag`,
       options: {
-        trackingIds: [
-          process.env.GTAG
-        ],
+        trackingIds: [process.env.GTAG],
         gtagConfig: {
           anonymize_ip: true,
           cookie_expires: 0,
@@ -49,7 +48,7 @@ module.exports = {
       options: {
         isTSX: true,
         jsxPragma: `jsx`,
-        allExtensions: true
+        allExtensions: true,
       },
     },
     {
@@ -65,12 +64,12 @@ module.exports = {
       },
     },
     {
-      resolve: 'gatsby-plugin-web-font-loader',
+      resolve: "gatsby-plugin-web-font-loader",
       options: {
         google: {
-          families: ['Noto Sans:400,400italic,700,700italic']
-        }
-      }
-    }
+          families: ["Noto Sans:400,400italic,700,700italic"],
+        },
+      },
+    },
   ],
 };

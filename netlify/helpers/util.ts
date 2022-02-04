@@ -1,8 +1,8 @@
 import { HandlerResponse } from '@netlify/functions';
 import { fetch } from 'cross-fetch';
-import { HEADER_HANDLE } from '../../src/lib/constants';
-import { getDefaultActiveSessionUnvailable, getDefaultResponseAvailable, getDefaultResponseUnvailable, getMultipleStakePoolResponse, getPaidSessionUnavailable, getReservedUnavailable, getSPOUnavailable, getStakePoolNotFoundResponse, getTwitterResponseUnvailable, HandleResponseBody } from '../../src/lib/helpers/search';
-import { getActiveSessionByHandle, getReservedHandles, getStakePoolsByTicker } from './firebase';
+import { HEADER_HANDLE, HEADER_JWT_ACCESS_TOKEN } from '../../src/lib/constants';
+import { buildUnavailableResponse, getDefaultResponseAvailable, getMultipleStakePoolResponse, getStakePoolNotFoundResponse, HandleResponseBody } from '../../src/lib/helpers/search';
+import { getStakePoolsByTicker, initFirebase } from './firebase';
 
 export const getNodeEndpointUrl = () => process.env.NODEJS_APP_ENDPOINT;
 
@@ -21,10 +21,23 @@ export enum WorkflowStatus {
   EXPIRED = "expired",
 }
 
-export const ensureHandleAvailable = async (handle: string, isSpo = false): Promise<HandlerResponse> => {
-  const activeSessionsByHandle = await getActiveSessionByHandle(handle);
-  const reservedHandles = await getReservedHandles();
+export interface HandleAvailabilityResponse {
+  available: boolean;
+  message?: string;
+  type?: 'twitter' | 'spo' | 'private' | 'pending' | 'notallowed' | 'invalid';
+  link?: string; //`https://${process.env.CARDANOSCAN_DOMAIN}/token/${policyID}.${assetName}`
+  reason?: string;
+  duration?: number;
+}
 
+interface FetchSearchResponse {
+  status: number;
+  error: boolean;
+  message?: string;
+  response?: HandleAvailabilityResponse
+}
+
+export const ensureHandleAvailable = async (accessToken: string, handle: string, isSpo = false): Promise<HandlerResponse> => {
   const { exists, policyID, assetName } = await fetchNodeApp("exists", {
     headers: {
       [HEADER_HANDLE]: handle,
@@ -43,49 +56,8 @@ export const ensureHandleAvailable = async (handle: string, isSpo = false): Prom
     };
   }
 
-  if (activeSessionsByHandle && activeSessionsByHandle.status === Status.PENDING) {
-    return {
-      statusCode: 403,
-      body: JSON.stringify(getDefaultActiveSessionUnvailable()),
-    };
-  }
-
-  if (activeSessionsByHandle && activeSessionsByHandle.status === Status.PAID && activeSessionsByHandle.workflowStatus === WorkflowStatus.PENDING) {
-    return {
-      statusCode: 403,
-      body: JSON.stringify(getPaidSessionUnavailable()),
-    };
-  }
-
-  if (reservedHandles && reservedHandles?.manual?.includes(handle)) {
-    return {
-      statusCode: 403,
-      body: JSON.stringify(getReservedUnavailable()),
-    };
-  }
-
-  if (!isSpo && reservedHandles && reservedHandles?.spos?.includes(handle)) {
-    return {
-      statusCode: 403,
-      body: JSON.stringify(getSPOUnavailable()),
-    };
-  }
-
-  if (reservedHandles && reservedHandles?.twitter?.includes(handle)) {
-    return {
-      statusCode: 403,
-      body: JSON.stringify(getTwitterResponseUnvailable()),
-    };
-  }
-
-  if (reservedHandles && reservedHandles?.blacklist?.includes(handle)) {
-    return {
-      statusCode: 403,
-      body: JSON.stringify(getDefaultResponseUnvailable()),
-    };
-  }
-
   if (isSpo) {
+    await initFirebase();
     const uppercaseHandle = handle.toUpperCase();
     const stakePools = await getStakePoolsByTicker(uppercaseHandle);
     if (stakePools.length === 0) {
@@ -104,10 +76,44 @@ export const ensureHandleAvailable = async (handle: string, isSpo = false): Prom
     }
   }
 
+  const searchResponse = await fetchNodeApp("search", {
+    headers: {
+      [HEADER_HANDLE]: handle,
+      [HEADER_JWT_ACCESS_TOKEN]: accessToken,
+    },
+  });
+
+  const { status } = searchResponse;
+  const results = await searchResponse.json() as FetchSearchResponse;
+
+  console.log('results', results);
+
+  const { error, message, response } = results;
+
+  if (error || !response) {
+    return {
+      statusCode: status ?? 500,
+      body: JSON.stringify({
+        available: false,
+        message: message || "Internal server error.",
+      } as HandleResponseBody),
+    };
+  }
+
+  const { available, message: responseMessage, link, reason } = response;
+
+  // if it doesn't exist on chain and it's available, send message that it's available
+  if (available) {
+    return {
+      statusCode: 200,
+      body: JSON.stringify(getDefaultResponseAvailable()),
+    };
+  }
+
   return {
-    statusCode: 200,
-    body: JSON.stringify(getDefaultResponseAvailable()),
-  };
+    statusCode: 403,
+    body: JSON.stringify(buildUnavailableResponse(responseMessage, reason, link)),
+  }
 }
 
 export const fetchNodeApp = async (
