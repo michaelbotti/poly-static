@@ -54,6 +54,7 @@ export const getSessionTokenFromCookie = (index: number): SessionResponseBody | 
 
   return JSON.parse(data);
 };
+
 export const setSessionTokenCookie = (data: SessionResponseBody, exp: Date, index: number) => {
   Cookie.set(
     `${COOKIE_SESSION_PREFIX}_${index}`,

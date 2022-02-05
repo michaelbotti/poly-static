@@ -8,6 +8,7 @@ import React, {
 
 import { SessionResponseBody } from "../../netlify/functions/session";
 import { StateResponseBody } from "../../netlify/functions/state";
+import { Status, WorkflowStatus } from "../../netlify/helpers/util";
 import { HandleResponseBody } from "../lib/helpers/search";
 
 export interface ReservedHandlesType {
@@ -17,14 +18,27 @@ export interface ReservedHandlesType {
   spos: string[];
 }
 
+export enum CreatedBySystem {
+  UI = "UI",
+  CLI = "CLI",
+  SPO = "SPO",
+}
+
 export interface ActiveSessionType {
   emailAddress: string;
   cost: number;
+  refundAmount?: number;
   handle: string;
-  start: number;
-  walletIndex: number;
   paymentAddress: string;
+  returnAddress?: string;
+  start: number;
+  id?: string;
   txId?: string;
+  createdBySystem: CreatedBySystem;
+  status?: Status;
+  workflowStatus?: WorkflowStatus;
+  attempts?: number;
+  dateAdded?: number;
 }
 
 interface PaymentSession {
@@ -46,7 +60,6 @@ export interface HandleMintContextType {
   primed: boolean;
   isPurchasing: boolean;
   stateLoading: boolean;
-  setPrimed: Dispatch<SetStateAction<boolean>>;
   setReservedHandles: Dispatch<SetStateAction<ReservedHandlesType>>;
   setHandleResponse: Dispatch<SetStateAction<HandleResponseBody>>;
   setTwitterToken: Dispatch<SetStateAction<string>>;
@@ -76,7 +89,6 @@ export const defaultState: HandleMintContextType = {
   setIsPurchasing: () => {},
   setReservedHandles: () => {},
   setTwitterToken: () => {},
-  setPrimed: () => {},
   setPendingSessions: () => {},
   setPaymentSessions: () => {},
   setCurrentIndex: () => {},
@@ -97,7 +109,6 @@ export const HandleMintContextProvider = ({ children, ...rest }) => {
     useState<ReservedHandlesType | null>(null);
   const [pendingSessions, setPendingSessions] = useState<string[]>(null);
   const [paymentSessions, setPaymentSessions] = useState<PaymentSession[]>([]);
-  const [primed, setPrimed] = useState<boolean>(false);
   const [currentIndex, setCurrentIndex] = useState<number>(0);
   const [betaState, setBetaState] = useState<StateResponseBody>(null);
   const [stateLoading, setStateLoading] = useState<boolean>(false);
@@ -136,14 +147,12 @@ export const HandleMintContextProvider = ({ children, ...rest }) => {
         paymentSessions,
         currentIndex,
         betaState,
-        primed,
         setFetching,
         setHandle,
         setHandleResponse,
         setTwitterToken,
         setIsPurchasing,
         setReservedHandles,
-        setPrimed,
         setPendingSessions,
         setPaymentSessions,
         setCurrentIndex,

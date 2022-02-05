@@ -15,6 +15,7 @@ export interface HandleResponseBody {
   message: string;
   twitter: boolean;
   link?: string;
+  reason?: string;
 }
 
 export const getDefaultResponseAvailable = (link?: string): HandleResponseBody => ({
@@ -98,4 +99,12 @@ export const getMultipleStakePoolResponse = (link?: string): HandleResponseBody 
   available: false,
   twitter: false,
   link
+});
+
+export const buildUnavailableResponse = (message: string, reason: string, link?: string): HandleResponseBody => ({
+  message,
+  reason,
+  link,
+  available: false,
+  twitter: false
 });

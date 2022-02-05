@@ -7,7 +7,9 @@ import {
 } from "../../../netlify/functions/payment";
 import { HandleMintContext } from "../../context/mint";
 import {
+  COOKIE_ACCESS_KEY,
   COOKIE_SESSION_PREFIX,
+  HEADER_HANDLE,
   HEADER_JWT_ACCESS_TOKEN,
   HEADER_JWT_SESSION_TOKEN,
   SPO_ADA_HANDLE_COST,
@@ -22,11 +24,38 @@ import Button from "../button";
 import { SessionResponseBody } from "../../../netlify/functions/session";
 import { Link } from "gatsby";
 import { useLocation } from "@reach/router";
+import { VerifyResponseBody } from "../../../netlify/functions/verify";
+import { fetchAuthenticatedRequest } from "../../../netlify/helpers/fetchAuthenticatedRequest";
+
+enum ConfirmPaymentStatusCode {
+  CONFIRMED = "CONFIRMED",
+  INVALID_PAYMENT = "INVALID_PAYMENT",
+  INVALID_PAYMENT_SPO = "INVALID_PAYMENT_SPO",
+  SERVER_ERROR = "SERVER_ERROR",
+  MISSING_PARAM = "MISSING_PARAM",
+  NO_PAYMENTS_FOUND_ON_CHAIN = "NO_PAYMENTS_FOUND_ON_CHAIN",
+  BAD_STATE = "BAD_STATE",
+}
+
+interface PaymentConfirmedItem {
+  statusCode: ConfirmPaymentStatusCode;
+  address: string;
+}
+
+interface PaymentConfirmedResponse {
+  error: boolean;
+  data: {
+    statusCode?: ConfirmPaymentStatusCode;
+    items?: PaymentConfirmedItem[];
+  };
+}
 
 export const HandleSession = ({
   sessionData,
+  setAgreedToTerms,
 }: {
   sessionData: SessionResponseBody;
+  setAgreedToTerms?: React.Dispatch<React.SetStateAction<boolean>>;
 }) => {
   const {
     data: { isSPO, handle, cost, exp },
@@ -35,11 +64,16 @@ export const HandleSession = ({
   } = sessionData;
 
   const { currentIndex, setCurrentIndex } = useContext(HandleMintContext);
-  const [paymentStatus, setPaymentStatus] = useState<PaymentData>(null);
+  const [paymentStatus, setPaymentStatus] =
+    useState<ConfirmPaymentStatusCode | null>(null);
   const [fetchingPayment, setFetchingPayment] = useState<boolean>(true);
   const [copying, setCopying] = useState<boolean>(false);
   const [retry, setRetry] = useState<boolean>(true);
   const [isTestnet, setIsTestnet] = useState<boolean>(false);
+  const [accessToken, setAccessToken] = useState<false | VerifyResponseBody>(
+    false
+  );
+  const [error, setError] = useState<boolean>(false);
 
   const { hostname } = useLocation();
 
@@ -59,6 +93,8 @@ export const HandleSession = ({
     if (!activeSession) {
       setCurrentIndex(0);
     }
+
+    setAccessToken(getAccessTokenFromCookie());
   }, [currentIndex]);
 
   const handleCopy = async () => {
@@ -71,27 +107,36 @@ export const HandleSession = ({
 
   // Check current session payment status.
   useEffect(() => {
-    const accessToken = getAccessTokenFromCookie();
-
     if (!accessToken) {
       return;
     }
 
     const controller = new AbortController();
     const updatePaymentStatus = async () => {
-      await fetch(`/.netlify/functions/payment?addresses=${address}`, {
-        signal: controller.signal,
-        headers: {
-          [HEADER_JWT_ACCESS_TOKEN]: accessToken.token,
-          [HEADER_JWT_SESSION_TOKEN]: token,
-        },
-      })
-        .then((res) => res.json())
-        .then((res: PaymentResponseBody) => {
-          if (res.data.addresses) {
-            setPaymentStatus(res.data.addresses[0]);
+      await fetchAuthenticatedRequest<PaymentConfirmedResponse>(
+        `/.netlify/functions/payment?addresses=${address}`,
+        {
+          signal: controller.signal,
+          headers: {
+            [HEADER_JWT_SESSION_TOKEN]: token,
+          },
+        }
+      )
+        .then((res) => {
+          if (!res.error) {
+            if (!res.data.items) {
+              setPaymentStatus(res.data.statusCode);
+              setFetchingPayment(false);
+              return;
+            }
+            setPaymentStatus(res.data.items[0].statusCode);
             setFetchingPayment(false);
+            return;
           }
+
+          setError(true);
+          setPaymentStatus(res.data.statusCode);
+          setFetchingPayment(false);
         })
         .catch((e) => {});
     };
@@ -107,16 +152,24 @@ export const HandleSession = ({
       controller.abort();
       clearInterval(interval);
     };
-  }, [retry, sessionData, currentIndex]);
+  }, [retry, sessionData, currentIndex, accessToken]);
 
-  const validPayment =
-    paymentStatus &&
-    paymentStatus.amount !== 0 &&
-    paymentStatus.amount === cost * 1000000;
+  const clearSession = () => {
+    setCurrentIndex(0);
+    if (setAgreedToTerms) {
+      setAgreedToTerms(false);
+    }
+    Cookies.remove(`${COOKIE_SESSION_PREFIX}_${currentIndex}`);
+    Cookies.remove(COOKIE_ACCESS_KEY);
+  };
+
+  const waitingForPayment =
+    paymentStatus === ConfirmPaymentStatusCode.NO_PAYMENTS_FOUND_ON_CHAIN;
+  const validPayment = paymentStatus === ConfirmPaymentStatusCode.CONFIRMED;
   const invalidPayment =
-    paymentStatus &&
-    paymentStatus.amount !== 0 &&
-    paymentStatus.amount !== cost * 1000000;
+    paymentStatus === ConfirmPaymentStatusCode.INVALID_PAYMENT;
+  const invalidSpoPayment =
+    paymentStatus === ConfirmPaymentStatusCode.INVALID_PAYMENT_SPO;
 
   if (!sessionData) {
     return (
@@ -141,14 +194,25 @@ export const HandleSession = ({
           </Link>
         </p>
         <hr className="w-12 border-dark-300 border-2 block my-8" />
-        <Button
-          onClick={() => {
-            Cookies.remove(`${COOKIE_SESSION_PREFIX}_${currentIndex}`);
-            setCurrentIndex(0);
-          }}
-        >
-          Clear Session &amp; Try Again!
-        </Button>
+        <Button onClick={clearSession}>Click Here &amp; Try Again!</Button>
+      </div>
+    );
+  }
+
+  if (invalidSpoPayment && !fetchingPayment) {
+    return (
+      <div className="col-span-6">
+        <h2 className="font-bold text-3xl mb-2">Invalid Payment!</h2>
+        <p className="text-lg">
+          Sorry, but the Cardano blockchain shows that this payment did not come
+          from the SPO owners' wallet. Payments will be refunded within 14 days
+          with a processing fee deducted{" "}
+          <Link className="text-primary-100" to="/faq">
+            See our FAQ.
+          </Link>
+        </p>
+        <hr className="w-12 border-dark-300 border-2 block my-8" />
+        <Button onClick={clearSession}>Click Here &amp; Try Again!</Button>
       </div>
     );
   }
@@ -198,7 +262,7 @@ export const HandleSession = ({
                   className="text-4xl mt-4 inline-block font-bold"
                   style={{ color: getRarityHex(handle) }}
                 >
-                  {isSPO ? SPO_ADA_HANDLE_COST : getRarityCost(handle)} $
+                  {isSPO ? SPO_ADA_HANDLE_COST : getRarityCost(handle)}{" "}
                   {isTestnet ? "tADA" : "ADA"}
                 </strong>
               </h4>
@@ -241,10 +305,9 @@ export const HandleSession = ({
               </div>
             </>
           )}
-          {paymentStatus && (
+          {paymentStatus && accessToken && (
             <Countdown
-              onComplete={() => setCurrentIndex(0)}
-              date={exp}
+              date={new Date(accessToken.data.exp * 1000)}
               renderer={({ formatted, total }) => {
                 const isWarning = !validPayment && total < 120 * 1000;
                 return (
@@ -258,6 +321,7 @@ export const HandleSession = ({
                       borderColor: isWarning ? "red" : "",
                     }}
                   >
+                    {/* Payment was successful! */}
                     {validPayment && (
                       <>
                         <div>
@@ -288,16 +352,11 @@ export const HandleSession = ({
                                 : `https://handle.me/${handle}`}
                             </a>
                           </p>
-                          <p className="text-lg">
-                            This session will close in:{" "}
-                            <strong>
-                              {formatted.minutes}:{formatted.seconds}
-                            </strong>
-                          </p>
                         </div>
                       </>
                     )}
-                    {!validPayment && !invalidPayment && (
+                    {/* No payment found on chain. Still waiting for payment */}
+                    {waitingForPayment && (
                       <>
                         <div>
                           {isWarning && (
@@ -308,19 +367,9 @@ export const HandleSession = ({
                               Hurry Up!
                             </h6>
                           )}
-                          {paymentStatus &&
-                            paymentStatus.amount === 0 &&
-                            !fetchingPayment && (
-                              <h2 className="text-xl font-bold mb-2">
-                                Waiting for payment...
-                              </h2>
-                            )}
-                          <h4 className="text-xl">
-                            Time Left:{" "}
-                            <strong>
-                              {formatted.minutes}:{formatted.seconds}
-                            </strong>
-                          </h4>
+                          <h2 className="text-xl font-bold mb-2">
+                            Waiting for payment...
+                          </h2>
                         </div>
                         <Loader className="mx-0" />
                       </>

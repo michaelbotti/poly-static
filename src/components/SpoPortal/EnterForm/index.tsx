@@ -14,10 +14,10 @@ import {
 import Button from "../../button";
 
 interface Props {
-  setAccessOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  setAgreedToTerms: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-export const SpoEnterForm: FC<Props> = ({ setAccessOpen }): JSX.Element => {
+export const EnterForm: FC<Props> = ({ setAgreedToTerms }): JSX.Element => {
   const [verifyingRecaptcha, setVerifyingRecaptcha] = useState<boolean>(false);
   const [responseMessage, setResponseMessage] = useState<string>(null);
   const [touChecked, setTouChecked] = useState<boolean>(false);
@@ -52,7 +52,7 @@ export const SpoEnterForm: FC<Props> = ({ setAccessOpen }): JSX.Element => {
 
       const { error, verified, message, token, data } = res;
       if (!error && verified && token && data) {
-        setAccessOpen(true);
+        setAgreedToTerms(true);
         setAccessTokenCookie(res, data.exp);
       }
 
@@ -61,7 +61,6 @@ export const SpoEnterForm: FC<Props> = ({ setAccessOpen }): JSX.Element => {
       }
     } catch (e) {
       setTimeoutResponseMessage("Hmm, try that again. Something went wrong.");
-      console.log(e);
     }
   };
 
