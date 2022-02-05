@@ -1,13 +1,7 @@
 import { useEffect, useContext } from "react";
 
-import {
-  getBetaPhaseResponseUnavailable,
-  getDefaultResponseUnvailable,
-  getReservedUnavailable,
-} from "../helpers/search";
 import { HandleResponseBody } from "../helpers/search";
 import {
-  BETA_PHASE_MATCH,
   HEADER_HANDLE,
   HEADER_IS_SPO,
   HEADER_JWT_ACCESS_TOKEN,
@@ -17,7 +11,7 @@ import { normalizeNFTHandle } from "../helpers/nfts";
 import { getAccessTokenFromCookie } from "../helpers/session";
 
 export const useSyncAvailableStatus = async (unsanitizedHandle: string, isSpo = false) => {
-  const { setFetching, setHandleResponse, reservedHandles } =
+  const { setFetching, setHandleResponse } =
     useContext(HandleMintContext);
 
   useEffect(() => {

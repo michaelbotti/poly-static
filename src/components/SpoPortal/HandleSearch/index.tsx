@@ -6,14 +6,10 @@ import React, {
   useState,
 } from "react";
 import { useDebounce } from "use-debounce";
-import { Link } from "gatsby";
 
 import {
-  COOKIE_ACCESS_KEY,
-  COOKIE_SESSION_PREFIX,
   HEADER_HANDLE,
   HEADER_IS_SPO,
-  HEADER_JWT_ACCESS_TOKEN,
   HEADER_RECAPTCHA,
 } from "../../../../src/lib/constants";
 import { HandleMintContext } from "../../../context/mint";
@@ -22,16 +18,12 @@ import { isValid } from "../../../lib/helpers/nfts";
 import LogoMark from "../../../images/logo-single.svg";
 import { Loader } from "../../Loader";
 import {
-  getAccessTokenFromCookie,
   getAllCurrentSPOSessionData,
   getRecaptchaToken,
   setSessionTokenCookie,
 } from "../../../lib/helpers/session";
 import { SessionResponseBody } from "../../../../netlify/functions/session";
 import { useSyncAvailableStatus } from "../../../lib/hooks/search";
-import { useAccessOpen } from "../../../lib/hooks/access";
-import Cookies from "js-cookie";
-import Button from "../../button";
 import { fetchAuthenticatedRequest } from "../../../../netlify/helpers/fetchAuthenticatedRequest";
 
 export const HandleSearch = ({ setAgreedToTerms }) => {
@@ -71,12 +63,6 @@ export const HandleSearch = ({ setAgreedToTerms }) => {
     e.preventDefault();
 
     const recaptchaToken: string = await getRecaptchaToken();
-    const headers = {
-      HEADER_HANDLE: handle,
-      HEADER_RECAPTCHA: recaptchaToken,
-      HEADER_IS_SPO: "true",
-    };
-
     try {
       setFetchingSession(true);
       const sessionResponse =

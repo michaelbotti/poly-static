@@ -37,13 +37,14 @@ interface FetchSearchResponse {
   response?: HandleAvailabilityResponse
 }
 
-export const ensureHandleAvailable = async (accessToken: string, handle: string, isSpo = false): Promise<HandlerResponse> => {
+export const ensureHandleAvailable = async (accessToken: string, handle: string): Promise<HandlerResponse> => {
   const { exists, policyID, assetName } = await fetchNodeApp("exists", {
     headers: {
       [HEADER_HANDLE]: handle,
     },
   }).then((res) => res.json());
 
+  // First and foremost, check if the handle exists on chain.
   if (exists) {
     return {
       statusCode: 200,
@@ -56,26 +57,7 @@ export const ensureHandleAvailable = async (accessToken: string, handle: string,
     };
   }
 
-  if (isSpo) {
-    await initFirebase();
-    const uppercaseHandle = handle.toUpperCase();
-    const stakePools = await getStakePoolsByTicker(uppercaseHandle);
-    if (stakePools.length === 0) {
-      return {
-        statusCode: 403,
-        body: JSON.stringify(getStakePoolNotFoundResponse()),
-      };
-    }
-
-    // Determine if the ticker has more than 1 result. If so, don't allow
-    if (stakePools.length > 1) {
-      return {
-        statusCode: 403,
-        body: JSON.stringify(getMultipleStakePoolResponse()),
-      };
-    }
-  }
-
+  // next hit the api to check if the handle is available
   const searchResponse = await fetchNodeApp("search", {
     headers: {
       [HEADER_HANDLE]: handle,

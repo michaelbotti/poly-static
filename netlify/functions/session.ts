@@ -5,7 +5,6 @@ import {
   HandlerResponse
 } from "@netlify/functions";
 import jwt, { decode, JwtPayload } from "jsonwebtoken";
-import { fetch } from 'cross-fetch';
 
 import {
   HEADER_HANDLE,
@@ -17,14 +16,11 @@ import {
   HEADER_IS_SPO,
   MAX_SESSION_LENGTH_SPO,
   SPO_ADA_HANDLE_COST,
-  SPO_MAX_TOTAL_SESSIONS,
-  MAX_TOTAL_SESSIONS
 } from "../../src/lib/constants";
 import { ensureHandleAvailable, fetchNodeApp } from '../helpers/util';
 import { getRarityCost, isValid, normalizeNFTHandle } from "../../src/lib/helpers/nfts";
 import { getSecret } from "../helpers";
 import { verifyTwitterUser } from "../helpers";
-import { getActiveSessionsByEmail, getActiveSessionByHandle, getReservedHandles, initFirebase } from "../helpers/firebase";
 import { responseWithMessage, unauthorizedResponse } from "../helpers/response";
 import { AccessTokenPayload } from "../helpers/jwt";
 import { HandleResponseBody } from "../../src/lib/helpers/search";
@@ -67,10 +63,8 @@ const handler: Handler = async (
     return responseWithMessage(400, 'Invalid handle format.', true);
   }
 
-  await initFirebase();
-
   // Ensure no one is trying to force an existing Handle.
-  const { body } = await ensureHandleAvailable(handle, headerIsSpo);
+  const { body } = await ensureHandleAvailable(accessToken, handle);
   const data: HandleResponseBody = JSON.parse(body);
 
   if (!data.available && !data.twitter) {
@@ -86,58 +80,6 @@ const handler: Handler = async (
   }
 
   const { emailAddress } = decode(accessToken) as AccessTokenPayload;
-  if (!headerIsSpo) {
-    // TODO: Since Email is always the same, figure out how to track the amount of sessions
-    const activeSessionsByPhone = await getActiveSessionsByEmail(emailAddress);
-    const totalSessions = headerIsSpo ? SPO_MAX_TOTAL_SESSIONS : MAX_TOTAL_SESSIONS
-    const tooManySessions = activeSessionsByPhone.length > totalSessions;
-    if (tooManySessions) {
-      return {
-        statusCode: 403,
-        body: JSON.stringify({
-          error: true,
-          message: 'Sorry, too many open sessions!'
-        } as SessionResponseBody)
-      }
-    }
-  }
-
-  const activeSessionsByHandle = await getActiveSessionByHandle(handle);
-  if (activeSessionsByHandle) {
-    return {
-      statusCode: 403,
-      body: JSON.stringify({
-        error: true,
-        message: 'Sorry, this handle is being purchased! Try again later.'
-      } as SessionResponseBody)
-    }
-  }
-
-  const reservedHandles = await getReservedHandles();
-  if (reservedHandles) {
-    const { manual, spos, blacklist } = reservedHandles;
-    if (blacklist?.includes(handle)) {
-      return {
-        statusCode: 403,
-        body: JSON.stringify({
-          error: true,
-          message: 'Sorry, that handle is not allowed.'
-        } as SessionResponseBody)
-      };
-    }
-
-    // If the incoming session is an SPO, we don't want to fail for reserved SPOs
-    const isManualOrSpo = !headerIsSpo ? (manual?.includes(handle) || spos?.includes(handle)) : manual?.includes(handle);
-    if (isManualOrSpo) {
-      return {
-        statusCode: 403,
-        body: JSON.stringify({
-          error: true,
-          message: 'This handle is reserved. Contact private@adahandle.com to claim.'
-        } as SessionResponseBody)
-      };
-    }
-  }
 
   /**
    * We sign a session JWT tokent to authorize the purchase,

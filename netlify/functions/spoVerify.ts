@@ -43,7 +43,8 @@ const handler: Handler = async (
     const secretKey = await getSecret('access');
     const jwtToken = secretKey && jwt.sign(
         {
-            emailAddress: 'spos@adahandle.com'
+            emailAddress: 'spos@adahandle.com',
+            isSPO: true,
         },
         secretKey,
         {
