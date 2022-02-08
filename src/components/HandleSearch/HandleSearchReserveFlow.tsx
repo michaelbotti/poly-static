@@ -119,11 +119,13 @@ export const HandleSearchReserveFlow = ({ className = "", ...rest }) => {
         return;
       }
 
-      setHandleResponse({
+      const { message } = sessionResponse;
+      const response = {
         available: false,
         twitter: !!twitterToken,
-        message: sessionResponse.message,
-      });
+        message,
+      };
+      setHandleResponse(response);
       setFetchingSession(false);
     } catch (e) {
       console.log(e);

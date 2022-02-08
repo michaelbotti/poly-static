@@ -16,6 +16,9 @@ export interface HandleResponseBody {
   twitter: boolean;
   link?: string;
   reason?: string;
+  mintingQueueSize?: number;
+  mintingQueuePosition?: number;
+  mintingQueueMinutes?: number;
 }
 
 export const getDefaultResponseAvailable = (link?: string): HandleResponseBody => ({

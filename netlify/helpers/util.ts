@@ -68,8 +68,6 @@ export const ensureHandleAvailable = async (accessToken: string, handle: string)
   const { status } = searchResponse;
   const results = await searchResponse.json() as FetchSearchResponse;
 
-  console.log('results', results);
-
   const { error, message, response } = results;
 
   if (error || !response) {
