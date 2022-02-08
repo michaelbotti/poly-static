@@ -1,8 +1,9 @@
 import { HandlerResponse } from '@netlify/functions';
 import { fetch } from 'cross-fetch';
+import { decode } from 'jsonwebtoken';
 import { HEADER_HANDLE, HEADER_JWT_ACCESS_TOKEN } from '../../src/lib/constants';
 import { buildUnavailableResponse, getDefaultResponseAvailable, getMultipleStakePoolResponse, getStakePoolNotFoundResponse, HandleResponseBody } from '../../src/lib/helpers/search';
-import { getStakePoolsByTicker, initFirebase } from './firebase';
+import { AccessTokenPayload } from './jwt';
 
 export const getNodeEndpointUrl = () => process.env.NODEJS_APP_ENDPOINT;
 
@@ -80,10 +81,19 @@ export const ensureHandleAvailable = async (accessToken: string, handle: string)
     };
   }
 
-  const { available, message: responseMessage, link, reason } = response;
+  const { available, message: responseMessage, link, type, reason } = response;
 
   // if it doesn't exist on chain and it's available, send message that it's available
   if (available) {
+    return {
+      statusCode: 200,
+      body: JSON.stringify(getDefaultResponseAvailable()),
+    };
+  }
+
+  // Allow SPO if type is SPO and reserved
+  const { isSPO } = decode(accessToken) as AccessTokenPayload;
+  if (isSPO && type === 'spo') {
     return {
       statusCode: 200,
       body: JSON.stringify(getDefaultResponseAvailable()),

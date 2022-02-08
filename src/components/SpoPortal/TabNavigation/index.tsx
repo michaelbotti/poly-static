@@ -2,14 +2,11 @@ import React, { useContext } from "react";
 import { HandleMintContext } from "../../../context/mint";
 import { getSessionTokenFromCookie } from "../../../lib/helpers/session";
 
-export const TabNavigation = ({
-  paymentSessions,
-  updatePaymentSessions,
-  agreedToTerms,
-}) => {
-  const { setCurrentIndex, currentIndex } = useContext(HandleMintContext);
+export const TabNavigation = ({ paymentSessions, updatePaymentSessions }) => {
+  const { setCurrentIndex, currentIndex, currentAccess } =
+    useContext(HandleMintContext);
 
-  if (!agreedToTerms) {
+  if (!currentAccess) {
     return null;
   }
 

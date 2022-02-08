@@ -1,6 +1,7 @@
 import { Link } from "gatsby";
-import React, { FC, useRef, useState } from "react";
+import React, { useContext, useRef, useState } from "react";
 import { SpoVerifyResponseBody } from "../../../../netlify/functions/spoVerify";
+import { HandleMintContext } from "../../../context/mint";
 
 import {
   HEADER_RECAPTCHA,
@@ -13,11 +14,8 @@ import {
 } from "../../../lib/helpers/session";
 import Button from "../../button";
 
-interface Props {
-  setAgreedToTerms: React.Dispatch<React.SetStateAction<boolean>>;
-}
-
-export const EnterForm: FC<Props> = ({ setAgreedToTerms }): JSX.Element => {
+export const EnterForm = (): JSX.Element => {
+  const { setCurrentAccess } = useContext(HandleMintContext);
   const [verifyingRecaptcha, setVerifyingRecaptcha] = useState<boolean>(false);
   const [responseMessage, setResponseMessage] = useState<string>(null);
   const [touChecked, setTouChecked] = useState<boolean>(false);
@@ -52,8 +50,8 @@ export const EnterForm: FC<Props> = ({ setAgreedToTerms }): JSX.Element => {
 
       const { error, verified, message, token, data } = res;
       if (!error && verified && token && data) {
-        setAgreedToTerms(true);
         setAccessTokenCookie(res, data.exp);
+        setCurrentAccess(res);
       }
 
       if (!verified && error && message) {

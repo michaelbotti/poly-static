@@ -5,6 +5,7 @@ type SecretContext = 'access' | 'session'
 
 export interface AccessTokenPayload extends JwtPayload {
   emailAddress: string;
+  isSPO?: boolean;
 }
 
 export const decodeAccessToken = (token: string): string | JwtPayload => {
