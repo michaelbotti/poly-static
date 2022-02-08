@@ -64,6 +64,7 @@ export const HandleSession = ({
   } = sessionData;
 
   const { currentIndex, setCurrentIndex } = useContext(HandleMintContext);
+
   const [paymentStatus, setPaymentStatus] =
     useState<ConfirmPaymentStatusCode | null>(null);
   const [fetchingPayment, setFetchingPayment] = useState<boolean>(true);
@@ -73,6 +74,9 @@ export const HandleSession = ({
   const [accessToken, setAccessToken] = useState<false | VerifyResponseBody>(
     false
   );
+  const [activeSession, setActiveSession] = useState<
+    false | SessionResponseBody
+  >(false);
   const [error, setError] = useState<boolean>(false);
 
   const { hostname } = useLocation();
@@ -89,8 +93,9 @@ export const HandleSession = ({
     setPaymentStatus(null);
     setRetry(true);
 
-    const activeSession = getSessionTokenFromCookie(currentIndex);
-    if (!activeSession) {
+    const session = getSessionTokenFromCookie(currentIndex);
+    setActiveSession(session);
+    if (!session) {
       setCurrentIndex(0);
     }
 
@@ -247,7 +252,18 @@ export const HandleSession = ({
         )}
         <li>Do NOT send more than one payment.</li>
       </ul>
+      <br />
+      {activeSession ? (
+        <p className="text-sm">
+          Your approximate position in the minting queue is{" "}
+          {activeSession.mintingQueuePosition} out of{" "}
+          {activeSession.mintingQueueSize}. At our current queue processing
+          rate, it should be about {activeSession.mintingQueueMinutes} minutes
+          until mint your handle.
+        </p>
+      ) : null}
       <hr className="w-12 border-dark-300 border-2 block my-8" />
+
       {fetchingPayment ? (
         <div className="flex flex-col items-center justify-center">
           <Loader />
