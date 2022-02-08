@@ -52,10 +52,8 @@ interface PaymentConfirmedResponse {
 
 export const HandleSession = ({
   sessionData,
-  setAgreedToTerms,
 }: {
   sessionData: SessionResponseBody;
-  setAgreedToTerms?: React.Dispatch<React.SetStateAction<boolean>>;
 }) => {
   const {
     data: { isSPO, handle, cost, exp },
@@ -63,7 +61,8 @@ export const HandleSession = ({
     token,
   } = sessionData;
 
-  const { currentIndex, setCurrentIndex } = useContext(HandleMintContext);
+  const { currentIndex, setCurrentIndex, setCurrentAccess } =
+    useContext(HandleMintContext);
 
   const [paymentStatus, setPaymentStatus] =
     useState<ConfirmPaymentStatusCode | null>(null);
@@ -161,9 +160,7 @@ export const HandleSession = ({
 
   const clearSession = () => {
     setCurrentIndex(0);
-    if (setAgreedToTerms) {
-      setAgreedToTerms(false);
-    }
+    setCurrentAccess(false);
     Cookies.remove(`${COOKIE_SESSION_PREFIX}_${currentIndex}`);
     Cookies.remove(COOKIE_ACCESS_KEY);
   };

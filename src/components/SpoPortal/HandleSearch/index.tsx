@@ -26,7 +26,7 @@ import { SessionResponseBody } from "../../../../netlify/functions/session";
 import { useSyncAvailableStatus } from "../../../lib/hooks/search";
 import { fetchAuthenticatedRequest } from "../../../../netlify/helpers/fetchAuthenticatedRequest";
 
-export const HandleSearch = ({ setAgreedToTerms }) => {
+export const HandleSearch = () => {
   const { fetching, handleResponse, setHandleResponse, handle, setHandle } =
     useContext(HandleMintContext);
   const { setCurrentIndex } = useContext(HandleMintContext);
