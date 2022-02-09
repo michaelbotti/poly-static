@@ -29,20 +29,12 @@ export interface NodeSessionResponseBody {
   error: boolean,
   message?: string;
   address?: string;
-  mintingQueueSize?: number;
-  mintingQueuePosition?: {
-    position: number;
-    minutes: number;
-  }
 }
 
 export interface SessionResponseBody {
   error: boolean,
   message?: string;
   address: string;
-  mintingQueueSize: number;
-  mintingQueuePosition: number;
-  mintingQueueMinutes: number;
   token: string;
   data: JwtPayload
 }
@@ -121,9 +113,6 @@ const handler: Handler = async (
     error: res.error,
     message: res?.message || '',
     address: res?.address || '',
-    mintingQueueSize: res?.mintingQueueSize ?? 0,
-    mintingQueuePosition: res?.mintingQueuePosition?.position ?? 0,
-    mintingQueueMinutes: res?.mintingQueuePosition?.minutes ?? 0,
     token: sessionToken,
     data: decode(sessionToken) as JwtPayload,
   }
