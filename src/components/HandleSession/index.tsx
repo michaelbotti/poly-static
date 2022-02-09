@@ -250,7 +250,7 @@ export const HandleSession = ({
         <li>Do NOT send more than one payment.</li>
       </ul>
       <br />
-      {activeSession ? (
+      {activeSession && activeSession.mintingQueueMinutes > 10 ? (
         <p className="text-sm">
           Your approximate position in the minting queue is{" "}
           {activeSession.mintingQueuePosition} out of{" "}
