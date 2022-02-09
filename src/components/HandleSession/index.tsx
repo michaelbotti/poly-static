@@ -250,15 +250,6 @@ export const HandleSession = ({
         <li>Do NOT send more than one payment.</li>
       </ul>
       <br />
-      {activeSession ? (
-        <p className="text-sm">
-          Your approximate position in the minting queue is{" "}
-          {activeSession.mintingQueuePosition} out of{" "}
-          {activeSession.mintingQueueSize}. At our current queue processing
-          rate, it should be about {activeSession.mintingQueueMinutes} minutes
-          until mint your handle.
-        </p>
-      ) : null}
       <hr className="w-12 border-dark-300 border-2 block my-8" />
 
       {fetchingPayment ? (
@@ -341,6 +332,7 @@ export const HandleSession = ({
                           <h2 className="text-2xl font-bold mb-2">
                             <strong>Yay!</strong> Your payment was successful!
                           </h2>
+                          {/* TODO: Add details about current minting position */}
                           <p className="text-lg">
                             We're minting your handle{" "}
                             <strong>right now.</strong> Please allow up to a few
