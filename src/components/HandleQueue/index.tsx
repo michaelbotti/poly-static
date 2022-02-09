@@ -102,12 +102,12 @@ export const HandleQueue = (): JSX.Element => {
       setEmailInput("");
 
       // Update response state.
-      const position =
-        res?.accessQueuePosition && res.accessQueuePosition.minutes > 10
-          ? `Your approximate position in the access queue is ${res?.accessQueuePosition?.position} out of ${res?.accessQueueSize}. At our current queue processing rate, it should be about ${res?.accessQueuePosition?.minutes} minutes until we send you an access code.`
-          : "";
+      const message =
+        res?.accessQueuePosition && res.accessQueuePosition.minutes > 3
+          ? `Your approximate position in the access queue is ${res?.accessQueuePosition?.position} out of ${res?.accessQueueSize}. At our current queue processing rate, it should be about ${res?.accessQueuePosition?.minutes} minutes until you receive an email with an access code.`
+          : "You should receive an email in a few minutes with your access code.";
       setResponseMessage(
-        `You have successfully been entered into the queue! Check your email for further instructions about your access link. ${position}`
+        `You have successfully been entered into the queue! ${message}`
       );
       setSubmitted(true);
     } else if (res?.bot && !recaptchaFallbackToken) {
