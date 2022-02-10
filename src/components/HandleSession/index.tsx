@@ -33,7 +33,7 @@ enum ConfirmPaymentStatusCode {
   INVALID_PAYMENT_SPO = "INVALID_PAYMENT_SPO",
   SERVER_ERROR = "SERVER_ERROR",
   MISSING_PARAM = "MISSING_PARAM",
-  NO_PAYMENTS_FOUND_ON_CHAIN = "NO_PAYMENTS_FOUND_ON_CHAIN",
+  PENDING = "PENDING",
   BAD_STATE = "BAD_STATE",
 }
 
@@ -165,8 +165,7 @@ export const HandleSession = ({
     Cookies.remove(COOKIE_ACCESS_KEY);
   };
 
-  const waitingForPayment =
-    paymentStatus === ConfirmPaymentStatusCode.NO_PAYMENTS_FOUND_ON_CHAIN;
+  const waitingForPayment = paymentStatus === ConfirmPaymentStatusCode.PENDING;
   const validPayment = paymentStatus === ConfirmPaymentStatusCode.CONFIRMED;
   const invalidPayment =
     paymentStatus === ConfirmPaymentStatusCode.INVALID_PAYMENT;
