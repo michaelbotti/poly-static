@@ -25,9 +25,12 @@ import { HandleSearchConnectTwitter } from "./";
 import { Loader } from "../Loader";
 import { SessionResponseBody } from "../../../netlify/functions/session";
 import {
+  AllSessionsData,
   getAccessTokenFromCookie,
+  getAllCurrentSessionCookie,
   getAllCurrentSessionData,
   getRecaptchaToken,
+  setAllSessionsCookie,
   setSessionTokenCookie,
 } from "../../lib/helpers/session";
 import { styled } from "@mui/material/styles";
@@ -113,6 +116,18 @@ export const HandleSearchReserveFlow = ({ className = "", ...rest }) => {
           new Date(sessionResponse.data.exp),
           nextIndex
         );
+
+        const newSession: AllSessionsData = {
+          handle,
+          date: Date.now(),
+          status: "pending",
+        };
+        const allSessions = getAllCurrentSessionCookie();
+        const allSessionsData: AllSessionsData[] = !allSessions
+          ? [newSession]
+          : [...allSessions, newSession];
+
+        setAllSessionsCookie(allSessionsData);
 
         setTwitterToken(null);
         setCurrentIndex(nextIndex);
@@ -314,6 +329,7 @@ export const HandleSearchReserveFlow = ({ className = "", ...rest }) => {
             )}
           </form>
           <p className="text-sm mt-8">
+            {/* TODO: Update this to match correct time */}
             Once you start a session,{" "}
             <strong>it will be active for approximately 10 minutes</strong>. We
             use several safeguards to ensure this is hard to get around. You get

@@ -13,6 +13,7 @@ export const SPO_MAX_TOTAL_SESSIONS = 1;
 // Keys
 export const COOKIE_SESSION_PREFIX = 'CURRENT_HANDLE_SESSION';
 export const COOKIE_ACCESS_KEY = 'ADAHANDLE_HAS_ACCESS';
+export const COOKIE_ALL_SESSIONS_KEY = 'ADAHANDLE_ALL_SESSIONS';
 
 // Headers.
 export const HEADER_HANDLE = 'x-handle';
