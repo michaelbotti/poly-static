@@ -5,7 +5,6 @@ import Countdown from "react-countdown";
 import { SessionResponseBody } from "../../../netlify/functions/session";
 import { HandleMintContext } from "../../context/mint";
 import {
-  getAccessTokenFromCookie,
   getAllCurrentSPOSessionData,
   getSessionTokenFromCookie,
 } from "../../lib/helpers/session";
@@ -30,6 +29,7 @@ export const SpoPortalPage = (): JSX.Element => {
     currentIndex,
     setCurrentIndex,
     currentAccess,
+    setCurrentAccess,
   } = useContext(HandleMintContext);
   const [currentSession, setCurrentSession] = useState<
     false | SessionResponseBody
@@ -37,6 +37,28 @@ export const SpoPortalPage = (): JSX.Element => {
   const [paymentSessions, setPaymentSessions] = useState<
     (false | SessionResponseBody)[]
   >([]);
+
+  const clearSession = () => {
+    setCurrentIndex(0);
+    setCurrentAccess(false);
+    // delete session cookie
+    // Could probably handle this better...
+    Cookies.remove(`${COOKIE_SESSION_PREFIX}_1`);
+    Cookies.remove(`${COOKIE_SESSION_PREFIX}_2`);
+    Cookies.remove(`${COOKIE_SESSION_PREFIX}_3`);
+    // delete access cookie
+    Cookies.remove(COOKIE_ACCESS_KEY);
+  };
+
+  useEffect(() => {
+    if (!currentAccess) {
+      return;
+    }
+
+    if (!currentAccess?.data?.isSPO) {
+      clearSession();
+    }
+  }, [currentAccess]);
 
   useEffect(() => {
     setPaymentSessions(getAllCurrentSPOSessionData());
@@ -113,13 +135,7 @@ export const SpoPortalPage = (): JSX.Element => {
         <>
           {currentAccess && (
             <Countdown
-              onComplete={() => {
-                setCurrentIndex(0);
-                // delete session cookie
-                Cookies.remove(`${COOKIE_SESSION_PREFIX}_1`);
-                // delete access cookie
-                Cookies.remove(COOKIE_ACCESS_KEY);
-              }}
+              onComplete={clearSession}
               date={new Date(currentAccess.data.exp * 1000)}
               renderer={({ formatted }) => {
                 return (

@@ -18,9 +18,37 @@ import { HandleNavigation } from "../components/HandleNavigation";
 import { SessionResponseBody } from "../../netlify/functions/session";
 import Countdown from "react-countdown";
 import { Link } from "gatsby";
+import Cookies from "js-cookie";
+import { COOKIE_ACCESS_KEY, COOKIE_SESSION_PREFIX } from "../lib/constants";
 
 function MintPage() {
-  const { handle, currentIndex, stateData } = useContext(HandleMintContext);
+  const {
+    handle,
+    currentIndex,
+    stateData,
+    currentAccess,
+    setCurrentIndex,
+    setCurrentAccess,
+  } = useContext(HandleMintContext);
+
+  const clearSession = () => {
+    setCurrentIndex(0);
+    setCurrentAccess(false);
+    // delete session cookie
+    Cookies.remove(`${COOKIE_SESSION_PREFIX}_1`);
+    // delete access cookie
+    Cookies.remove(COOKIE_ACCESS_KEY);
+  };
+
+  useEffect(() => {
+    if (!currentAccess) {
+      return;
+    }
+
+    if (currentAccess?.data?.isSPO) {
+      clearSession();
+    }
+  }, [currentAccess]);
 
   const [paymentSessions, setPaymentSessions] =
     useState<(false | SessionResponseBody)[]>();
@@ -30,10 +58,6 @@ function MintPage() {
     setPaymentSessions(getAllCurrentSessionData());
   }, [currentIndex, setPaymentSessions]);
 
-  const currentAccess = useMemo(
-    () => getAccessTokenFromCookie(),
-    [currentIndex]
-  );
   const currentSession =
     currentIndex > 0
       ? (getSessionTokenFromCookie(currentIndex) as SessionResponseBody)
