@@ -160,9 +160,12 @@ export const HandleSession = ({
 
   const clearSession = () => {
     setCurrentIndex(0);
-    setCurrentAccess(false);
     Cookies.remove(`${COOKIE_SESSION_PREFIX}_${currentIndex}`);
-    Cookies.remove(COOKIE_ACCESS_KEY);
+
+    if (isSPO) {
+      setCurrentAccess(false);
+      Cookies.remove(COOKIE_ACCESS_KEY);
+    }
   };
 
   const waitingForPayment = paymentStatus === ConfirmPaymentStatusCode.PENDING;
@@ -356,6 +359,13 @@ export const HandleSession = ({
                                 : `https://handle.me/${handle}`}
                             </a>
                           </p>
+                          <p className="text-lg">
+                            Ready to get another handle?
+                          </p>
+                          <hr className="w-12 border-dark-300 border-2 block my-8" />
+                          <Button onClick={clearSession}>
+                            Click Here &amp; Try Again!
+                          </Button>
                         </div>
                       </>
                     )}

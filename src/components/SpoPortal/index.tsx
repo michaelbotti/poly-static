@@ -24,7 +24,7 @@ import { COOKIE_ACCESS_KEY, COOKIE_SESSION_PREFIX } from "../../lib/constants";
 export const SpoPortalPage = (): JSX.Element => {
   const {
     primed,
-    betaState,
+    stateData,
     stateLoading,
     handle,
     currentIndex,
@@ -97,7 +97,7 @@ export const SpoPortalPage = (): JSX.Element => {
     );
   };
 
-  const spoPageEnabled = betaState?.spoPageEnabled ?? false;
+  const spoPageEnabled = stateData?.spoPageEnabled ?? false;
 
   if (stateLoading) {
     return (
@@ -140,9 +140,9 @@ export const SpoPortalPage = (): JSX.Element => {
           >
             {renderContent()}
           </div>
-          {betaState && (
+          {stateData && (
             <p className="text-white mt-4 text-center">
-              Current Chain Load: {`${(betaState.chainLoad * 100).toFixed(2)}%`}
+              Current Chain Load: {`${(stateData.chainLoad * 100).toFixed(2)}%`}
             </p>
           )}
         </>

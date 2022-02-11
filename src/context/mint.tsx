@@ -58,7 +58,7 @@ export interface HandleMintContextType {
   pendingSessions: string[];
   paymentSessions: PaymentSession[];
   currentIndex: number;
-  betaState: StateResponseBody;
+  stateData: StateResponseBody;
   primed: boolean;
   isPurchasing: boolean;
   stateLoading: boolean;
@@ -70,7 +70,7 @@ export interface HandleMintContextType {
   setPendingSessions: Dispatch<SetStateAction<string[]>>;
   setPaymentSessions: Dispatch<SetStateAction<PaymentSession[]>>;
   setCurrentIndex: Dispatch<SetStateAction<number>>;
-  setBetaState: Dispatch<SetStateAction<StateResponseBody>>;
+  setStateData: Dispatch<SetStateAction<StateResponseBody>>;
   setCurrentAccess: React.Dispatch<
     React.SetStateAction<false | VerifyResponseBody>
   >;
@@ -87,7 +87,7 @@ export const defaultState: HandleMintContextType = {
   twitterToken: null,
   primed: false,
   currentIndex: 0,
-  betaState: null,
+  stateData: null,
   stateLoading: false,
   currentAccess: false,
   setHandleResponse: () => {},
@@ -99,7 +99,7 @@ export const defaultState: HandleMintContextType = {
   setPendingSessions: () => {},
   setPaymentSessions: () => {},
   setCurrentIndex: () => {},
-  setBetaState: () => {},
+  setStateData: () => {},
   setCurrentAccess: () => {},
 };
 
@@ -121,18 +121,18 @@ export const HandleMintContextProvider = ({ children, ...rest }) => {
   const [currentAccess, setCurrentAccess] = useState<
     false | VerifyResponseBody
   >(false);
-  const [betaState, setBetaState] = useState<StateResponseBody>(null);
+  const [stateData, setStateData] = useState<StateResponseBody>(null);
   const [stateLoading, setStateLoading] = useState<boolean>(false);
 
   useEffect(() => {
-    const updateBetaState = async () => {
+    const updatestateData = async () => {
       await fetch("/.netlify/functions/state")
         .then(async (res) => {
           const data: StateResponseBody = await res.json();
-          setBetaState(data);
+          setStateData(data);
         })
         .catch((e) => {
-          setBetaState(null);
+          setStateData(null);
           console.log(e);
         })
         .finally(() => {
@@ -142,7 +142,7 @@ export const HandleMintContextProvider = ({ children, ...rest }) => {
 
     setCurrentAccess(getAccessTokenFromCookie());
     setStateLoading(true);
-    updateBetaState();
+    updatestateData();
   }, []);
 
   return (
@@ -158,7 +158,7 @@ export const HandleMintContextProvider = ({ children, ...rest }) => {
         pendingSessions,
         paymentSessions,
         currentIndex,
-        betaState,
+        stateData,
         setFetching,
         setHandle,
         setHandleResponse,
@@ -168,7 +168,7 @@ export const HandleMintContextProvider = ({ children, ...rest }) => {
         setPendingSessions,
         setPaymentSessions,
         setCurrentIndex,
-        setBetaState,
+        setStateData,
         stateLoading,
         currentAccess,
         setCurrentAccess,
