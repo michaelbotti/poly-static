@@ -119,15 +119,15 @@ export const SpoPortalPage = (): JSX.Element => {
     );
   };
 
-  const spoPageEnabled = stateData?.spoPageEnabled ?? false;
-
-  if (stateLoading) {
+  if (stateLoading || !stateData) {
     return (
       <div className="flex">
         <Loader />
       </div>
     );
   }
+
+  const spoPageEnabled = stateData.spoPageEnabled ?? false;
 
   return (
     <section id="top" className="max-w-5xl mx-auto">
