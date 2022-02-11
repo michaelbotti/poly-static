@@ -125,7 +125,7 @@ export const HandleMintContextProvider = ({ children, ...rest }) => {
   const [stateLoading, setStateLoading] = useState<boolean>(false);
 
   useEffect(() => {
-    const updatestateData = async () => {
+    const updateStateData = async () => {
       await fetch("/.netlify/functions/state")
         .then(async (res) => {
           const data: StateResponseBody = await res.json();
@@ -142,7 +142,7 @@ export const HandleMintContextProvider = ({ children, ...rest }) => {
 
     setCurrentAccess(getAccessTokenFromCookie());
     setStateLoading(true);
-    updatestateData();
+    updateStateData();
   }, []);
 
   return (

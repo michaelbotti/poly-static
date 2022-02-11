@@ -8,9 +8,9 @@ import { getCachedState, initFirebase } from "../helpers/firebase";
 
 export interface StateData {
   chainLoad?: number | null;
-  position?: number;
   totalHandles?: number;
   spoPageEnabled?: boolean;
+  accessWindowTimeoutMinutes?: number;
 }
 
 export interface StateResponseBody extends StateData {
