@@ -1,5 +1,6 @@
 import Countdown from "react-countdown";
 import { VerifyResponseBody } from "../../../netlify/functions/verify";
+import Button from "../button";
 import { Loader } from "../Loader";
 
 interface Props {
@@ -7,6 +8,7 @@ interface Props {
   accessToken: VerifyResponseBody;
   validPayment: boolean;
   waitingForPayment: boolean;
+  clearSession: () => void;
 }
 
 export const PaymentStatus: React.FC<Props> = ({
@@ -14,6 +16,7 @@ export const PaymentStatus: React.FC<Props> = ({
   accessToken,
   validPayment,
   waitingForPayment,
+  clearSession,
 }) => {
   return (
     <Countdown
@@ -62,6 +65,12 @@ export const PaymentStatus: React.FC<Props> = ({
                         : `https://handle.me/${handle}`}
                     </a>
                   </p>
+
+                  <p className="text-lg">Ready to get another handle?</p>
+                  <hr className="w-12 border-dark-300 border-2 block my-8" />
+                  <Button onClick={clearSession}>
+                    Click Here &amp; Try Again!
+                  </Button>
                 </div>
               </>
             )}

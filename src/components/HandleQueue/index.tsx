@@ -50,7 +50,7 @@ const getActiveAuthCode = (): string | null => {
 };
 
 export const HandleQueue = (): JSX.Element => {
-  const { betaState } = useContext(HandleMintContext);
+  const { stateData } = useContext(HandleMintContext);
   const [savingSpot, setSavingSpot] = useState<boolean>(false);
   const [authenticating, setAuthenticating] = useState<boolean>(false);
   const [verifyingRecaptcha, setVerifyingRecaptcha] = useState<boolean>(false);
@@ -239,27 +239,27 @@ export const HandleQueue = (): JSX.Element => {
           <h4 className="text-lg text-dark-350 mb-4">Blockchain Load</h4>
           <span
             className={`font-bold text-4xl ${
-              betaState?.chainLoad > 0.8 ? "" : "text-primary-100"
+              stateData?.chainLoad > 0.8 ? "" : "text-primary-100"
             }`}
             style={{
-              color: betaState?.chainLoad > 0.8 ? "red" : "",
+              color: stateData?.chainLoad > 0.8 ? "red" : "",
             }}
           >
-            {null === betaState && "Loading..."}
-            {null !== betaState &&
-              !betaState.error &&
-              `${(betaState.chainLoad * 100).toFixed(2)}%`}
-            {null !== betaState && betaState.error && "N/A"}
+            {null === stateData && "Loading..."}
+            {null !== stateData &&
+              !stateData.error &&
+              `${(stateData.chainLoad * 100).toFixed(2)}%`}
+            {null !== stateData && stateData.error && "N/A"}
           </span>
         </div>
         <div className="w-1/2 text-center">
           <h4 className="text-lg text-dark-350 mb-4">Current Waitlist</h4>
           <span className={`font-bold text-4xl text-primary-100`}>
-            {null === betaState && "Loading..."}
-            {null !== betaState && !betaState.error && (
-              <span>{betaState.position?.toLocaleString("en-US") ?? 0}</span>
+            {null === stateData && "Loading..."}
+            {null !== stateData && !stateData.error && (
+              <span>{stateData.position?.toLocaleString("en-US") ?? 0}</span>
             )}
-            {null !== betaState && betaState.error && "N/A"}
+            {null !== stateData && stateData.error && "N/A"}
           </span>
         </div>
       </div>
@@ -292,7 +292,7 @@ export const HandleQueue = (): JSX.Element => {
               <>Enter the Queue</>
             )}
           </h3>
-          {!activeEmail && !activeAuthCode && betaState?.chainLoad > 0.8 && (
+          {!activeEmail && !activeAuthCode && stateData?.chainLoad > 0.8 && (
             <p className="text-center">
               You may experienced delayed delivery times while we wait for the
               blockchain load to fall below 80%.
