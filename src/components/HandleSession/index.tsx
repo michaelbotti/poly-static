@@ -160,9 +160,12 @@ export const HandleSession = ({
 
   const clearSession = () => {
     setCurrentIndex(0);
-    setCurrentAccess(false);
     Cookies.remove(`${COOKIE_SESSION_PREFIX}_${currentIndex}`);
-    Cookies.remove(COOKIE_ACCESS_KEY);
+
+    if (isSPO) {
+      setCurrentAccess(false);
+      Cookies.remove(COOKIE_ACCESS_KEY);
+    }
   };
 
   const waitingForPayment = paymentStatus === ConfirmPaymentStatusCode.PENDING;
@@ -222,24 +225,25 @@ export const HandleSession = ({
     <div className="col-span-6">
       <h2 className="font-bold text-3xl mb-2">Session Active</h2>
       <p className="text-lg">
-        Submit your payment <u>exactly</u> in the amount shown.{" "}
-        {isSPO ? (
-          <span>
-            Invalid payments will be refunded, minus a 50 ADA processing, but
-            can take up to 14 days!
-          </span>
-        ) : (
-          <span>
-            Invalid payments will be refunded, but can take up to 14 days!
-          </span>
-        )}
+        Submit your payment <u>exactly</u> in the amount shown. Invalid payments
+        will be refunded, but can take up to 14 days!
       </p>
       <ul>
         {isSPO ? (
-          <li>
-            Do NOT send from an exchange. Only use a STAKE POOL wallet you own
-            the keys to (like Nami, Yoroi, Daedalus, etc).
-          </li>
+          <>
+            <li>
+              <b>
+                <u>
+                  Invalid payments will be refunded, minus a 50 ADA processing
+                  fee
+                </u>
+              </b>
+            </li>
+            <li>
+              Do NOT send from an exchange. Only use a STAKE POOL wallet you own
+              the keys to (like Nami, Yoroi, Daedalus, etc).
+            </li>
+          </>
         ) : (
           <li>
             Do NOT send from an exchange. Only use wallets you own the keys to
@@ -356,6 +360,13 @@ export const HandleSession = ({
                                 : `https://handle.me/${handle}`}
                             </a>
                           </p>
+                          <p className="text-lg">
+                            Ready to get another handle?
+                          </p>
+                          <hr className="w-12 border-dark-300 border-2 block my-8" />
+                          <Button onClick={clearSession}>
+                            Click Here &amp; Try Again!
+                          </Button>
                         </div>
                       </>
                     )}

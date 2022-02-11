@@ -18,9 +18,37 @@ import { HandleNavigation } from "../components/HandleNavigation";
 import { SessionResponseBody } from "../../netlify/functions/session";
 import Countdown from "react-countdown";
 import { Link } from "gatsby";
+import Cookies from "js-cookie";
+import { COOKIE_ACCESS_KEY, COOKIE_SESSION_PREFIX } from "../lib/constants";
 
 function MintPage() {
-  const { handle, currentIndex, betaState } = useContext(HandleMintContext);
+  const {
+    handle,
+    currentIndex,
+    stateData,
+    currentAccess,
+    setCurrentIndex,
+    setCurrentAccess,
+  } = useContext(HandleMintContext);
+
+  const clearSession = () => {
+    setCurrentIndex(0);
+    setCurrentAccess(false);
+    // delete session cookie
+    Cookies.remove(`${COOKIE_SESSION_PREFIX}_1`);
+    // delete access cookie
+    Cookies.remove(COOKIE_ACCESS_KEY);
+  };
+
+  useEffect(() => {
+    if (!currentAccess) {
+      return;
+    }
+
+    if (currentAccess?.data?.isSPO) {
+      clearSession();
+    }
+  }, [currentAccess]);
 
   const [paymentSessions, setPaymentSessions] =
     useState<(false | SessionResponseBody)[]>();
@@ -30,10 +58,6 @@ function MintPage() {
     setPaymentSessions(getAllCurrentSessionData());
   }, [currentIndex, setPaymentSessions]);
 
-  const currentAccess = useMemo(
-    () => getAccessTokenFromCookie(),
-    [currentIndex]
-  );
   const currentSession =
     currentIndex > 0
       ? (getSessionTokenFromCookie(currentIndex) as SessionResponseBody)
@@ -68,7 +92,7 @@ function MintPage() {
           className="grid grid-cols-12 gap-4 lg:gap-8 bg-dark-200 rounded-lg rounded-tl-none place-content-start p-4 lg:p-8"
           style={{ minHeight: "40vh" }}
         >
-          {(null === accessOpen || null === betaState) && (
+          {(null === accessOpen || null === stateData) && (
             <div className="col-span-12 md:col-span-6 md:col-start-4 relative z-10">
               <div className="grid justify-center content-center h-full w-full p-8 flex-wrap">
                 <p className="w-full text-center">Fetching details...</p>
@@ -84,8 +108,7 @@ function MintPage() {
                     How it Works
                   </h3>
                   <p className="text-lg text-center text-dark-350">
-                    Purchasing a Handle during the Beta sale is a 3-step
-                    process, starting with:
+                    Purchasing a Handle is a 3-step process, starting with:
                   </p>
                   <ol className="mb-4">
                     <li>Enter the queue to save your place in line.</li>
@@ -130,9 +153,9 @@ function MintPage() {
             </>
           )}
         </div>
-        {accessOpen && betaState && (
+        {accessOpen && stateData && (
           <p className="text-white mt-4 text-center">
-            Current Chain Load: {`${(betaState.chainLoad * 100).toFixed(2)}%`}
+            Current Chain Load: {`${(stateData.chainLoad * 100).toFixed(2)}%`}
           </p>
         )}
       </section>

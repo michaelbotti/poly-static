@@ -5,7 +5,6 @@ import Countdown from "react-countdown";
 import { SessionResponseBody } from "../../../netlify/functions/session";
 import { HandleMintContext } from "../../context/mint";
 import {
-  getAccessTokenFromCookie,
   getAllCurrentSPOSessionData,
   getSessionTokenFromCookie,
 } from "../../lib/helpers/session";
@@ -24,12 +23,13 @@ import { COOKIE_ACCESS_KEY, COOKIE_SESSION_PREFIX } from "../../lib/constants";
 export const SpoPortalPage = (): JSX.Element => {
   const {
     primed,
-    betaState,
+    stateData,
     stateLoading,
     handle,
     currentIndex,
     setCurrentIndex,
     currentAccess,
+    setCurrentAccess,
   } = useContext(HandleMintContext);
   const [currentSession, setCurrentSession] = useState<
     false | SessionResponseBody
@@ -37,6 +37,28 @@ export const SpoPortalPage = (): JSX.Element => {
   const [paymentSessions, setPaymentSessions] = useState<
     (false | SessionResponseBody)[]
   >([]);
+
+  const clearSession = () => {
+    setCurrentIndex(0);
+    setCurrentAccess(false);
+    // delete session cookie
+    // Could probably handle this better...
+    Cookies.remove(`${COOKIE_SESSION_PREFIX}_1`);
+    Cookies.remove(`${COOKIE_SESSION_PREFIX}_2`);
+    Cookies.remove(`${COOKIE_SESSION_PREFIX}_3`);
+    // delete access cookie
+    Cookies.remove(COOKIE_ACCESS_KEY);
+  };
+
+  useEffect(() => {
+    if (!currentAccess) {
+      return;
+    }
+
+    if (!currentAccess?.data?.isSPO) {
+      clearSession();
+    }
+  }, [currentAccess]);
 
   useEffect(() => {
     setPaymentSessions(getAllCurrentSPOSessionData());
@@ -97,9 +119,7 @@ export const SpoPortalPage = (): JSX.Element => {
     );
   };
 
-  const spoPageEnabled = betaState?.spoPageEnabled ?? false;
-
-  if (stateLoading) {
+  if (stateLoading || !stateData) {
     return (
       <div className="flex">
         <Loader />
@@ -107,19 +127,15 @@ export const SpoPortalPage = (): JSX.Element => {
     );
   }
 
+  const spoPageEnabled = stateData.spoPageEnabled ?? false;
+
   return (
     <section id="top" className="max-w-5xl mx-auto">
       {spoPageEnabled && (
         <>
           {currentAccess && (
             <Countdown
-              onComplete={() => {
-                setCurrentIndex(0);
-                // delete session cookie
-                Cookies.remove(`${COOKIE_SESSION_PREFIX}_1`);
-                // delete access cookie
-                Cookies.remove(COOKIE_ACCESS_KEY);
-              }}
+              onComplete={clearSession}
               date={new Date(currentAccess.data.exp * 1000)}
               renderer={({ formatted }) => {
                 return (
@@ -140,9 +156,9 @@ export const SpoPortalPage = (): JSX.Element => {
           >
             {renderContent()}
           </div>
-          {betaState && (
+          {stateData && (
             <p className="text-white mt-4 text-center">
-              Current Chain Load: {`${(betaState.chainLoad * 100).toFixed(2)}%`}
+              Current Chain Load: {`${(stateData.chainLoad * 100).toFixed(2)}%`}
             </p>
           )}
         </>

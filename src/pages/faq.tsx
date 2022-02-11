@@ -82,8 +82,7 @@ function FAQPage() {
                   description: () => (
                     <>
                       <p>
-                        For beta launch, you are limited to the following UTF-8
-                        characters:
+                        Handles are limited to the following UTF-8 characters:
                       </p>
                       <ul>
                         <li>

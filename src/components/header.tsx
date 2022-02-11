@@ -47,7 +47,7 @@ const navItems: NavItem[] = [
 const Header: FC<HeaderProps> = ({ className, showMint = true }) => {
   const [isExpanded, toggleExpansion] = useState<boolean>(false);
   const [noticeHidden, setNoticeHidden] = useState<boolean>(false);
-  const { betaState } = useContext(HandleMintContext);
+  const { stateData } = useContext(HandleMintContext);
   const isProduction = useIsProduction();
 
   return (
@@ -69,9 +69,9 @@ const Header: FC<HeaderProps> = ({ className, showMint = true }) => {
         </div>
       )}
 
-      {betaState &&
-        !betaState.error &&
-        betaState.chainLoad > 0.8 &&
+      {stateData &&
+        !stateData.error &&
+        stateData.chainLoad > 0.8 &&
         !noticeHidden && (
           <div
             className="fixed w-full bottom-0 left-0 px-8"
@@ -91,7 +91,7 @@ const Header: FC<HeaderProps> = ({ className, showMint = true }) => {
               <p className="mb-0">
                 <strong>
                   NOTICE: The Cardano network is currently at{" "}
-                  {(betaState.chainLoad * 100).toFixed(1)}% capacity.
+                  {(stateData.chainLoad * 100).toFixed(1)}% capacity.
                 </strong>
                 <br /> You may experience slow transaction times, and we cannot
                 guarantee immediate Handle delivery. This is a limitation of the

@@ -314,10 +314,8 @@ export const HandleSearchReserveFlow = ({ className = "", ...rest }) => {
             )}
           </form>
           <p className="text-sm mt-8">
-            Once you start a session,{" "}
-            <strong>it will be active for approximately 10 minutes</strong>. We
-            use several safeguards to ensure this is hard to get around. You get
-            a max of up to 3 sessions at any one time. If you have questions,{" "}
+            You get a max of up to 3 sessions at any one time. If you have
+            questions,{" "}
             <a
               className="text-primary-100"
               href="https://discord.gg/8b4a48DdgF"
