@@ -10,6 +10,7 @@ import {
   HEADER_RECAPTCHA,
   HEADER_RECAPTCHA_FALLBACK,
   RECAPTCHA_SITE_KEY_FALLBACK,
+  REFUND_POLICY_DATE,
 } from "../../lib/constants";
 import Button from "../button";
 import {
@@ -257,7 +258,7 @@ export const HandleQueue = (): JSX.Element => {
           <span className={`font-bold text-4xl text-primary-100`}>
             {null === stateData && "Loading..."}
             {null !== stateData && !stateData.error && (
-              <span>{stateData.position?.toLocaleString("en-US") ?? 0}</span>
+              <span>{stateData.accessQueueSize ?? 0}</span>
             )}
             {null !== stateData && stateData.error && "N/A"}
           </span>
@@ -340,16 +341,6 @@ export const HandleQueue = (): JSX.Element => {
             )}
             {activeEmail && activeAuthCode && (
               <>
-                <input
-                  name="auth"
-                  data-lpignore="true"
-                  disabled={authenticating}
-                  placeholder={"Your 6 digit code..."}
-                  type="number"
-                  onChange={(e) => setAuthInput(e.target.value)}
-                  value={authInput}
-                  className={`hidden focus:ring-0 focus:ring-opacity-0 border-2 outline-none form-input bg-dark-100 border-dark-300 px-6 py-4 text-xl w-full appearance-none rounded-t-lg`}
-                />
                 <div className="flex items-center text-sm bg-dark-100 border-dark-300 border-2 rounded-t-lg p-4 pt-2 pb-0">
                   <input
                     className="form-checkbox p-2 text-primary-200 rounded focus:ring-primary-200 cursor-pointer"
@@ -388,7 +379,7 @@ export const HandleQueue = (): JSX.Element => {
                     </Link>{" "}
                     and{" "}
                     <strong className="underline">
-                      14-day processing time!
+                      {REFUND_POLICY_DATE} processing time!
                     </strong>
                   </label>
                 </div>

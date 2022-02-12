@@ -26,6 +26,7 @@ export const HEADER_EMAIL_AUTH = 'x-email-authcode';
 export const HEADER_JWT_ACCESS_TOKEN = 'x-access-token';
 export const HEADER_JWT_SESSION_TOKEN = 'x-session-token';
 export const HEADER_CLIENT_IP = 'x-nf-client-connection-ip';
+export const REFUND_POLICY_DATE = '72 hours';
 
 /**
  * a-z

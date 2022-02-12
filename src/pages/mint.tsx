@@ -108,7 +108,7 @@ function MintPage() {
                     How it Works
                   </h3>
                   <p className="text-lg text-center text-dark-350">
-                    Purchasing a Handle is a 3-step process, starting with:
+                    Purchasing a Handle is a 4-step process, starting with:
                   </p>
                   <ol className="mb-4">
                     <li>Enter the queue to save your place in line.</li>

@@ -11,6 +11,7 @@ export interface StateData {
   totalHandles?: number;
   spoPageEnabled?: boolean;
   accessWindowTimeoutMinutes?: number;
+  accessQueueSize: number;
 }
 
 export interface StateResponseBody extends StateData {
