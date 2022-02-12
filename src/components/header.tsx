@@ -42,6 +42,11 @@ const navItems: NavItem[] = [
     title: "Blog",
     external: true,
   },
+  {
+    route: "https://ada-handle.gitbook.io/docs/",
+    title: "Developers",
+    external: true,
+  },
 ];
 
 const Header: FC<HeaderProps> = ({ className, showMint = true }) => {

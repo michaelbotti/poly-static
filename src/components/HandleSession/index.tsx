@@ -1,17 +1,12 @@
 import Cookies from "js-cookie";
 import React, { useContext, useEffect, useState } from "react";
 import Countdown from "react-countdown";
-import {
-  PaymentData,
-  PaymentResponseBody,
-} from "../../../netlify/functions/payment";
 import { HandleMintContext } from "../../context/mint";
 import {
   COOKIE_ACCESS_KEY,
   COOKIE_SESSION_PREFIX,
-  HEADER_HANDLE,
-  HEADER_JWT_ACCESS_TOKEN,
   HEADER_JWT_SESSION_TOKEN,
+  REFUND_POLICY_DATE,
   SPO_ADA_HANDLE_COST,
 } from "../../lib/constants";
 import { getRarityCost, getRarityHex } from "../../lib/helpers/nfts";
@@ -192,7 +187,7 @@ export const HandleSession = ({
         <h2 className="font-bold text-3xl mb-2">Invalid Payment!</h2>
         <p className="text-lg">
           Sorry, but you sent an incorrect amount for your Handle. Any invalid
-          payments will be refunded within 14 days.{" "}
+          payments will be refunded within {REFUND_POLICY_DATE}.{" "}
           <Link className="text-primary-100" to="/faq">
             See our FAQ.
           </Link>
@@ -209,7 +204,8 @@ export const HandleSession = ({
         <h2 className="font-bold text-3xl mb-2">Invalid Payment!</h2>
         <p className="text-lg">
           Sorry, but the Cardano blockchain shows that this payment did not come
-          from the SPO owners' wallet. Payments will be refunded within 14 days
+          from the SPO owners' wallet. Payments will be refunded within{" "}
+          {REFUND_POLICY_DATE}
           with a processing fee deducted{" "}
           <Link className="text-primary-100" to="/faq">
             See our FAQ.
@@ -226,7 +222,7 @@ export const HandleSession = ({
       <h2 className="font-bold text-3xl mb-2">Session Active</h2>
       <p className="text-lg">
         Submit your payment <u>exactly</u> in the amount shown. Invalid payments
-        will be refunded, but can take up to 14 days!
+        will be refunded, but can take up to {REFUND_POLICY_DATE}!
       </p>
       <ul>
         {isSPO ? (
@@ -360,12 +356,9 @@ export const HandleSession = ({
                                 : `https://handle.me/${handle}`}
                             </a>
                           </p>
-                          <p className="text-lg">
-                            Ready to get another handle?
-                          </p>
                           <hr className="w-12 border-dark-300 border-2 block my-8" />
                           <Button onClick={clearSession}>
-                            Click Here &amp; Try Again!
+                            Get Another Handle!
                           </Button>
                         </div>
                       </>
