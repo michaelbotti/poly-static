@@ -4,11 +4,11 @@ import { HandleResponseBody } from "../helpers/search";
 import {
   HEADER_HANDLE,
   HEADER_IS_SPO,
-  HEADER_JWT_ACCESS_TOKEN,
 } from "../constants";
 import { HandleMintContext } from "../../context/mint";
 import { normalizeNFTHandle } from "../helpers/nfts";
 import { getAccessTokenFromCookie, getSPOAccessTokenCookie } from "../helpers/session";
+import { getAccessTokenCookieName } from "../../../netlify/helpers/util";
 
 export const useSyncAvailableStatus = async (unsanitizedHandle: string, isSpo = false) => {
   const { setFetching, setHandleResponse } =
@@ -44,7 +44,7 @@ export const useSyncAvailableStatus = async (unsanitizedHandle: string, isSpo = 
       const headers: HeadersInit = {
         [HEADER_HANDLE]: handle,
         [HEADER_IS_SPO]: isSpo ? 'true' : 'false',
-        [HEADER_JWT_ACCESS_TOKEN]: accessToken.token
+        [getAccessTokenCookieName(isSpo)]: accessToken.token
       };
 
       // Search on-chain.

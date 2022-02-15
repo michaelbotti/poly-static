@@ -11,15 +11,11 @@ import {
   HEADER_RECAPTCHA,
   HEADER_TWITTER_ACCESS_TOKEN,
   MAX_SESSION_LENGTH,
-  HEADER_JWT_ACCESS_TOKEN,
-  HEADER_JWT_SESSION_TOKEN,
   HEADER_IS_SPO,
   MAX_SESSION_LENGTH_SPO,
   SPO_ADA_HANDLE_COST,
-  HEADER_JWT_SPO_ACCESS_TOKEN,
-  HEADER_JWT_SPO_SESSION_TOKEN,
 } from "../../src/lib/constants";
-import { ensureHandleAvailable, fetchNodeApp } from '../helpers/util';
+import { ensureHandleAvailable, fetchNodeApp, getAccessTokenCookieName, getSessionTokenCookieName } from '../helpers/util';
 import { getRarityCost, isValid, normalizeNFTHandle } from "../../src/lib/helpers/nfts";
 import { getSecret } from "../helpers";
 import { verifyTwitterUser } from "../helpers";
@@ -51,7 +47,7 @@ const handler: Handler = async (
   const headerIsSpo = headers[HEADER_IS_SPO] === 'true';
   const headerRecaptcha = headers[HEADER_RECAPTCHA];
   const headerTwitter = headers[HEADER_TWITTER_ACCESS_TOKEN];
-  const accessToken = headers[headerIsSpo ? HEADER_JWT_ACCESS_TOKEN : HEADER_JWT_SPO_ACCESS_TOKEN];
+  const accessToken = headers[getAccessTokenCookieName(headerIsSpo)];
 
   // Normalize and validate handle.
   const handle = headerHandle && normalizeNFTHandle(headerHandle);
@@ -106,8 +102,8 @@ const handler: Handler = async (
   // Get payment details from server.
   const res: NodeSessionResponseBody = await fetchNodeApp('session', {
     headers: {
-      [headerIsSpo ? HEADER_JWT_ACCESS_TOKEN : HEADER_JWT_SPO_ACCESS_TOKEN]: accessToken,
-      [headerIsSpo ? HEADER_JWT_SESSION_TOKEN : HEADER_JWT_SPO_SESSION_TOKEN]: sessionToken,
+      [getAccessTokenCookieName(headerIsSpo)]: accessToken,
+      [getSessionTokenCookieName(headerIsSpo)]: sessionToken,
     }
   }).then(res => res.json());
 

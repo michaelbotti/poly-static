@@ -5,7 +5,7 @@ import { HandleMintContext } from "../../context/mint";
 import {
   COOKIE_ACCESS_KEY,
   COOKIE_SESSION_PREFIX,
-  HEADER_JWT_SESSION_TOKEN,
+  HEADER_IS_SPO,
   REFUND_POLICY_DATE,
   SPO_ADA_HANDLE_COST,
 } from "../../lib/constants";
@@ -21,6 +21,7 @@ import { Link } from "gatsby";
 import { useLocation } from "@reach/router";
 import { VerifyResponseBody } from "../../../netlify/functions/verify";
 import { fetchAuthenticatedRequest } from "../../../netlify/helpers/fetchAuthenticatedRequest";
+import { getSessionTokenCookieName } from "../../../netlify/helpers/util";
 
 enum ConfirmPaymentStatusCode {
   CONFIRMED = "CONFIRMED",
@@ -117,9 +118,11 @@ export const HandleSession = ({
         {
           signal: controller.signal,
           headers: {
-            [HEADER_JWT_SESSION_TOKEN]: token,
+            [getSessionTokenCookieName(isSPO)]: token,
+            [HEADER_IS_SPO]: isSPO ? "true" : "false",
           },
-        }
+        },
+        isSPO
       )
         .then((res) => {
           if (!res.error) {
@@ -237,13 +240,15 @@ export const HandleSession = ({
             </li>
             <li>
               Do NOT send from an exchange. Only use a STAKE POOL wallet you own
-              the keys to (like Nami, Yoroi, Daedalus, etc).
+              the keys to (like Nami, Yoroi, Daedalus, etc). In addition, Byron
+              wallets and bundled transactions will be refunded.
             </li>
           </>
         ) : (
           <li>
             Do NOT send from an exchange. Only use wallets you own the keys to
-            (like Nami, Yoroi, Daedalus, etc).
+            (like Nami, Yoroi, Daedalus, etc). In addition, Byron wallets and
+            bundled transactions will be refunded.
           </li>
         )}
         <li>Do NOT send more than one payment.</li>

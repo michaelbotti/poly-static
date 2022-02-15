@@ -13,7 +13,6 @@ import Tooltip, { tooltipClasses } from "@mui/material/Tooltip";
 
 import {
   HEADER_HANDLE,
-  HEADER_JWT_ACCESS_TOKEN,
   HEADER_RECAPTCHA,
   HEADER_TWITTER_ACCESS_TOKEN,
 } from "../../../src/lib/constants";
@@ -31,6 +30,7 @@ import {
   setSessionTokenCookie,
 } from "../../lib/helpers/session";
 import { styled } from "@mui/material/styles";
+import { getAccessTokenCookieName } from "../../../netlify/helpers/util";
 
 export const HandleSearchReserveFlow = ({ className = "", ...rest }) => {
   const {
@@ -90,7 +90,7 @@ export const HandleSearchReserveFlow = ({ className = "", ...rest }) => {
     headers.append(HEADER_RECAPTCHA, recaptchaToken);
     const accessToken = getAccessTokenFromCookie();
     if (accessToken) {
-      headers.append(HEADER_JWT_ACCESS_TOKEN, accessToken.token);
+      headers.append(getAccessTokenCookieName(false), accessToken.token);
     }
 
     /**

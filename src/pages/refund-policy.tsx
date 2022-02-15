@@ -31,6 +31,9 @@ function RefundPolicyPage() {
               Payments of under 2 ADA will <strong>NOT</strong> be refunded at
               all.
             </li>
+            <li>
+              Any payment made after 24 hours <b>will not</b> be refunded.
+            </li>
           </ul>
         </div>
       </section>

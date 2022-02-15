@@ -1,6 +1,6 @@
 import { HandlerResponse } from '@netlify/functions';
 import { fetch } from 'cross-fetch';
-import { HEADER_HANDLE, HEADER_JWT_ACCESS_TOKEN, HEADER_JWT_SPO_ACCESS_TOKEN } from '../../src/lib/constants';
+import { HEADER_HANDLE, HEADER_JWT_ACCESS_TOKEN, HEADER_JWT_SESSION_TOKEN, HEADER_JWT_SPO_ACCESS_TOKEN, HEADER_JWT_SPO_SESSION_TOKEN } from '../../src/lib/constants';
 import { buildUnavailableResponse, getDefaultResponseAvailable, HandleResponseBody } from '../../src/lib/helpers/search';
 
 export const getNodeEndpointUrl = () => process.env.NODEJS_APP_ENDPOINT;
@@ -60,7 +60,7 @@ export const ensureHandleAvailable = async (accessToken: string, handle: string,
   const searchResponse = await fetchNodeApp("search", {
     headers: {
       [HEADER_HANDLE]: handle,
-      [isSPO ? HEADER_JWT_ACCESS_TOKEN : HEADER_JWT_SPO_ACCESS_TOKEN]: accessToken,
+      [getAccessTokenCookieName(isSPO)]: accessToken,
     },
   });
 
@@ -143,4 +143,12 @@ export const buildCollectionNameWithSuffix = (collectionName: string): string =>
   if (isProduction()) return collectionName
   else if (isTesting() || isLocal()) return `${collectionName}_test`;
   return `${collectionName}_dev`;
+}
+
+export const getAccessTokenCookieName = (isSPO = false) => {
+  return isSPO ? HEADER_JWT_SPO_ACCESS_TOKEN : HEADER_JWT_ACCESS_TOKEN;
+}
+
+export const getSessionTokenCookieName = (isSPO = false) => {
+  return isSPO ? HEADER_JWT_SPO_SESSION_TOKEN : HEADER_JWT_SESSION_TOKEN;
 }
