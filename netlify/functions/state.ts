@@ -11,6 +11,7 @@ export interface StateData {
   totalHandles?: number;
   spoPageEnabled?: boolean;
   accessWindowTimeoutMinutes?: number;
+  paymentWindowTimeoutMinutes?: number;
   accessQueueSize: number;
 }
 

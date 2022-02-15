@@ -1,10 +1,10 @@
 import { HEADER_JWT_ACCESS_TOKEN } from "../../src/lib/constants";
-import { getAccessTokenFromCookie } from "../../src/lib/helpers/session";
+import { getAccessTokenFromCookie, getSPOAccessTokenCookie } from "../../src/lib/helpers/session";
 
 type FunctionName = "session"
 
-export const fetchAuthenticatedRequest = async <T>(input: RequestInfo, init?: RequestInit): Promise<T> => {
-    const accessToken = getAccessTokenFromCookie();
+export const fetchAuthenticatedRequest = async <T>(input: RequestInfo, init?: RequestInit, isSPO = false): Promise<T> => {
+    const accessToken = isSPO ? getSPOAccessTokenCookie() : getAccessTokenFromCookie();
     if (!accessToken) {
         // If there is no access token, we need to send them back to the login page.
         throw new Error("No access token found");

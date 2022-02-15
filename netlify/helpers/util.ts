@@ -1,9 +1,7 @@
 import { HandlerResponse } from '@netlify/functions';
 import { fetch } from 'cross-fetch';
-import { decode } from 'jsonwebtoken';
-import { HEADER_HANDLE, HEADER_JWT_ACCESS_TOKEN } from '../../src/lib/constants';
-import { buildUnavailableResponse, getDefaultResponseAvailable, getMultipleStakePoolResponse, getStakePoolNotFoundResponse, HandleResponseBody } from '../../src/lib/helpers/search';
-import { AccessTokenPayload } from './jwt';
+import { HEADER_HANDLE, HEADER_JWT_ACCESS_TOKEN, HEADER_JWT_SPO_ACCESS_TOKEN } from '../../src/lib/constants';
+import { buildUnavailableResponse, getDefaultResponseAvailable, HandleResponseBody } from '../../src/lib/helpers/search';
 
 export const getNodeEndpointUrl = () => process.env.NODEJS_APP_ENDPOINT;
 
@@ -38,7 +36,7 @@ interface FetchSearchResponse {
   response?: HandleAvailabilityResponse
 }
 
-export const ensureHandleAvailable = async (accessToken: string, handle: string): Promise<HandlerResponse> => {
+export const ensureHandleAvailable = async (accessToken: string, handle: string, isSPO = false): Promise<HandlerResponse> => {
   const { exists, policyID, assetName } = await fetchNodeApp("exists", {
     headers: {
       [HEADER_HANDLE]: handle,
@@ -62,7 +60,7 @@ export const ensureHandleAvailable = async (accessToken: string, handle: string)
   const searchResponse = await fetchNodeApp("search", {
     headers: {
       [HEADER_HANDLE]: handle,
-      [HEADER_JWT_ACCESS_TOKEN]: accessToken,
+      [isSPO ? HEADER_JWT_ACCESS_TOKEN : HEADER_JWT_SPO_ACCESS_TOKEN]: accessToken,
     },
   });
 
@@ -92,7 +90,6 @@ export const ensureHandleAvailable = async (accessToken: string, handle: string)
   }
 
   // Allow SPO if type is SPO and reserved
-  const { isSPO } = decode(accessToken) as AccessTokenPayload;
   if (isSPO && type === 'spo') {
     return {
       statusCode: 200,

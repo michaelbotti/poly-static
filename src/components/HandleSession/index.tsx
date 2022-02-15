@@ -56,7 +56,7 @@ export const HandleSession = ({
     token,
   } = sessionData;
 
-  const { currentIndex, setCurrentIndex, setCurrentAccess } =
+  const { currentIndex, setCurrentIndex, setCurrentAccess, stateData } =
     useContext(HandleMintContext);
 
   const [paymentStatus, setPaymentStatus] =
@@ -247,6 +247,14 @@ export const HandleSession = ({
           </li>
         )}
         <li>Do NOT send more than one payment.</li>
+        <li>
+          Each handle has{" "}
+          {isSPO
+            ? "1 hour"
+            : `${stateData?.paymentWindowTimeoutMinutes ?? 60} minutes`}{" "}
+          to wait for a payment. Your access window may expire, but we are still
+          waiting for the payment
+        </li>
       </ul>
       <br />
       <hr className="w-12 border-dark-300 border-2 block my-8" />

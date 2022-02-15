@@ -8,7 +8,7 @@ import {
 } from "../constants";
 import { HandleMintContext } from "../../context/mint";
 import { normalizeNFTHandle } from "../helpers/nfts";
-import { getAccessTokenFromCookie } from "../helpers/session";
+import { getAccessTokenFromCookie, getSPOAccessTokenCookie } from "../helpers/session";
 
 export const useSyncAvailableStatus = async (unsanitizedHandle: string, isSpo = false) => {
   const { setFetching, setHandleResponse } =
@@ -35,7 +35,7 @@ export const useSyncAvailableStatus = async (unsanitizedHandle: string, isSpo = 
 
     (async () => {
       setFetching(true);
-      const accessToken = getAccessTokenFromCookie();
+      const accessToken = isSpo ? getSPOAccessTokenCookie() : getAccessTokenFromCookie();
 
       if (!accessToken) {
         return;

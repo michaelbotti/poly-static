@@ -20,16 +20,21 @@ import { Loader } from "../../Loader";
 import {
   getAllCurrentSPOSessionData,
   getRecaptchaToken,
-  setSessionTokenCookie,
+  setSPOSessionTokenCookie,
 } from "../../../lib/helpers/session";
 import { SessionResponseBody } from "../../../../netlify/functions/session";
 import { useSyncAvailableStatus } from "../../../lib/hooks/search";
 import { fetchAuthenticatedRequest } from "../../../../netlify/helpers/fetchAuthenticatedRequest";
 
 export const HandleSearch = () => {
-  const { fetching, handleResponse, setHandleResponse, handle, setHandle } =
-    useContext(HandleMintContext);
-  const { setCurrentIndex } = useContext(HandleMintContext);
+  const {
+    fetching,
+    handleResponse,
+    setCurrentIndex,
+    setHandleResponse,
+    handle,
+    setHandle,
+  } = useContext(HandleMintContext);
   const [fetchingSession, setFetchingSession] = useState<boolean>(false);
   const [debouncedHandle] = useDebounce(handle, 600);
   const handleInputRef = useRef(null);
@@ -74,11 +79,12 @@ export const HandleSearch = () => {
               [HEADER_RECAPTCHA]: recaptchaToken,
               [HEADER_IS_SPO]: "true",
             },
-          }
+          },
+          true
         );
       if (!sessionResponse.error) {
         setHandle("");
-        setSessionTokenCookie(
+        setSPOSessionTokenCookie(
           sessionResponse,
           new Date(sessionResponse.data.exp),
           nextIndex
