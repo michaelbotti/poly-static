@@ -1,4 +1,5 @@
 import React, { useCallback, useContext, useEffect, useState } from "react";
+
 import Cookies from "js-cookie";
 
 import Countdown from "react-countdown";
@@ -6,7 +7,7 @@ import { SessionResponseBody } from "../../../netlify/functions/session";
 import { HandleMintContext } from "../../context/mint";
 import {
   getAllCurrentSPOSessionData,
-  getSessionTokenFromCookie,
+  getSPOSessionTokenFromCookie,
 } from "../../lib/helpers/session";
 import { HandleSession } from "../HandleSession";
 import { Loader } from "../Loader";
@@ -15,21 +16,20 @@ import { Closed } from "./Closed";
 import { EnterForm } from "./EnterForm";
 import { HandleSearch } from "./HandleSearch";
 import { TabNavigation } from "./TabNavigation";
-import { COOKIE_ACCESS_KEY, COOKIE_SESSION_PREFIX } from "../../lib/constants";
-
-// TODO: Test with an SPO with the correct amount but not the owner - DONE!
-// TODO: Test with an SPO that is the owner
+import {
+  SPO_COOKIE_ACCESS_KEY,
+  SPO_COOKIE_SESSION_PREFIX,
+} from "../../lib/constants";
 
 export const SpoPortalPage = (): JSX.Element => {
   const {
-    primed,
     stateData,
     stateLoading,
     handle,
     currentIndex,
     setCurrentIndex,
-    currentAccess,
-    setCurrentAccess,
+    currentSPOAccess,
+    setCurrentSPOAccess,
   } = useContext(HandleMintContext);
   const [currentSession, setCurrentSession] = useState<
     false | SessionResponseBody
@@ -40,31 +40,18 @@ export const SpoPortalPage = (): JSX.Element => {
 
   const clearSession = () => {
     setCurrentIndex(0);
-    setCurrentAccess(false);
+    setCurrentSPOAccess(false);
     // delete session cookie
-    // Could probably handle this better...
-    Cookies.remove(`${COOKIE_SESSION_PREFIX}_1`);
-    Cookies.remove(`${COOKIE_SESSION_PREFIX}_2`);
-    Cookies.remove(`${COOKIE_SESSION_PREFIX}_3`);
+    Cookies.remove(`${SPO_COOKIE_SESSION_PREFIX}_1`);
     // delete access cookie
-    Cookies.remove(COOKIE_ACCESS_KEY);
+    Cookies.remove(SPO_COOKIE_ACCESS_KEY);
   };
-
-  useEffect(() => {
-    if (!currentAccess) {
-      return;
-    }
-
-    if (!currentAccess?.data?.isSPO) {
-      clearSession();
-    }
-  }, [currentAccess]);
 
   useEffect(() => {
     setPaymentSessions(getAllCurrentSPOSessionData());
 
     if (currentIndex > 0) {
-      setCurrentSession(getSessionTokenFromCookie(currentIndex));
+      setCurrentSession(getSPOSessionTokenFromCookie(currentIndex));
     }
   }, [currentIndex]);
 
@@ -73,7 +60,7 @@ export const SpoPortalPage = (): JSX.Element => {
   }, [setPaymentSessions, getAllCurrentSPOSessionData]);
 
   const renderContent = () => {
-    if (!currentAccess) {
+    if (!currentSPOAccess) {
       return <EnterForm />;
     }
 
@@ -133,10 +120,10 @@ export const SpoPortalPage = (): JSX.Element => {
     <section id="top" className="max-w-5xl mx-auto">
       {spoPageEnabled && (
         <>
-          {currentAccess && (
+          {currentSPOAccess && (
             <Countdown
               onComplete={clearSession}
-              date={new Date(currentAccess.data.exp * 1000)}
+              date={new Date(currentSPOAccess.data.exp * 1000)}
               renderer={({ formatted }) => {
                 return (
                   <p className="text-white text-right">

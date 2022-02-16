@@ -11,9 +11,9 @@ import {
 import { normalizeNFTHandle } from "../../src/lib/helpers/nfts";
 import {
   HEADER_HANDLE,
-  HEADER_JWT_ACCESS_TOKEN,
+  HEADER_IS_SPO,
 } from "../../src/lib/constants";
-import { ensureHandleAvailable } from "../helpers/util";
+import { ensureHandleAvailable, getAccessTokenCookieName } from "../helpers/util";
 
 // Main handler function for GET requests.
 const handler: Handler = async (
@@ -24,7 +24,8 @@ const handler: Handler = async (
   const { headers } = event;
 
   const headerHandle = headers[HEADER_HANDLE];
-  const headerAccess = headers[HEADER_JWT_ACCESS_TOKEN];
+  const isSPO = headers[HEADER_IS_SPO] === 'true';
+  const headerAccess = headers[getAccessTokenCookieName(isSPO)];
 
   if (!headerAccess || !headerHandle) {
     return {
@@ -37,7 +38,7 @@ const handler: Handler = async (
   }
 
   const handle = normalizeNFTHandle(headerHandle);
-  return ensureHandleAvailable(headerAccess, handle);
+  return ensureHandleAvailable(headerAccess, handle, isSPO);
 };
 
 export { handler };

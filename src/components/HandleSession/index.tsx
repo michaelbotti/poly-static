@@ -5,14 +5,18 @@ import { HandleMintContext } from "../../context/mint";
 import {
   COOKIE_ACCESS_KEY,
   COOKIE_SESSION_PREFIX,
-  HEADER_JWT_SESSION_TOKEN,
+  HEADER_IS_SPO,
   REFUND_POLICY_DATE,
   SPO_ADA_HANDLE_COST,
+  SPO_COOKIE_ACCESS_KEY,
+  SPO_COOKIE_SESSION_PREFIX,
 } from "../../lib/constants";
 import { getRarityCost, getRarityHex } from "../../lib/helpers/nfts";
 import {
   getAccessTokenFromCookie,
   getSessionTokenFromCookie,
+  getSPOAccessTokenCookie,
+  getSPOSessionTokenFromCookie,
 } from "../../lib/helpers/session";
 import { Loader } from "../Loader";
 import Button from "../button";
@@ -21,6 +25,7 @@ import { Link } from "gatsby";
 import { useLocation } from "@reach/router";
 import { VerifyResponseBody } from "../../../netlify/functions/verify";
 import { fetchAuthenticatedRequest } from "../../../netlify/helpers/fetchAuthenticatedRequest";
+import { getSessionTokenCookieName } from "../../../netlify/helpers/util";
 
 enum ConfirmPaymentStatusCode {
   CONFIRMED = "CONFIRMED",
@@ -56,8 +61,13 @@ export const HandleSession = ({
     token,
   } = sessionData;
 
-  const { currentIndex, setCurrentIndex, setCurrentAccess } =
-    useContext(HandleMintContext);
+  const {
+    currentIndex,
+    setCurrentIndex,
+    setCurrentAccess,
+    setCurrentSPOAccess,
+    stateData,
+  } = useContext(HandleMintContext);
 
   const [paymentStatus, setPaymentStatus] =
     useState<ConfirmPaymentStatusCode | null>(null);
@@ -87,13 +97,18 @@ export const HandleSession = ({
     setPaymentStatus(null);
     setRetry(true);
 
-    const session = getSessionTokenFromCookie(currentIndex);
+    const session = isSPO
+      ? getSPOSessionTokenFromCookie(currentIndex)
+      : getSessionTokenFromCookie(currentIndex);
     setActiveSession(session);
     if (!session) {
       setCurrentIndex(0);
     }
 
-    setAccessToken(getAccessTokenFromCookie());
+    const accessToken = isSPO
+      ? getSPOAccessTokenCookie()
+      : getAccessTokenFromCookie();
+    setAccessToken(accessToken);
   }, [currentIndex]);
 
   const handleCopy = async () => {
@@ -117,9 +132,11 @@ export const HandleSession = ({
         {
           signal: controller.signal,
           headers: {
-            [HEADER_JWT_SESSION_TOKEN]: token,
+            [getSessionTokenCookieName(isSPO)]: token,
+            [HEADER_IS_SPO]: isSPO ? "true" : "false",
           },
-        }
+        },
+        isSPO
       )
         .then((res) => {
           if (!res.error) {
@@ -155,11 +172,15 @@ export const HandleSession = ({
 
   const clearSession = () => {
     setCurrentIndex(0);
-    Cookies.remove(`${COOKIE_SESSION_PREFIX}_${currentIndex}`);
 
     if (isSPO) {
+      setCurrentSPOAccess(false);
+      Cookies.remove(SPO_COOKIE_ACCESS_KEY);
+      Cookies.remove(`${SPO_COOKIE_SESSION_PREFIX}_${currentIndex}`);
+    } else {
       setCurrentAccess(false);
       Cookies.remove(COOKIE_ACCESS_KEY);
+      Cookies.remove(`${COOKIE_SESSION_PREFIX}_${currentIndex}`);
     }
   };
 
@@ -237,16 +258,26 @@ export const HandleSession = ({
             </li>
             <li>
               Do NOT send from an exchange. Only use a STAKE POOL wallet you own
-              the keys to (like Nami, Yoroi, Daedalus, etc).
+              the keys to (like Nami, Yoroi, Daedalus, etc). In addition, Byron
+              wallets and bundled transactions will be refunded.
             </li>
           </>
         ) : (
           <li>
             Do NOT send from an exchange. Only use wallets you own the keys to
-            (like Nami, Yoroi, Daedalus, etc).
+            (like Nami, Yoroi, Daedalus, etc). In addition, Byron wallets and
+            bundled transactions will be refunded.
           </li>
         )}
         <li>Do NOT send more than one payment.</li>
+        <li>
+          Each handle has{" "}
+          {isSPO
+            ? "1 hour"
+            : `${stateData?.paymentWindowTimeoutMinutes ?? 60} minutes`}{" "}
+          to wait for a payment. Your access window may expire, but we are still
+          waiting for the payment
+        </li>
       </ul>
       <br />
       <hr className="w-12 border-dark-300 border-2 block my-8" />

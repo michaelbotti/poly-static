@@ -11,13 +11,11 @@ import {
   HEADER_RECAPTCHA,
   HEADER_TWITTER_ACCESS_TOKEN,
   MAX_SESSION_LENGTH,
-  HEADER_JWT_ACCESS_TOKEN,
-  HEADER_JWT_SESSION_TOKEN,
   HEADER_IS_SPO,
   MAX_SESSION_LENGTH_SPO,
   SPO_ADA_HANDLE_COST,
 } from "../../src/lib/constants";
-import { ensureHandleAvailable, fetchNodeApp } from '../helpers/util';
+import { ensureHandleAvailable, fetchNodeApp, getAccessTokenCookieName, getSessionTokenCookieName } from '../helpers/util';
 import { getRarityCost, isValid, normalizeNFTHandle } from "../../src/lib/helpers/nfts";
 import { getSecret } from "../helpers";
 import { verifyTwitterUser } from "../helpers";
@@ -46,10 +44,10 @@ const handler: Handler = async (
   const { headers } = event;
 
   const headerHandle = headers[HEADER_HANDLE];
-  const headerIsSpo = headers[HEADER_IS_SPO] === 'true' ? true : false;
+  const headerIsSpo = headers[HEADER_IS_SPO] === 'true';
   const headerRecaptcha = headers[HEADER_RECAPTCHA];
   const headerTwitter = headers[HEADER_TWITTER_ACCESS_TOKEN];
-  const accessToken = headers[HEADER_JWT_ACCESS_TOKEN];
+  const accessToken = headers[getAccessTokenCookieName(headerIsSpo)];
 
   // Normalize and validate handle.
   const handle = headerHandle && normalizeNFTHandle(headerHandle);
@@ -64,7 +62,7 @@ const handler: Handler = async (
   }
 
   // Ensure no one is trying to force an existing Handle.
-  const { body } = await ensureHandleAvailable(accessToken, handle);
+  const { body } = await ensureHandleAvailable(accessToken, handle, headerIsSpo);
   const data: HandleResponseBody = JSON.parse(body);
 
   if (!data.available && !data.twitter) {
@@ -85,7 +83,7 @@ const handler: Handler = async (
    * We sign a session JWT tokent to authorize the purchase,
    * and include the access email address to limit request.
    */
-  const expiresIn = headerIsSpo ? MAX_SESSION_LENGTH_SPO : MAX_SESSION_LENGTH;
+  const expiresIn = headerIsSpo ? MAX_SESSION_LENGTH_SPO : MAX_SESSION_LENGTH; // TODO: update to payment window
   const sessionSecret = await getSecret('session');
   const sessionToken = jwt.sign(
     {
@@ -104,8 +102,8 @@ const handler: Handler = async (
   // Get payment details from server.
   const res: NodeSessionResponseBody = await fetchNodeApp('session', {
     headers: {
-      [HEADER_JWT_ACCESS_TOKEN]: accessToken,
-      [HEADER_JWT_SESSION_TOKEN]: sessionToken,
+      [getAccessTokenCookieName(headerIsSpo)]: accessToken,
+      [getSessionTokenCookieName(headerIsSpo)]: sessionToken,
     }
   }).then(res => res.json());
 

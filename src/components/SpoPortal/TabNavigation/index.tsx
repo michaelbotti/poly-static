@@ -1,12 +1,12 @@
 import React, { useContext } from "react";
 import { HandleMintContext } from "../../../context/mint";
-import { getSessionTokenFromCookie } from "../../../lib/helpers/session";
+import { getSPOSessionTokenFromCookie } from "../../../lib/helpers/session";
 
 export const TabNavigation = ({ paymentSessions, updatePaymentSessions }) => {
-  const { setCurrentIndex, currentIndex, currentAccess } =
+  const { setCurrentIndex, currentIndex, currentSPOAccess } =
     useContext(HandleMintContext);
 
-  if (!currentAccess) {
+  if (!currentSPOAccess) {
     return null;
   }
 
@@ -30,7 +30,7 @@ export const TabNavigation = ({ paymentSessions, updatePaymentSessions }) => {
             <button
               key={index}
               onClick={() => {
-                const session = getSessionTokenFromCookie(index + 1);
+                const session = getSPOSessionTokenFromCookie(index + 1);
                 if (session) {
                   setCurrentIndex(index + 1);
                 } else {
