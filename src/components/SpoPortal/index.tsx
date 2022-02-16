@@ -7,7 +7,7 @@ import { SessionResponseBody } from "../../../netlify/functions/session";
 import { HandleMintContext } from "../../context/mint";
 import {
   getAllCurrentSPOSessionData,
-  getSessionTokenFromCookie,
+  getSPOSessionTokenFromCookie,
 } from "../../lib/helpers/session";
 import { HandleSession } from "../HandleSession";
 import { Loader } from "../Loader";
@@ -51,7 +51,7 @@ export const SpoPortalPage = (): JSX.Element => {
     setPaymentSessions(getAllCurrentSPOSessionData());
 
     if (currentIndex > 0) {
-      setCurrentSession(getSessionTokenFromCookie(currentIndex));
+      setCurrentSession(getSPOSessionTokenFromCookie(currentIndex));
     }
   }, [currentIndex]);
 

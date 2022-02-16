@@ -8,11 +8,15 @@ import {
   HEADER_IS_SPO,
   REFUND_POLICY_DATE,
   SPO_ADA_HANDLE_COST,
+  SPO_COOKIE_ACCESS_KEY,
+  SPO_COOKIE_SESSION_PREFIX,
 } from "../../lib/constants";
 import { getRarityCost, getRarityHex } from "../../lib/helpers/nfts";
 import {
   getAccessTokenFromCookie,
   getSessionTokenFromCookie,
+  getSPOAccessTokenCookie,
+  getSPOSessionTokenFromCookie,
 } from "../../lib/helpers/session";
 import { Loader } from "../Loader";
 import Button from "../button";
@@ -57,8 +61,13 @@ export const HandleSession = ({
     token,
   } = sessionData;
 
-  const { currentIndex, setCurrentIndex, setCurrentAccess, stateData } =
-    useContext(HandleMintContext);
+  const {
+    currentIndex,
+    setCurrentIndex,
+    setCurrentAccess,
+    setCurrentSPOAccess,
+    stateData,
+  } = useContext(HandleMintContext);
 
   const [paymentStatus, setPaymentStatus] =
     useState<ConfirmPaymentStatusCode | null>(null);
@@ -88,13 +97,18 @@ export const HandleSession = ({
     setPaymentStatus(null);
     setRetry(true);
 
-    const session = getSessionTokenFromCookie(currentIndex);
+    const session = isSPO
+      ? getSPOSessionTokenFromCookie(currentIndex)
+      : getSessionTokenFromCookie(currentIndex);
     setActiveSession(session);
     if (!session) {
       setCurrentIndex(0);
     }
 
-    setAccessToken(getAccessTokenFromCookie());
+    const accessToken = isSPO
+      ? getSPOAccessTokenCookie()
+      : getAccessTokenFromCookie();
+    setAccessToken(accessToken);
   }, [currentIndex]);
 
   const handleCopy = async () => {
@@ -158,11 +172,15 @@ export const HandleSession = ({
 
   const clearSession = () => {
     setCurrentIndex(0);
-    Cookies.remove(`${COOKIE_SESSION_PREFIX}_${currentIndex}`);
 
     if (isSPO) {
+      setCurrentSPOAccess(false);
+      Cookies.remove(SPO_COOKIE_ACCESS_KEY);
+      Cookies.remove(`${SPO_COOKIE_SESSION_PREFIX}_${currentIndex}`);
+    } else {
       setCurrentAccess(false);
       Cookies.remove(COOKIE_ACCESS_KEY);
+      Cookies.remove(`${COOKIE_SESSION_PREFIX}_${currentIndex}`);
     }
   };
 

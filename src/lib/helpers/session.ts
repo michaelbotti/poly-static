@@ -2,7 +2,7 @@ import Cookie from 'js-cookie';
 
 import { SessionResponseBody } from "../../../netlify/functions/session";
 import { VerifyResponseBody } from '../../../netlify/functions/verify';
-import { COOKIE_ACCESS_KEY, COOKIE_SESSION_PREFIX, RECAPTCHA_SITE_KEY, SPO_COOKIE_ACCESS_KEY, SPO_MAX_TOTAL_SESSIONS } from '../constants';
+import { COOKIE_ACCESS_KEY, COOKIE_SESSION_PREFIX, RECAPTCHA_SITE_KEY, SPO_COOKIE_ACCESS_KEY, SPO_COOKIE_SESSION_PREFIX, SPO_MAX_TOTAL_SESSIONS } from '../constants';
 
 export const getAllCurrentSessionData = (): (SessionResponseBody | false)[] => {
   return [1, 2, 3].reduce((sessions, index) => {
@@ -54,7 +54,7 @@ export const setAccessTokenCookie = (data: VerifyResponseBody, exp: number, isSP
 }
 
 export const getSessionTokenFromCookie = (index: number, isSPO = false): SessionResponseBody | false => {
-  const cookieName = isSPO ? `${SPO_COOKIE_ACCESS_KEY}_${index}` : `${COOKIE_SESSION_PREFIX}_${index}`;
+  const cookieName = isSPO ? `${SPO_COOKIE_SESSION_PREFIX}_${index}` : `${COOKIE_SESSION_PREFIX}_${index}`;
   const data = Cookie.get(cookieName);
   if (!data || data.length === 0) {
     return false;
@@ -64,7 +64,7 @@ export const getSessionTokenFromCookie = (index: number, isSPO = false): Session
 };
 
 export const setSessionTokenCookie = (data: SessionResponseBody, exp: Date, index: number, isSPO = false) => {
-  const cookieName = isSPO ? `${SPO_COOKIE_ACCESS_KEY}_${index}` : `${COOKIE_SESSION_PREFIX}_${index}`;
+  const cookieName = isSPO ? `${SPO_COOKIE_SESSION_PREFIX}_${index}` : `${COOKIE_SESSION_PREFIX}_${index}`;
   Cookie.set(
     cookieName,
     JSON.stringify(data),
