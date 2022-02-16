@@ -13,7 +13,11 @@ export const SPO_MAX_TOTAL_SESSIONS = 1;
 // Keys
 export const COOKIE_SESSION_PREFIX = 'CURRENT_HANDLE_SESSION';
 export const COOKIE_ACCESS_KEY = 'ADAHANDLE_HAS_ACCESS';
+
 export const COOKIE_ALL_SESSIONS_KEY = 'ADAHANDLE_ALL_SESSIONS';
+
+export const SPO_COOKIE_SESSION_PREFIX = 'SPO_CURRENT_HANDLE_SESSION';
+export const SPO_COOKIE_ACCESS_KEY = 'SPO_ADAHANDLE_HAS_ACCESS';
 
 // Headers.
 export const HEADER_HANDLE = 'x-handle';
@@ -24,9 +28,16 @@ export const HEADER_TWITTER_ACCESS_TOKEN = 'x-twitter-token';
 export const TWITTER_UNLOCK_HEADER = 'x-twitter-credentials';
 export const HEADER_EMAIL = 'x-email';
 export const HEADER_EMAIL_AUTH = 'x-email-authcode';
+
 export const HEADER_JWT_ACCESS_TOKEN = 'x-access-token';
 export const HEADER_JWT_SESSION_TOKEN = 'x-session-token';
+
+export const HEADER_JWT_SPO_ACCESS_TOKEN = 'x-spo-access-token';
+export const HEADER_JWT_SPO_SESSION_TOKEN = 'x-spo-session-token';
+export const HEADER_JWT_ALL_SESSIONS_TOKEN = 'x-all-sessions-token';
+
 export const HEADER_CLIENT_IP = 'x-nf-client-connection-ip';
+export const REFUND_POLICY_DATE = '72 hours';
 
 /**
  * a-z

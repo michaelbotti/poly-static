@@ -68,9 +68,7 @@ export const PaymentStatus: React.FC<Props> = ({
 
                   <p className="text-lg">Ready to get another handle?</p>
                   <hr className="w-12 border-dark-300 border-2 block my-8" />
-                  <Button onClick={clearSession}>
-                    Click Here &amp; Try Again!
-                  </Button>
+                  <Button onClick={clearSession}>Get Another Handle!</Button>
                 </div>
               </>
             )}

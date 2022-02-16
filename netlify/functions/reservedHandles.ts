@@ -17,6 +17,7 @@ interface ReservedHandlesResponses {
   data: ReservedHandlesType;
 }
 
+// TODO: Aaron - Do we need this handler?
 const handler: Handler = async (
   event: HandlerEvent,
   context: HandlerContext

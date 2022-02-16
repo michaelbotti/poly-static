@@ -1,6 +1,7 @@
 import React from "react";
 
 import SEO from "../components/seo";
+import { REFUND_POLICY_DATE } from "../lib/constants";
 
 function RefundPolicyPage() {
   return (
@@ -13,11 +14,26 @@ function RefundPolicyPage() {
       </section>
       <section id="refund-policy" className="my-16 max-w-3xl mx-auto">
         <div className="p-4 lg:p-8 bg-dark-200 rounded-lg shadow-lg">
-          <p>Refunds are handled in a specific manner, and are subject to the following:</p>
+          <p>
+            Refunds are handled in a specific manner, and are subject to the
+            following:
+          </p>
           <ul>
-            <li>Refunds may take up to <strong>14 days</strong> to process.</li>
-            <li>If you submit an inaccurate payment, those funds will be locked for up to 14 days!</li>
-            <li>Payments of under 2 ADA will <strong>NOT</strong> be refunded at all.</li>
+            <li>
+              Refunds may take up to <strong>{REFUND_POLICY_DATE}</strong> to
+              process.
+            </li>
+            <li>
+              If you submit an inaccurate payment, those funds will be locked
+              for up to {REFUND_POLICY_DATE}!
+            </li>
+            <li>
+              Payments of under 2 ADA will <strong>NOT</strong> be refunded at
+              all.
+            </li>
+            <li>
+              Any payment made after 24 hours <b>will not</b> be refunded.
+            </li>
           </ul>
         </div>
       </section>

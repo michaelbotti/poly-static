@@ -10,12 +10,12 @@ import {
 } from "../../../lib/constants";
 import {
   getRecaptchaToken,
-  setAccessTokenCookie,
+  setSPOAccessTokenCookie,
 } from "../../../lib/helpers/session";
 import Button from "../../button";
 
 export const EnterForm = (): JSX.Element => {
-  const { setCurrentAccess } = useContext(HandleMintContext);
+  const { setCurrentSPOAccess } = useContext(HandleMintContext);
   const [verifyingRecaptcha, setVerifyingRecaptcha] = useState<boolean>(false);
   const [responseMessage, setResponseMessage] = useState<string>(null);
   const [touChecked, setTouChecked] = useState<boolean>(false);
@@ -50,8 +50,8 @@ export const EnterForm = (): JSX.Element => {
 
       const { error, verified, message, token, data } = res;
       if (!error && verified && token && data) {
-        setAccessTokenCookie(res, data.exp);
-        setCurrentAccess(res);
+        setSPOAccessTokenCookie(res, data.exp);
+        setCurrentSPOAccess(res);
       }
 
       if (!verified && error && message) {
