@@ -25,6 +25,7 @@ import { Loader } from "../Loader";
 import { SessionResponseBody } from "../../../netlify/functions/session";
 import {
   AllSessionsData,
+  AllSessionsDataBody,
   getAccessTokenFromCookie,
   getAllCurrentSessionCookie,
   getAllCurrentSessionData,
@@ -119,13 +120,26 @@ export const HandleSearchReserveFlow = ({ className = "", ...rest }) => {
 
         const newSession: AllSessionsData = {
           handle,
-          date: Date.now(),
+          dateAdded: Date.now(),
           status: "pending",
         };
-        const allSessions = getAllCurrentSessionCookie();
-        const allSessionsData: AllSessionsData[] = !allSessions
-          ? [newSession]
-          : [...allSessions, newSession];
+
+        const allSessionsCookieData = getAllCurrentSessionCookie();
+        const allSessionsData: AllSessionsDataBody = !allSessionsCookieData
+          ? {
+              token: sessionResponse.allSessionsToken,
+              data: {
+                ...sessionResponse.allSessionsData,
+                sessions: [newSession],
+              },
+            }
+          : {
+              ...allSessionsCookieData,
+              data: {
+                ...allSessionsCookieData.data,
+                sessions: [...allSessionsCookieData.data.sessions, newSession],
+              },
+            };
 
         setAllSessionsCookie(allSessionsData);
 
@@ -193,7 +207,7 @@ export const HandleSearchReserveFlow = ({ className = "", ...rest }) => {
         <>
           <p className="text-lg">
             You have {currentActiveSessions.length} active sessions in progress!
-            In order to make distributing handles as fair as possible, we're
+            In order to make distributing Handles as fair as possible, we're
             limiting how many you can purchase at a time. Don't worry, it goes
             fast.
           </p>
@@ -201,8 +215,8 @@ export const HandleSearchReserveFlow = ({ className = "", ...rest }) => {
       ) : (
         <>
           <p className="text-lg">
-            Purchasing your own handle allows you to easily receive Cardano
-            payments just by sharing your handle name, or by sharing your unique
+            Purchasing your own Handle allows you to easily receive Cardano
+            payments just by sharing your Handle name, or by sharing your unique
             link.
           </p>
           <p className="text-lg">
@@ -273,9 +287,8 @@ export const HandleSearchReserveFlow = ({ className = "", ...rest }) => {
                               title={
                                 <>
                                   <p className="text-sm">
-                                    You're handle is not allowed for the
-                                    following reason: <br />{" "}
-                                    {handleResponse.reason}
+                                    Handle is not allowed for the following
+                                    reason: <br /> {handleResponse.reason}
                                   </p>
                                   <p className="text-sm">
                                     Click below for more information.{" "}

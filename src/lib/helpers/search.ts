@@ -1,8 +1,8 @@
-const RESPONSE_UNAVAILABLE_DEFAULT = 'Sorry! This handle is unavailable.';
+const RESPONSE_UNAVAILABLE_DEFAULT = 'Sorry! This Handle is unavailable.';
 const RESPONSE_UNAVAILABLE_PAID = 'Sorry! This Handle is pending mint.';
 const RESPONSE_UNAVAILABLE_TWITTER = 'Reserved! Please unlock with Twitter below.';
-const RESPONSE_AVAILABLE_DEFAULT = 'Yay! This handle is available.';
-const RESPONSE_BETA_PHASE_UNAVAILABLE = 'Legendary handles are not available yet.';
+const RESPONSE_AVAILABLE_DEFAULT = 'Yay! This Handle is available.';
+const RESPONSE_BETA_PHASE_UNAVAILABLE = 'Legendary Handles are not available yet.';
 const RESPONSE_ACTIVE_SESSION_UNAVAILABLE = 'Pending purchase. Try again soon!';
 const RESPONSE_SESSION_COUNT_UNAVAILABLE = 'Sorry! You can only have 3 active sessions at a time.';
 const RESPONSE_SPO_HANDLE_UNAVAILABLE = 'Reserved for the stake pool. Email private@adahandle.com to claim!';

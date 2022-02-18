@@ -273,12 +273,12 @@ export const HandleSession = ({
         )}
         <li>Do NOT send more than one payment.</li>
         <li>
-          Each handle has{" "}
+          Each Handle has{" "}
           {isSPO
             ? "1 hour"
             : `${stateData?.paymentWindowTimeoutMinutes ?? 60} minutes`}{" "}
           to wait for a payment. Your access window may expire, but we are still
-          waiting for the payment
+          waiting for the payment.
         </li>
       </ul>
       <br />
@@ -347,6 +347,7 @@ export const HandleSession = ({
               accessToken={accessToken}
               validPayment={validPayment}
               waitingForPayment={waitingForPayment}
+              isSPO={isSPO}
               clearSession={clearSession}
             />
           )}

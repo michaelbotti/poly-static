@@ -34,7 +34,7 @@ export const HandleSearchConnectTwitter = () => {
       {!isConnecting ? (
         <>Unlock with Twitter</>
       ) : (
-        <>Authenticating your reserved handle...</>
+        <>Authenticating your reserved Handle...</>
       )}
     </button>
   );
