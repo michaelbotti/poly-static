@@ -22,6 +22,7 @@ import { verifyTwitterUser } from "../helpers";
 import { responseWithMessage, unauthorizedResponse } from "../helpers/response";
 import { AccessTokenPayload } from "../helpers/jwt";
 import { HandleResponseBody } from "../../src/lib/helpers/search";
+import { getCachedState, initFirebase } from "../helpers/firebase";
 
 export interface NodeSessionResponseBody {
   error: boolean,
@@ -35,6 +36,8 @@ export interface SessionResponseBody {
   address: string;
   token: string;
   data: JwtPayload
+  allSessionsToken?: string;
+  allSessionsData?: JwtPayload;
 }
 
 const handler: Handler = async (
@@ -83,7 +86,9 @@ const handler: Handler = async (
    * We sign a session JWT tokent to authorize the purchase,
    * and include the access email address to limit request.
    */
-  const expiresIn = headerIsSpo ? MAX_SESSION_LENGTH_SPO : MAX_SESSION_LENGTH; // TODO: update to payment window
+  await initFirebase();
+  const stateData = await getCachedState();
+  const expiresIn = headerIsSpo ? MAX_SESSION_LENGTH_SPO : stateData?.accessWindowTimeoutMinutes * 60 * 1000 ?? MAX_SESSION_LENGTH;
   const sessionSecret = await getSecret('session');
   const sessionToken = jwt.sign(
     {
@@ -95,7 +100,7 @@ const handler: Handler = async (
     },
     sessionSecret,
     {
-      expiresIn: (expiresIn * 1000).toString() // 10 minutes or 24 hours for SPOs
+      expiresIn: (expiresIn * 1000).toString()
     }
   );
 
@@ -121,6 +126,20 @@ const handler: Handler = async (
       body: JSON.stringify(mutatedRes),
     }
   }
+
+  // If the session is successfully created, we append to the all sessions cookie
+  const AllSessionToken = jwt.sign(
+    {
+      sessions: [{ handle, dateAdded: Date.now(), status: 'pending' }]
+    },
+    sessionSecret,
+    {
+      expiresIn: '30 days'
+    }
+  );
+
+  mutatedRes.allSessionsToken = AllSessionToken;
+  mutatedRes.allSessionsData = decode(AllSessionToken) as JwtPayload;
 
   return {
     statusCode: 200,

@@ -1,8 +1,20 @@
 import Cookie from 'js-cookie';
+import { JwtPayload } from 'jsonwebtoken';
 
 import { SessionResponseBody } from "../../../netlify/functions/session";
 import { VerifyResponseBody } from '../../../netlify/functions/verify';
-import { COOKIE_ACCESS_KEY, COOKIE_SESSION_PREFIX, RECAPTCHA_SITE_KEY, SPO_COOKIE_ACCESS_KEY, SPO_COOKIE_SESSION_PREFIX, SPO_MAX_TOTAL_SESSIONS } from '../constants';
+import { COOKIE_ACCESS_KEY, COOKIE_ALL_SESSIONS_KEY, COOKIE_SESSION_PREFIX, RECAPTCHA_SITE_KEY, SPO_COOKIE_ACCESS_KEY, SPO_COOKIE_SESSION_PREFIX, SPO_MAX_TOTAL_SESSIONS } from '../constants';
+
+export interface AllSessionsData {
+  handle: string;
+  dateAdded: number;
+  status: 'pending' | 'paid' | 'refund';
+}
+
+export interface AllSessionsDataBody {
+  token: string;
+  data: JwtPayload;
+}
 
 export const getAllCurrentSessionData = (): (SessionResponseBody | false)[] => {
   return [1, 2, 3].reduce((sessions, index) => {
@@ -72,6 +84,27 @@ export const setSessionTokenCookie = (data: SessionResponseBody, exp: Date, inde
       sameSite: 'strict',
       secure: true,
       expires: new Date(exp)
+    }
+  )
+}
+
+export const getAllCurrentSessionCookie = (): AllSessionsDataBody | null => {
+  const data = Cookie.get(`${COOKIE_ALL_SESSIONS_KEY}`);
+  if (!data || data.length === 0) {
+    return null;
+  }
+
+  return JSON.parse(data);
+}
+
+export const setAllSessionsCookie = (data: AllSessionsDataBody) => {
+  Cookie.set(
+    `${COOKIE_ALL_SESSIONS_KEY}`,
+    JSON.stringify(data),
+    {
+      sameSite: 'strict',
+      secure: true,
+      expires: 30 // days
     }
   )
 }

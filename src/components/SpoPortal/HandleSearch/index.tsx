@@ -18,8 +18,12 @@ import { isValid } from "../../../lib/helpers/nfts";
 import LogoMark from "../../../images/logo-single.svg";
 import { Loader } from "../../Loader";
 import {
+  AllSessionsData,
+  AllSessionsDataBody,
+  getAllCurrentSessionCookie,
   getAllCurrentSPOSessionData,
   getRecaptchaToken,
+  setAllSessionsCookie,
   setSPOSessionTokenCookie,
 } from "../../../lib/helpers/session";
 import { SessionResponseBody } from "../../../../netlify/functions/session";
@@ -91,6 +95,32 @@ export const HandleSearch = () => {
         );
 
         setCurrentIndex(nextIndex);
+
+        const newSession: AllSessionsData = {
+          handle,
+          dateAdded: Date.now(),
+          status: "pending",
+        };
+
+        const allSessionsCookieData = getAllCurrentSessionCookie();
+        const allSessionsData: AllSessionsDataBody = !allSessionsCookieData
+          ? {
+              token: sessionResponse.allSessionsToken,
+              data: {
+                ...sessionResponse.allSessionsData,
+                sessions: [newSession],
+              },
+            }
+          : {
+              ...allSessionsCookieData,
+              data: {
+                ...allSessionsCookieData.data,
+                sessions: [...allSessionsCookieData.data.sessions, newSession],
+              },
+            };
+
+        setAllSessionsCookie(allSessionsData);
+
         return;
       }
 

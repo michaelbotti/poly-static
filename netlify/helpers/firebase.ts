@@ -138,7 +138,7 @@ export const getRefundedSessionByHandle = async (handle: string): Promise<Refund
     });
 }
 
-export const getCachedState = async (): Promise<StateData | false> => {
+export const getCachedState = async (): Promise<StateData | null> => {
   const doc = await admin
     .firestore()
     .collection(buildCollectionNameWithSuffix("/stateData"))
@@ -148,7 +148,7 @@ export const getCachedState = async (): Promise<StateData | false> => {
 
   const state = doc.data() as StateData;
   if (!state) {
-    return false;
+    return null;
   }
 
   return state;

@@ -19,6 +19,8 @@ import {
 } from "../../lib/helpers/session";
 import { HandleMintContext } from "../../context/mint";
 import { buildClientAgentInfo } from "../../lib/helpers/clientInfo";
+import { EmailInputs } from "./EmailInputs";
+import { AgreeInputs } from "./AgreeInputs";
 
 const validateEmail = (email: string): boolean => {
   const res =
@@ -310,80 +312,21 @@ export const HandleQueue = (): JSX.Element => {
             ref={form}
             className="bg-dark-100 border-dark-300 rounded-t-lg"
           >
-            {!activeEmail && !activeAuthCode && (
-              <>
-                <input
-                  name="email"
-                  disabled={savingSpot}
-                  placeholder={"Your email address..."}
-                  className={`focus:ring-0 focus:ring-opacity-0 border-2 outline-none form-input bg-dark-100 border-dark-300 rounded-t-lg px-6 py-4 text-xl w-full`}
-                  value={emailInput}
-                  // @ts-ignore
-                  onChange={(e) => handleOnChange(e.target.value)}
-                />
-                <div className="flex items-center text-sm bg-dark-100 border-dark-300 border-l-2 border-r-2 px-4 py-2">
-                  <input
-                    className="form-checkbox p-2 text-primary-200 rounded focus:ring-primary-200 cursor-pointer"
-                    id="acceptEmail"
-                    name="acceptEmail"
-                    type="checkbox"
-                    checked={emailChecked}
-                    onChange={() => setEmailChecked(!emailChecked)}
-                  />
-                  <label
-                    className="ml-2 text-white py-3 cursor-pointer"
-                    htmlFor="acceptEmail"
-                  >
-                    I agree to receive email notifications.
-                  </label>
-                </div>
-              </>
-            )}
-            {activeEmail && activeAuthCode && (
-              <>
-                <div className="flex items-center text-sm bg-dark-100 border-dark-300 border-2 rounded-t-lg p-4 pt-2 pb-0">
-                  <input
-                    className="form-checkbox p-2 text-primary-200 rounded focus:ring-primary-200 cursor-pointer"
-                    id="tou"
-                    name="tou"
-                    type="checkbox"
-                    checked={touChecked}
-                    onChange={() => setTouChecked(!touChecked)}
-                  />
-                  <label
-                    className="ml-2 text-white py-3 cursor-pointer"
-                    htmlFor="tou"
-                  >
-                    I have read and agree to the ADA Handle{" "}
-                    <Link to="/tou" className="text-primary-100">
-                      Terms of Use
-                    </Link>
-                  </label>
-                </div>
-                <div className="flex items-center text-sm bg-dark-100 border-dark-300 border-l-2 border-r-2 p-4 pb-2 pt-0">
-                  <input
-                    className="form-checkbox p-2 text-primary-200 rounded focus:ring-primary-200 cursor-pointer"
-                    id="refunds"
-                    name="refunds"
-                    type="checkbox"
-                    checked={refundsChecked}
-                    onChange={() => setRefundsChecked(!refundsChecked)}
-                  />
-                  <label
-                    className="ml-2 text-white py-3 cursor-pointer"
-                    htmlFor="refunds"
-                  >
-                    You agree to our{" "}
-                    <Link className="text-primary-100" to="/refund-policy">
-                      Refund Policy
-                    </Link>{" "}
-                    and{" "}
-                    <strong className="underline">
-                      {REFUND_POLICY_DATE} processing time!
-                    </strong>
-                  </label>
-                </div>
-              </>
+            {activeEmail && activeAuthCode ? (
+              <AgreeInputs
+                touChecked={touChecked}
+                setTouChecked={setTouChecked}
+                refundsChecked={refundsChecked}
+                setRefundsChecked={setRefundsChecked}
+              />
+            ) : (
+              <EmailInputs
+                savingSpot={savingSpot}
+                emailInput={emailInput}
+                emailChecked={emailChecked}
+                handleOnChange={handleOnChange}
+                setEmailChecked={setEmailChecked}
+              />
             )}
             {activeEmail ? (
               <Button

@@ -69,11 +69,11 @@ export const SpoPortalPage = (): JSX.Element => {
         <div className="col-span-12 relative z-10">
           <div className="p-8">
             <h2 className="font-bold text-3xl text-primary-100 mb-2">
-              You have secured a your handle!
+              You have secured a your Handle!
             </h2>
             <hr className="w-12 border-dark-300 border-2 block my-8" />
             <p>
-              We're currently only allowing 1 handle per sessions. Once we
+              We're currently only allowing 1 Handle per sessions. Once we
               confirm payment, you'll have the option to start a new session.
             </p>
           </div>
