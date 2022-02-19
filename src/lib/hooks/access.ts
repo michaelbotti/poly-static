@@ -7,7 +7,7 @@ export const useAccessOpen = (): [
   boolean | null,
   Dispatch<SetStateAction<boolean>>
 ] => {
-  const [accessOpen, setAccessOpen] = useState<boolean>(null);
+  const [accessOpen, setAccessOpen] = useState<boolean | null>(null);
 
   useEffect(() => {
     const updateAccess = () => {
