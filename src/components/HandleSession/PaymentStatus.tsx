@@ -83,7 +83,7 @@ export const PaymentStatus: React.FC<Props> = ({
   return (
     <Countdown
       date={new Date(accessToken.data.exp * 1000)}
-      renderer={({ formatted, total }) => {
+      renderer={({ total }) => {
         const isWarning = !validPayment && total < 120 * 1000;
         return (
           <div

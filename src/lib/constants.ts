@@ -37,7 +37,7 @@ export const HEADER_JWT_SPO_SESSION_TOKEN = 'x-spo-session-token';
 export const HEADER_JWT_ALL_SESSIONS_TOKEN = 'x-all-sessions-token';
 
 export const HEADER_CLIENT_IP = 'x-nf-client-connection-ip';
-export const REFUND_POLICY_DATE = '72 hours';
+export const REFUND_POLICY_DATE = '14 days';
 
 /**
  * a-z

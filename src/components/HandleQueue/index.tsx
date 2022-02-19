@@ -1,26 +1,19 @@
-import React, { useRef, useState, useContext, useEffect } from "react";
-import { Link, navigate } from "gatsby";
+import React, { useRef, useState, useContext } from "react";
+import { Link } from "gatsby";
 import { useLocation } from "@reach/router";
 import { parse } from "query-string";
 
-import { VerifyResponseBody } from "../../../netlify/functions/verify";
 import {
   HEADER_EMAIL,
-  HEADER_EMAIL_AUTH,
   HEADER_RECAPTCHA,
   HEADER_RECAPTCHA_FALLBACK,
   RECAPTCHA_SITE_KEY_FALLBACK,
-  REFUND_POLICY_DATE,
 } from "../../lib/constants";
 import Button from "../button";
-import {
-  getRecaptchaToken,
-  setAccessTokenCookie,
-} from "../../lib/helpers/session";
+import { getRecaptchaToken } from "../../lib/helpers/session";
 import { HandleMintContext } from "../../context/mint";
 import { buildClientAgentInfo } from "../../lib/helpers/clientInfo";
 import { EmailInputs } from "./EmailInputs";
-import { AgreeInputs } from "./AgreeInputs";
 
 const validateEmail = (email: string): boolean => {
   const res =
@@ -60,11 +53,8 @@ export const HandleQueue = (): JSX.Element => {
   const [submitted, setSubmitted] = useState<boolean>(false);
   const [responseMessage, setResponseMessage] = useState<string>(null);
   const [emailInput, setEmailInput] = useState<string>("");
-  const [authInput, setAuthInput] = useState<string>("");
   const [expired, setExpired] = useState<boolean>(false);
   const [emailChecked, setEmailChecked] = useState<boolean>(false);
-  const [touChecked, setTouChecked] = useState<boolean>(false);
-  const [refundsChecked, setRefundsChecked] = useState<boolean>(false);
   const [recaptchaFallbackToken, setRecaptchaFallbackToken] =
     useState<string>(null);
   const [recaptchaRendered, setRecaptchaRendered] = useState<boolean>(false);
@@ -74,12 +64,6 @@ export const HandleQueue = (): JSX.Element => {
   const activeEmail = getActiveEmail();
   const activeAuthCode = getActiveAuthCode();
   const form = useRef(null);
-
-  useEffect(() => {
-    if (activeAuthCode) {
-      setAuthInput(activeAuthCode);
-    }
-  }, []);
 
   const setTimeoutResponseMessage = (message: string) => {
     setResponseMessage(message);
@@ -199,46 +183,12 @@ export const HandleQueue = (): JSX.Element => {
     handleSavingResponse(res);
   };
 
-  // Sends the user's email and auth code (via URL params) to the server for verification.
-  const handleAuthenticating = async (e: Event) => {
-    e.preventDefault();
-
-    setAuthenticating(true);
-    try {
-      const res: VerifyResponseBody = await fetch(
-        "/.netlify/functions/verify",
-        {
-          headers: {
-            [HEADER_EMAIL]: activeEmail,
-            [HEADER_EMAIL_AUTH]: activeAuthCode,
-          },
-        }
-      )
-        .then((res) => res.json())
-        .catch((e) => console.log(e));
-
-      const { error, verified, message, token, data } = res;
-      if (!error && verified && token && data) {
-        setAccessTokenCookie(res, data.exp);
-        window.location.href = "/mint";
-      }
-
-      if (!verified && error && message) {
-        setResponseMessage(message);
-        setExpired(true);
-      }
-    } catch (e) {
-      setTimeoutResponseMessage("Hmm, try that again. Something went wrong.");
-      console.log(e);
-    }
-
-    setAuthenticating(false);
-  };
+  const showWaitlist = stateData?.accessQueueSize > 500;
 
   return (
     <>
       <div className="flex items-center justify-between mb-8 lg:mb-12">
-        <div className="w-1/2 text-center">
+        <div className={`${showWaitlist ? "w-1/2" : "w-full"} text-center`}>
           <h4 className="text-lg text-dark-350 mb-4">Blockchain Load</h4>
           <span
             className={`font-bold text-4xl ${
@@ -255,16 +205,18 @@ export const HandleQueue = (): JSX.Element => {
             {null !== stateData && stateData.error && "N/A"}
           </span>
         </div>
-        <div className="w-1/2 text-center">
-          <h4 className="text-lg text-dark-350 mb-4">Current Waitlist</h4>
-          <span className={`font-bold text-4xl text-primary-100`}>
-            {null === stateData && "Loading..."}
-            {null !== stateData && !stateData.error && (
-              <span>{stateData.accessQueueSize ?? 0}</span>
-            )}
-            {null !== stateData && stateData.error && "N/A"}
-          </span>
-        </div>
+        {showWaitlist ? (
+          <div className="w-1/2 text-center">
+            <h4 className="text-lg text-dark-350 mb-4">Current Waitlist</h4>
+            <span className={`font-bold text-4xl text-primary-100`}>
+              {null === stateData && "Loading..."}
+              {null !== stateData && !stateData.error && (
+                <span>{stateData.accessQueueSize ?? 0}</span>
+              )}
+              {null !== stateData && stateData.error && "N/A"}
+            </span>
+          </div>
+        ) : null}
       </div>
       {submitted ? (
         <div className="bg-dark-100 rounded-lg shadow-lg p-8 block">
@@ -289,22 +241,13 @@ export const HandleQueue = (): JSX.Element => {
       ) : (
         <>
           <h3 className="text-2xl text-white text-center mb-4">
-            {activeEmail && activeAuthCode ? (
-              <>Agree to the Terms</>
-            ) : (
-              <>Enter the Queue</>
-            )}
+            Enter the Queue
           </h3>
+          {/* TODO: use state chain load param */}
           {!activeEmail && !activeAuthCode && stateData?.chainLoad > 0.8 && (
             <p className="text-center">
               You may experienced delayed delivery times while we wait for the
               blockchain load to fall below 80%.
-            </p>
-          )}
-          {activeEmail && activeAuthCode && (
-            <p className="text-lg text-center">
-              Almost there! Just make sure to agree to the terms of use before
-              purchasing your Handles. This information is important!
             </p>
           )}
           <form
@@ -312,49 +255,27 @@ export const HandleQueue = (): JSX.Element => {
             ref={form}
             className="bg-dark-100 border-dark-300 rounded-t-lg"
           >
-            {activeEmail && activeAuthCode ? (
-              <AgreeInputs
-                touChecked={touChecked}
-                setTouChecked={setTouChecked}
-                refundsChecked={refundsChecked}
-                setRefundsChecked={setRefundsChecked}
-              />
-            ) : (
-              <EmailInputs
-                savingSpot={savingSpot}
-                emailInput={emailInput}
-                emailChecked={emailChecked}
-                handleOnChange={handleOnChange}
-                setEmailChecked={setEmailChecked}
-              />
-            )}
-            {activeEmail ? (
-              <Button
-                className={`w-full rounded-t-none`}
-                buttonStyle={"primary"}
-                type="submit"
-                disabled={authenticating || !touChecked || !refundsChecked}
-                onClick={handleAuthenticating}
-              >
-                {authenticating && "Authenticating..."}
-                {!authenticating && "Enter Minting Portal"}
-              </Button>
-            ) : (
-              <Button
-                className={`w-full rounded-t-none`}
-                buttonStyle={"primary"}
-                type="submit"
-                disabled={savingSpot || !emailChecked || verifyingRecaptcha}
-                onClick={handleSaving}
-              >
-                {savingSpot && "Entering queue..."}
-                {!savingSpot && verifyingRecaptcha && "Waiting..."}
-                {!authenticating &&
-                  !savingSpot &&
-                  !verifyingRecaptcha &&
-                  "Submit"}
-              </Button>
-            )}
+            <EmailInputs
+              savingSpot={savingSpot}
+              emailInput={emailInput}
+              emailChecked={emailChecked}
+              handleOnChange={handleOnChange}
+              setEmailChecked={setEmailChecked}
+            />
+            <Button
+              className={`w-full rounded-t-none`}
+              buttonStyle={"primary"}
+              type="submit"
+              disabled={savingSpot || !emailChecked || verifyingRecaptcha}
+              onClick={handleSaving}
+            >
+              {savingSpot && "Entering queue..."}
+              {!savingSpot && verifyingRecaptcha && "Waiting..."}
+              {!authenticating &&
+                !savingSpot &&
+                !verifyingRecaptcha &&
+                "Submit"}
+            </Button>
           </form>
           {responseMessage && (
             <p className="my-2 text-center">{responseMessage}</p>
@@ -376,7 +297,6 @@ export const HandleQueue = (): JSX.Element => {
                 to="/mint"
                 onClick={() => {
                   setResponseMessage("");
-                  setAuthInput(null);
                   setEmailInput(null);
                 }}
                 className="text-primary-100"
