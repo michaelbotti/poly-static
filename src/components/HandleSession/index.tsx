@@ -176,12 +176,11 @@ export const HandleSession = ({
     setCurrentIndex(0);
 
     if (isSPO) {
+      // Only clear the session if it's the SPO session.
       setCurrentSPOAccess(false);
       Cookies.remove(SPO_COOKIE_ACCESS_KEY);
       Cookies.remove(`${SPO_COOKIE_SESSION_PREFIX}_${currentIndex}`);
     } else {
-      setCurrentAccess(false);
-      Cookies.remove(COOKIE_ACCESS_KEY);
       Cookies.remove(`${COOKIE_SESSION_PREFIX}_${currentIndex}`);
     }
   };
