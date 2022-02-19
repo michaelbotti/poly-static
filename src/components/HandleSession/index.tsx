@@ -260,25 +260,28 @@ export const HandleSession = ({
             </li>
             <li>
               Do NOT send from an exchange. Only use a STAKE POOL wallet you own
-              the keys to (like Nami, Yoroi, Daedalus, etc). In addition, Byron
-              wallets and bundled transactions will be refunded.
+              the keys to (like Nami, Yoroi, Daedalus, etc).
             </li>
           </>
         ) : (
           <li>
             Do NOT send from an exchange. Only use wallets you own the keys to
-            (like Nami, Yoroi, Daedalus, etc). In addition, Byron wallets and
-            bundled transactions will be refunded.
+            (like Nami, Yoroi, Daedalus, etc).
           </li>
         )}
+        <li>Byron wallets and bundled transactions will be refunded.</li>
         <li>Do NOT send more than one payment.</li>
         <li>
-          Each Handle has{" "}
+          Each Handle payment has{" "}
           {isSPO
             ? "1 hour"
             : `${stateData?.paymentWindowTimeoutMinutes ?? 60} minutes`}{" "}
-          to wait for a payment. Your access window may expire, but we are still
-          waiting for the payment.
+          to settle on the blockchain before it will be considered expired. If
+          your access window expires before a your Handle payment window, the{" "}
+          {isSPO
+            ? "1 hour"
+            : `${stateData?.paymentWindowTimeoutMinutes ?? 60} minutes`}{" "}
+          minute window will still be honored!
         </li>
       </ul>
       <br />
@@ -303,7 +306,7 @@ export const HandleSession = ({
                 </strong>
               </h4>
               <div className="relative">
-                <pre className="p-4 rounded-t-lg shadow-inner shadow-lg bg-dark-300 overflow-hidden overflow-scroll pr-24 border-2 border-b-0 border-primary-100">
+                <pre className="p-4 rounded-none rounded-tr-lg rounded-tl-lg shadow-inner shadow-lg bg-dark-300 overflow-hidden overflow-scroll pr-24 border-2 border-b-0 border-primary-100">
                   {address}
                 </pre>
                 <button
