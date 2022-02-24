@@ -241,7 +241,7 @@ export const HandleSession = ({
 
   return (
     <div className="col-span-6">
-      <h2 className="font-bold text-3xl mb-2">Session Active</h2>
+      <h2 className="font-bold text-3xl mb-2">Handle payment</h2>
       <p className="text-lg">
         Submit your payment <u>exactly</u> in the amount shown. Invalid payments
         will be refunded, but can take up to {REFUND_POLICY_DATE}!
