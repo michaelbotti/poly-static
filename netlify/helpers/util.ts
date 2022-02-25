@@ -1,7 +1,7 @@
 import { HandlerResponse } from '@netlify/functions';
 import { fetch } from 'cross-fetch';
 import { HEADER_HANDLE, HEADER_JWT_ACCESS_TOKEN, HEADER_JWT_SESSION_TOKEN, HEADER_JWT_SPO_ACCESS_TOKEN, HEADER_JWT_SPO_SESSION_TOKEN } from '../../src/lib/constants';
-import { buildUnavailableResponse, getDefaultResponseAvailable, HandleResponseBody } from '../../src/lib/helpers/search';
+import { buildUnavailableResponse, getDefaultResponseAvailable, getTwitterResponseUnvailable, HandleResponseBody } from '../../src/lib/helpers/search';
 
 export const getNodeEndpointUrl = () => process.env.NODEJS_APP_ENDPOINT;
 
@@ -94,6 +94,14 @@ export const ensureHandleAvailable = async (accessToken: string, handle: string,
     return {
       statusCode: 200,
       body: JSON.stringify(getDefaultResponseAvailable()),
+    };
+  }
+
+  // If the type is twitter, allow user to authenticate and purchase handle
+  if (type === 'twitter') {
+    return {
+      statusCode: 200,
+      body: JSON.stringify(getTwitterResponseUnvailable()),
     };
   }
 
