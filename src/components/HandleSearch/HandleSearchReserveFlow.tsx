@@ -192,7 +192,7 @@ export const HandleSearchReserveFlow = ({ className = "", ...rest }) => {
   if (fetchingSession) {
     return (
       <div className="text-center">
-        <p className="text-3xl">Fetching session...</p>
+        <p className="text-3xl">Fetching...</p>
         <Loader />
       </div>
     );
@@ -206,10 +206,10 @@ export const HandleSearchReserveFlow = ({ className = "", ...rest }) => {
       {currentActiveSessions.length > 0 ? (
         <>
           <p className="text-lg">
-            You have {currentActiveSessions.length} active sessions in progress!
-            In order to make distributing Handles as fair as possible, we're
-            limiting how many you can purchase at a time. Don't worry, it goes
-            fast.
+            You have {currentActiveSessions.length} active Handle reservations
+            in progress! In order to make distributing Handles as fair as
+            possible, we're limiting how many you can purchase at a time. Don't
+            worry, it goes fast.
           </p>
         </>
       ) : (
@@ -235,7 +235,8 @@ export const HandleSearchReserveFlow = ({ className = "", ...rest }) => {
         <>
           <p className="text-lg">
             <strong>Wow, you got speed!</strong> You're clearly a pro, but let's
-            slow down. Try again when one of your open sessions expire!
+            slow down. You can only reserve three handles at a time. Once each
+            payment confirms another handle can be reserved.
           </p>
         </>
       ) : (
@@ -244,7 +245,7 @@ export const HandleSearchReserveFlow = ({ className = "", ...rest }) => {
             {currentActiveSessions.length !== 3 && (
               <p className="text-lg">
                 <strong>
-                  You have {3 - currentActiveSessions.length} session
+                  You have {3 - currentActiveSessions.length} reservation
                   {2 === currentActiveSessions.length ? "" : "s"} left.
                 </strong>
               </p>
@@ -331,7 +332,7 @@ export const HandleSearchReserveFlow = ({ className = "", ...rest }) => {
             ) : (
               <input
                 type="submit"
-                value={"Reserve a Session"}
+                value={"Reserve Handle"}
                 disabled={!handleResponse?.available}
                 className={`${
                   !fetching && true === handleResponse?.available
@@ -342,8 +343,8 @@ export const HandleSearchReserveFlow = ({ className = "", ...rest }) => {
             )}
           </form>
           <p className="text-sm mt-8">
-            You get a max of up to 3 sessions at any one time. If you have
-            questions,{" "}
+            You get a max of up to 3 Handle reservations at any one time. If you
+            have questions,{" "}
             <a
               className="text-primary-100"
               href="https://discord.gg/8b4a48DdgF"
