@@ -27,6 +27,7 @@ export interface HandleAvailabilityResponse {
   link?: string; //`https://${process.env.CARDANOSCAN_DOMAIN}/token/${policyID}.${assetName}`
   reason?: string;
   duration?: number;
+  ogNumber?: number;
 }
 
 interface FetchSearchResponse {
@@ -79,7 +80,7 @@ export const ensureHandleAvailable = async (accessToken: string, handle: string,
     };
   }
 
-  const { available, message: responseMessage, link, type, reason } = response;
+  const { available, message: responseMessage, link, type, reason, ogNumber } = response;
 
   // if it doesn't exist on chain and it's available, send message that it's available
   if (available) {
@@ -101,7 +102,7 @@ export const ensureHandleAvailable = async (accessToken: string, handle: string,
   if (type === 'twitter') {
     return {
       statusCode: 200,
-      body: JSON.stringify(getTwitterResponseUnvailable()),
+      body: JSON.stringify(getTwitterResponseUnvailable({ ogNumber })),
     };
   }
 
