@@ -47,7 +47,6 @@ export const useSyncAvailableStatus = async (unsanitizedHandle: string, isSpo = 
         [getAccessTokenCookieName(isSpo)]: accessToken.token
       };
 
-      // Search on-chain.
       const res: HandleResponseBody = await (
         await fetch(`/.netlify/functions/search`, { headers })
       ).json();

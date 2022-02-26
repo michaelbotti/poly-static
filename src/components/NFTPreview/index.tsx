@@ -3,7 +3,6 @@ import { HandleMintContext } from "../../context/mint";
 
 import Background from "../../images/code.svg";
 import FullLogo from "../../images/logo-dark.svg";
-import { normalizeNFTHandle } from "../../lib/helpers/nfts";
 import { HandleDetails } from "../HandleSearch";
 import Logo from "./logo";
 
@@ -12,16 +11,19 @@ interface NFTPreviewProps {
   showPrice?: boolean;
   showHeader?: boolean;
   isSpo?: boolean;
+  twitterOgNumber?: number;
 }
+
+const TWITTER_OG_SIZE = 2438;
 
 const NFTPreview: FC<NFTPreviewProps> = ({
   handle,
   showPrice = true,
   showHeader = true,
   isSpo = false,
+  twitterOgNumber = 0,
 }) => {
-  const { isPurchasing, reservedHandles, primed } =
-    useContext(HandleMintContext);
+  const { isPurchasing } = useContext(HandleMintContext);
 
   const textSize = () => {
     if (handle.length < 3) {
@@ -68,18 +70,16 @@ const NFTPreview: FC<NFTPreviewProps> = ({
             <p className="m-0 text-xs font-bold absolute bottom-6 right-6">
               handle.me/{handle}
             </p>
-            {primed &&
-              reservedHandles?.twitter.includes(normalizeNFTHandle(handle)) && (
-                <p
-                  className="m-0 text-xs font-bold absolute bottom-6 left-6"
-                  style={{
-                    color: "#FFCD59",
-                  }}
-                >
-                  OG {primed && reservedHandles?.twitter.indexOf(handle)}/
-                  {primed && reservedHandles?.twitter.length}
-                </p>
-              )}
+            {twitterOgNumber !== 0 ? (
+              <p
+                className="m-0 text-xs font-bold absolute bottom-6 left-6"
+                style={{
+                  color: "#FFCD59",
+                }}
+              >
+                OG {twitterOgNumber}/{TWITTER_OG_SIZE}
+              </p>
+            ) : null}
           </div>
         </div>
       </div>

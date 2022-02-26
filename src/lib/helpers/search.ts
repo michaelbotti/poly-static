@@ -14,6 +14,7 @@ export interface HandleResponseBody {
   available: boolean;
   message: string;
   twitter: boolean;
+  ogNumber?: number;
   link?: string;
   reason?: string;
   mintingQueueSize?: number;
@@ -55,11 +56,12 @@ export const getTwitterResponseAvailable = (link?: string): HandleResponseBody =
   link
 });
 
-export const getTwitterResponseUnvailable = (link?: string): HandleResponseBody => ({
+export const getTwitterResponseUnvailable = ({ link, ogNumber }: { link?: string, ogNumber?: number }): HandleResponseBody => ({
   message: RESPONSE_UNAVAILABLE_TWITTER,
   available: false,
   twitter: true,
-  link
+  link,
+  ogNumber
 });
 
 export const getBetaPhaseResponseUnavailable = (link?: string): HandleResponseBody => ({
