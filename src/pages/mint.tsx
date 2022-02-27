@@ -25,6 +25,7 @@ function MintPage() {
     currentIndex,
     stateData,
     currentAccess,
+    handleResponse,
     setCurrentIndex,
     setCurrentAccess,
   } = useContext(HandleMintContext);
@@ -117,6 +118,7 @@ function MintPage() {
                   handle={
                     currentIndex === 0 ? handle : currentSession.data.handle
                   }
+                  twitterOgNumber={handleResponse?.ogNumber ?? 0}
                 />
               </div>
             </>
