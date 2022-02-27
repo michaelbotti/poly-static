@@ -139,14 +139,26 @@ export const getRefundedSessionByHandle = async (handle: string): Promise<Refund
 }
 
 export const getCachedState = async (): Promise<StateData | null> => {
-  const doc = await admin
+  const stateDoc = await admin
     .firestore()
     .collection(buildCollectionNameWithSuffix("/stateData"))
     .doc('state')
     .get();
+  const settingsDoc = await admin
+    .firestore()
+    .collection(buildCollectionNameWithSuffix("/stateData"))
+    .doc('settings')
+    .get();
 
 
-  const state = doc.data() as StateData;
+  const state = {
+    chainLoad: stateDoc.data().chainLoad,
+    totalHandles: stateDoc.data().totalHandles,
+    spoPageEnabled: settingsDoc.data().spoPageEnabled,
+    accessWindowTimeoutMinutes: settingsDoc.data().accessWindowTimeoutMinutes,
+    paymentWindowTimeoutMinutes: settingsDoc.data().paymentWindowTimeoutMinutes,
+    accessQueueSize: stateDoc.data().accessQueueSize
+  } as StateData;
   if (!state) {
     return null;
   }
