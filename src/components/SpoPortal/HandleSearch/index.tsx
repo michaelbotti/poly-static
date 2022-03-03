@@ -38,6 +38,7 @@ export const HandleSearch = () => {
     setHandleResponse,
     handle,
     setHandle,
+    setHandleCost,
   } = useContext(HandleMintContext);
   const [fetchingSession, setFetchingSession] = useState<boolean>(false);
   const [debouncedHandle] = useDebounce(handle, 600);
@@ -88,6 +89,7 @@ export const HandleSearch = () => {
         );
       if (!sessionResponse.error) {
         setHandle("");
+        setHandleCost(null);
         setSPOSessionTokenCookie(
           sessionResponse,
           new Date(sessionResponse.data.exp),
@@ -133,6 +135,7 @@ export const HandleSearch = () => {
     } catch (e) {
       console.log(e);
       setHandle("");
+      setHandleCost(null);
       setHandleResponse({
         available: false,
         message: "Something went wrong. Please refresh the page.",

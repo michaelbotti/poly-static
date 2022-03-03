@@ -8,6 +8,7 @@ import Logo from "./logo";
 
 interface NFTPreviewProps {
   handle: string;
+  handleCost: number | null;
   showPrice?: boolean;
   showHeader?: boolean;
   isSpo?: boolean;
@@ -18,12 +19,13 @@ const TWITTER_OG_SIZE = 2438;
 
 const NFTPreview: FC<NFTPreviewProps> = ({
   handle,
+  handleCost,
   showPrice = true,
   showHeader = true,
   isSpo = false,
   twitterOgNumber = 0,
 }) => {
-  const { isPurchasing } = useContext(HandleMintContext);
+  const { isPurchasing, fetching } = useContext(HandleMintContext);
 
   const textSize = () => {
     if (handle.length < 3) {
@@ -37,14 +39,20 @@ const NFTPreview: FC<NFTPreviewProps> = ({
     return "text-3xl";
   };
 
+  console.log("fetching", fetching);
+
   return (
     <>
       {!isPurchasing && (
         <>
-          {showHeader && <p className="m-0 text-center">Your NFT Preview</p>}
+          {showHeader && <p className="m-0 text-center">Your NFT Previewzz</p>}
           {showPrice && (
             <div className="text-center mt-2 mb-8">
-              <HandleDetails handle={handle} isSpo={isSpo} />
+              <HandleDetails
+                handle={handle}
+                cost={handleCost}
+                fetching={fetching}
+              />
             </div>
           )}
         </>

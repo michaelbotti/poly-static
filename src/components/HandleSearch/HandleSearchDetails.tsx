@@ -1,23 +1,22 @@
+import { CircularProgress } from "@mui/material";
 import React, { FC } from "react";
-import {
-  getRarityCost,
-  getRarityHex,
-  getRaritySlug,
-} from "../../../src/lib/helpers/nfts";
-import { SPO_ADA_HANDLE_COST } from "../../lib/constants";
+import { getRarityHex, getRaritySlug } from "../../../src/lib/helpers/nfts";
+import { Loader } from "../Loader";
 
 interface HandleDetailProps {
   handle: string;
   isSpo?: boolean;
+  cost?: number;
+  fetching: boolean;
 }
 
 export const HandleDetails: FC<HandleDetailProps> = ({
   handle,
-  isSpo = false,
+  cost,
+  fetching,
 }): JSX.Element => {
   const hex = getRarityHex(handle);
   const slug = getRaritySlug(handle);
-  const cost = isSpo ? SPO_ADA_HANDLE_COST : getRarityCost(handle);
 
   return (
     <h4 className="text-xl">
@@ -25,8 +24,14 @@ export const HandleDetails: FC<HandleDetailProps> = ({
         <span className="text-xl">Rarity / Price</span>
       ) : (
         <span className="font-bold text-xl">
-          <span style={{ color: hex }}>{slug}</span> /{" "}
-          {cost ? `${cost} ₳` : "Auction Only"}
+          {fetching ? (
+            <CircularProgress size={20} thickness={5} />
+          ) : (
+            <>
+              <span style={{ color: hex }}>{slug}</span> /{" "}
+              <span>{cost ? `${cost} ₳` : "Auction Only"}</span>
+            </>
+          )}
         </span>
       )}
     </h4>

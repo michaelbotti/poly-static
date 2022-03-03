@@ -11,7 +11,7 @@ import {
   SPO_COOKIE_ACCESS_KEY,
   SPO_COOKIE_SESSION_PREFIX,
 } from "../../lib/constants";
-import { getRarityCost, getRarityHex } from "../../lib/helpers/nfts";
+import { getRarityHex } from "../../lib/helpers/nfts";
 import {
   getAccessTokenFromCookie,
   getSessionTokenFromCookie,
@@ -57,7 +57,7 @@ export const HandleSession = ({
   sessionData: SessionResponseBody;
 }) => {
   const {
-    data: { isSPO, handle, cost, exp },
+    data: { isSPO, handle, cost },
     address,
     token,
   } = sessionData;
@@ -140,21 +140,22 @@ export const HandleSession = ({
         isSPO
       )
         .then((res) => {
-          if (!res.error) {
-            if (!res.data.items) {
-              setPaymentStatus(res.data.statusCode);
-              setFetchingPayment(false);
-              return;
-            }
+          setFetchingPayment(false);
 
-            setPaymentStatus(res.data.items[0].statusCode);
-            setFetchingPayment(false);
+          if (res.error) {
+            setError(true);
+            setPaymentStatus(res.data.statusCode);
             return;
           }
 
-          setError(true);
-          setPaymentStatus(res.data.statusCode);
-          setFetchingPayment(false);
+          let status = res.data.items
+            ? res.data.items[0].statusCode
+            : res.data.statusCode;
+          setPaymentStatus(status);
+
+          if (status !== ConfirmPaymentStatusCode.PENDING) {
+            clearInterval(interval);
+          }
         })
         .catch((e) => {});
     };
@@ -300,8 +301,7 @@ export const HandleSession = ({
                   className="text-4xl mt-4 inline-block font-bold"
                   style={{ color: getRarityHex(handle) }}
                 >
-                  {isSPO ? SPO_ADA_HANDLE_COST : getRarityCost(handle)}{" "}
-                  {isTestnet ? "tADA" : "ADA"}
+                  {isSPO ? SPO_ADA_HANDLE_COST : cost} {isTestnet ? "t₳" : "₳"}
                 </strong>
               </h4>
               <div className="relative">

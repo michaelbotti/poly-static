@@ -18,8 +18,9 @@ export const HowItWorks = () => {
           <li>Search and select an available Handle to purchase.</li>
         </ol>
         <p>
-          Pricing for each Handle ranges from 10 $ADA to 500 $ADA, depending on
-          the character length. You can see full details on{" "}
+          Pricing for each Handle, depending on the character length, uses our
+          Stable-Pricing Model which is based on the current USD/ADA market
+          price. You can see full details on{" "}
           <Link to="/faq" className="text-primary-100">
             our FAQ page
           </Link>

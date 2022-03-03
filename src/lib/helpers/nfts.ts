@@ -11,23 +11,23 @@ export const isValid = (handle: string) =>
 export const normalizeNFTHandle = (handle: string): string => handle.toLowerCase();
 
 export const getRarityFromLength = (length: number): RarityType => {
-    if (1 === length) {
-      return 'Legendary';
-    }
+  if (1 === length) {
+    return 'Legendary';
+  }
 
-    if (2 === length) {
-      return 'Ultra Rare';
-    }
+  if (2 === length) {
+    return 'Ultra Rare';
+  }
 
-    if (3 === length) {
-      return 'Rare';
-    }
+  if (3 === length) {
+    return 'Rare';
+  }
 
-    if (length > 3 && length < 8) {
-      return 'Common';
-    }
+  if (length > 3 && length < 8) {
+    return 'Common';
+  }
 
-    return 'Basic';
+  return 'Basic';
 }
 
 export const getRaritySlug = (handle: string): RarityType =>
@@ -60,21 +60,5 @@ export const getRarityHex = (handle: string): RarityHexTypes => {
     default:
     case "Common":
       return "#ffffff";
-  }
-};
-
-export const getRarityCost = (handle: string): RarityCostTypes => {
-  const rarity = getRarityFromLength(handle.length);
-  switch (rarity) {
-    case "Legendary":
-      return null;
-    case "Ultra Rare":
-      return 500;
-    case "Rare":
-      return 100;
-    case "Common":
-      return 50;
-    case "Basic":
-      return 10;
   }
 };

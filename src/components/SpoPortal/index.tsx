@@ -26,6 +26,7 @@ export const SpoPortalPage = (): JSX.Element => {
     stateData,
     stateLoading,
     handle,
+    handleCost,
     currentIndex,
     setCurrentIndex,
     currentSPOAccess,
@@ -97,6 +98,11 @@ export const SpoPortalPage = (): JSX.Element => {
             handle={
               currentIndex === 0
                 ? handle
+                : currentSession && currentSession.data.handle
+            }
+            handleCost={
+              currentIndex === 0
+                ? handleCost
                 : currentSession && currentSession.data.handle
             }
             isSpo={true}
