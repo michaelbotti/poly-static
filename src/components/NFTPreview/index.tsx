@@ -3,6 +3,7 @@ import { HandleMintContext } from "../../context/mint";
 
 import Background from "../../images/code.svg";
 import FullLogo from "../../images/logo-dark.svg";
+import { useIsTestnet } from "../../lib/hooks/useIsTestnet";
 import { HandleDetails } from "../HandleSearch";
 import Logo from "./logo";
 
@@ -27,6 +28,8 @@ const NFTPreview: FC<NFTPreviewProps> = ({
 }) => {
   const { isPurchasing, fetching } = useContext(HandleMintContext);
 
+  const { isTestnet } = useIsTestnet();
+
   const textSize = () => {
     if (handle.length < 3) {
       return "text-jumbo";
@@ -45,13 +48,14 @@ const NFTPreview: FC<NFTPreviewProps> = ({
     <>
       {!isPurchasing && (
         <>
-          {showHeader && <p className="m-0 text-center">Your NFT Previewzz</p>}
+          {showHeader && <p className="m-0 text-center">Your NFT Preview</p>}
           {showPrice && (
             <div className="text-center mt-2 mb-8">
               <HandleDetails
                 handle={handle}
                 cost={handleCost}
                 fetching={fetching}
+                isTestnet={isTestnet}
               />
             </div>
           )}

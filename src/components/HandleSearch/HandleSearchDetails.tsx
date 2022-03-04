@@ -8,15 +8,19 @@ interface HandleDetailProps {
   isSpo?: boolean;
   cost?: number;
   fetching: boolean;
+  isTestnet?: boolean;
 }
 
 export const HandleDetails: FC<HandleDetailProps> = ({
   handle,
   cost,
   fetching,
+  isTestnet = false,
 }): JSX.Element => {
   const hex = getRarityHex(handle);
   const slug = getRaritySlug(handle);
+
+  const auctionText = slug === "Legendary" ? "Auction Only" : "Unavailable";
 
   return (
     <h4 className="text-xl">
@@ -29,7 +33,9 @@ export const HandleDetails: FC<HandleDetailProps> = ({
           ) : (
             <>
               <span style={{ color: hex }}>{slug}</span> /{" "}
-              <span>{cost ? `${cost} ₳` : "Auction Only"}</span>
+              <span>
+                {cost ? `${cost} ${isTestnet ? "t₳" : "₳"}` : auctionText}
+              </span>
             </>
           )}
         </span>

@@ -40,6 +40,7 @@ import { getAccessTokenCookieName } from "../../../netlify/helpers/util";
 export const HandleSearchReserveFlow = ({ className = "", ...rest }) => {
   const {
     fetching,
+    setFetching,
     handleResponse,
     setHandleCost,
     setHandleResponse,
@@ -77,6 +78,7 @@ export const HandleSearchReserveFlow = ({ className = "", ...rest }) => {
     }
 
     if (valid) {
+      setFetching(true);
       setHandle(newHandle.toLowerCase());
     }
   };

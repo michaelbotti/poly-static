@@ -1,9 +1,7 @@
 import Cookies from "js-cookie";
 import React, { useContext, useEffect, useState } from "react";
-import Countdown from "react-countdown";
 import { HandleMintContext } from "../../context/mint";
 import {
-  COOKIE_ACCESS_KEY,
   COOKIE_SESSION_PREFIX,
   HEADER_IS_SPO,
   REFUND_POLICY_DATE,
@@ -22,11 +20,11 @@ import { Loader } from "../Loader";
 import Button from "../button";
 import { SessionResponseBody } from "../../../netlify/functions/session";
 import { Link } from "gatsby";
-import { useLocation } from "@reach/router";
 import { VerifyResponseBody } from "../../../netlify/functions/verify";
 import { fetchAuthenticatedRequest } from "../../../netlify/helpers/fetchAuthenticatedRequest";
 import { PaymentStatus } from "./PaymentStatus";
 import { getSessionTokenCookieName } from "../../../netlify/helpers/util";
+import { useIsTestnet } from "../../lib/hooks/useIsTestnet";
 
 enum ConfirmPaymentStatusCode {
   CONFIRMED = "CONFIRMED",
@@ -75,7 +73,6 @@ export const HandleSession = ({
   const [fetchingPayment, setFetchingPayment] = useState<boolean>(true);
   const [copying, setCopying] = useState<boolean>(false);
   const [retry, setRetry] = useState<boolean>(true);
-  const [isTestnet, setIsTestnet] = useState<boolean>(false);
   const [accessToken, setAccessToken] = useState<false | VerifyResponseBody>(
     false
   );
@@ -84,13 +81,7 @@ export const HandleSession = ({
   >(false);
   const [error, setError] = useState<boolean>(false);
 
-  const { hostname } = useLocation();
-
-  useEffect(() => {
-    if (hostname.includes("testnet") || hostname.includes("localhost")) {
-      setIsTestnet(true);
-    }
-  }, [hostname]);
+  const { isTestnet } = useIsTestnet();
 
   // Reset on index change.
   useEffect(() => {
