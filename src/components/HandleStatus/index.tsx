@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { CircularProgress } from "@mui/material";
 import { QueuePositionResponseBody } from "../../../netlify/functions/mintingQueuePosition";
 import { fetchAuthenticatedRequest } from "../../../netlify/helpers/fetchAuthenticatedRequest";
 import {
@@ -10,49 +11,69 @@ import { getAllCurrentSessionCookie } from "../../lib/helpers/session";
 export const HandleStatus = () => {
   const [mintingQueuePositionResponse, setMintingQueuePositionResponse] =
     useState(null);
+  const [fetchingMintingQueuePosition, setFetchingMintingQueuePosition] =
+    useState(false);
   const [error, setError] = useState<boolean>(false);
-  //useEffect(() => {
 
-  //     const allSessionsCookie = getAllCurrentSessionCookie();
-  //     if (!accessToken || !allSessionsCookie || !validPayment) {
-  //       return;
-  //     }
+  const fetchMintingQueuePosition = async () => {
+    const allSessionsCookie = getAllCurrentSessionCookie();
+    if (!allSessionsCookie) {
+      return;
+    }
 
-  //     const controller = new AbortController();
-  //     const updateMintingQueuePosition = async () => {
-  //       await fetchAuthenticatedRequest<QueuePositionResponseBody>(
-  //         `/.netlify/functions/mintingQueuePosition`,
-  //         {
-  //           signal: controller.signal,
-  //           headers: {
-  //             [HEADER_IS_SPO]: isSPO ? "true" : "false",
-  //             [HEADER_JWT_ALL_SESSIONS_TOKEN]: allSessionsCookie.token,
-  //           },
-  //         },
-  //         isSPO
-  //       )
-  //         .then((res) => {
-  //           if (!res.error) {
-  //             setMintingQueuePosition(res.mintingQueuePosition);
-  //             setMintingQueueMinutes(res.minutes);
-  //             setFetchingMintingQueuePosition(false);
-  //             return;
-  //           }
+    setFetchingMintingQueuePosition(true);
 
-  //           setError(true);
-  //           setFetchingMintingQueuePosition(false);
-  //         })
-  //         .catch((e) => {});
-  //     };
+    const result = await fetch(`/.netlify/functions/mintingQueuePosition`, {
+      headers: {
+        [HEADER_IS_SPO]: "false",
+        [HEADER_JWT_ALL_SESSIONS_TOKEN]: allSessionsCookie.token,
+      },
+    });
+    const response = await result.json();
+    if (!response.error) {
+      setMintingQueuePositionResponse(response);
+      setFetchingMintingQueuePosition(false);
+      return;
+    }
 
-  //     updateMintingQueuePosition();
-  //     const interval = setInterval(updateMintingQueuePosition, 5000);
+    setError(true);
+    setFetchingMintingQueuePosition(false);
+  };
 
-  //     return () => {
-  //       controller.abort();
-  //       clearInterval(interval);
-  //     };
-  //   }, [accessToken, validPayment]);
+  useEffect(() => {
+    fetchMintingQueuePosition();
+  }, []);
+
+  console.log("mintingQueuePositionResponse", mintingQueuePositionResponse);
+
+  const renderSessions = () => {
+    if (!mintingQueuePositionResponse) {
+      return null;
+    }
+
+    if (
+      mintingQueuePositionResponse.sessions.waitingForPayment.length === 0 &&
+      mintingQueuePositionResponse.sessions.waitingForMinting.length === 0 &&
+      mintingQueuePositionResponse.sessions.waitingForConfirmation.length ===
+        0 &&
+      mintingQueuePositionResponse.sessions.confirmed.length === 0
+    ) {
+      return <p>No sessions found</p>;
+    }
+
+    return (
+      <div>
+        <div>Pending Payment</div>
+        <div>
+          {mintingQueuePositionResponse.sessions.waitingForPayment.map(
+            (session) => {
+              return <div>{session.sessionId}</div>;
+            }
+          )}
+        </div>
+      </div>
+    );
+  };
 
   return (
     <>
@@ -67,6 +88,13 @@ export const HandleStatus = () => {
       <h1 className="m-0 text-center inline-block mb-4 text-4xl font-bold leading-none">
         Check you handle(s) status
       </h1>
+      {fetchingMintingQueuePosition ? (
+        <div>
+          <CircularProgress />
+        </div>
+      ) : (
+        renderSessions()
+      )}
     </>
   );
 };
