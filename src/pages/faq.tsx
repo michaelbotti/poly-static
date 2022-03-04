@@ -3,6 +3,7 @@ import React from "react";
 import SEO from "../components/seo";
 import FAQ from "../components/faq";
 import { Link } from "gatsby";
+import { DynamicPricing } from "../components/FAQ/DynamicPricing";
 
 function FAQPage() {
   return (
@@ -118,23 +119,7 @@ function FAQPage() {
                         pricing and rarity, determined simply by character
                         length:
                       </p>
-                      <ul>
-                        <li>
-                          Legendary (1 character): <strong>Auction Only</strong>
-                        </li>
-                        <li>
-                          Ultra Rare (2 characters): <strong>500 $ADA</strong>
-                        </li>
-                        <li>
-                          Rare (3 characters): <strong>100 $ADA</strong>
-                        </li>
-                        <li>
-                          Common (4–7): <strong>50 $ADA</strong>
-                        </li>
-                        <li>
-                          Basic (8–15): <strong>10 $ADA</strong>
-                        </li>
-                      </ul>
+                      <DynamicPricing />
                     </>
                   ),
                 },

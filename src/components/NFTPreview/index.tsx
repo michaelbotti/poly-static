@@ -42,8 +42,6 @@ const NFTPreview: FC<NFTPreviewProps> = ({
     return "text-3xl";
   };
 
-  console.log("fetching", fetching);
-
   return (
     <>
       {!isPurchasing && (

@@ -13,6 +13,12 @@ export interface StateData {
   accessWindowTimeoutMinutes?: number;
   paymentWindowTimeoutMinutes?: number;
   accessQueueSize: number;
+  handlePrices: {
+    basic: number;
+    common: number;
+    rare: number;
+    ultraRare: number;
+  }
 }
 
 export interface StateResponseBody extends StateData {
