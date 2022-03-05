@@ -13,6 +13,7 @@ import Tooltip, { tooltipClasses } from "@mui/material/Tooltip";
 
 import {
   HEADER_HANDLE,
+  HEADER_HANDLE_COST,
   HEADER_RECAPTCHA,
   HEADER_TWITTER_ACCESS_TOKEN,
 } from "../../../src/lib/constants";
@@ -39,9 +40,12 @@ import { getAccessTokenCookieName } from "../../../netlify/helpers/util";
 export const HandleSearchReserveFlow = ({ className = "", ...rest }) => {
   const {
     fetching,
+    setFetching,
     handleResponse,
+    setHandleCost,
     setHandleResponse,
     handle,
+    handleCost,
     setHandle,
     twitterToken,
     setTwitterToken,
@@ -74,6 +78,7 @@ export const HandleSearchReserveFlow = ({ className = "", ...rest }) => {
     }
 
     if (valid) {
+      setFetching(true);
       setHandle(newHandle.toLowerCase());
     }
   };
@@ -91,6 +96,7 @@ export const HandleSearchReserveFlow = ({ className = "", ...rest }) => {
 
     const headers = new Headers();
     headers.append(HEADER_HANDLE, handle);
+    headers.append(HEADER_HANDLE_COST, handleCost?.toString());
     headers.append(HEADER_RECAPTCHA, recaptchaToken);
     const accessToken = getAccessTokenFromCookie();
     if (accessToken) {
@@ -112,6 +118,7 @@ export const HandleSearchReserveFlow = ({ className = "", ...rest }) => {
       const sessionResponse: SessionResponseBody = await session.json();
       if (!sessionResponse.error) {
         setHandle("");
+        setHandleCost(null);
         setSessionTokenCookie(
           sessionResponse,
           new Date(sessionResponse.data.exp),
@@ -159,6 +166,7 @@ export const HandleSearchReserveFlow = ({ className = "", ...rest }) => {
     } catch (e) {
       console.log(e);
       setHandle("");
+      setHandleCost(null);
       setHandleResponse({
         available: false,
         message: "Something went wrong. Please refresh the page.",

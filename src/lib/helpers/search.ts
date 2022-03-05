@@ -15,6 +15,7 @@ export interface HandleResponseBody {
   message: string;
   twitter: boolean;
   ogNumber?: number;
+  cost?: number;
   link?: string;
   reason?: string;
   mintingQueueSize?: number;
@@ -22,12 +23,17 @@ export interface HandleResponseBody {
   mintingQueueMinutes?: number;
 }
 
-export const getDefaultResponseAvailable = (link?: string): HandleResponseBody => ({
-  message: RESPONSE_AVAILABLE_DEFAULT,
-  available: true,
-  twitter: false,
-  link
-});
+interface DefaultResponseInput { link?: string, cost?: number }
+export const getDefaultResponseAvailable = (input?: DefaultResponseInput): HandleResponseBody => {
+  const { link, cost } = input;
+  return {
+    message: RESPONSE_AVAILABLE_DEFAULT,
+    available: true,
+    twitter: false,
+    cost,
+    link
+  }
+};
 
 export const getDefaultResponseUnvailable = (link?: string): HandleResponseBody => ({
   message: RESPONSE_UNAVAILABLE_DEFAULT,

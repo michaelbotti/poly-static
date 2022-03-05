@@ -9,7 +9,7 @@ import { HowItWorks } from "../components/HowItWorks";
 import { RedirectTo } from "../components/RedirectTo";
 
 function MintPage() {
-  const { stateData } = useContext(HandleMintContext);
+  const { stateLoading, stateData } = useContext(HandleMintContext);
 
   const [accessOpen] = useAccessOpen();
 
@@ -25,7 +25,10 @@ function MintPage() {
           className="grid grid-cols-12 gap-4 lg:gap-8 bg-dark-200 rounded-lg rounded-tl-none place-content-start p-4 lg:p-8"
           style={{ minHeight: "40vh" }}
         >
-          <HowItWorks />
+          <HowItWorks
+            stateLoading={stateLoading}
+            dynamicPricingEnabled={stateData?.dynamicPricingEnabled}
+          />
           <div className="col-span-12 md:col-span-6 relative z-10">
             <HandleQueue />
           </div>

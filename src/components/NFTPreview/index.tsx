@@ -3,11 +3,13 @@ import { HandleMintContext } from "../../context/mint";
 
 import Background from "../../images/code.svg";
 import FullLogo from "../../images/logo-dark.svg";
+import { useIsTestnet } from "../../lib/hooks/useIsTestnet";
 import { HandleDetails } from "../HandleSearch";
 import Logo from "./logo";
 
 interface NFTPreviewProps {
   handle: string;
+  handleCost: number | null;
   showPrice?: boolean;
   showHeader?: boolean;
   isSpo?: boolean;
@@ -18,12 +20,15 @@ const TWITTER_OG_SIZE = 2438;
 
 const NFTPreview: FC<NFTPreviewProps> = ({
   handle,
+  handleCost,
   showPrice = true,
   showHeader = true,
   isSpo = false,
   twitterOgNumber = 0,
 }) => {
-  const { isPurchasing } = useContext(HandleMintContext);
+  const { isPurchasing, fetching } = useContext(HandleMintContext);
+
+  const { isTestnet } = useIsTestnet();
 
   const textSize = () => {
     if (handle.length < 3) {
@@ -44,7 +49,12 @@ const NFTPreview: FC<NFTPreviewProps> = ({
           {showHeader && <p className="m-0 text-center">Your NFT Preview</p>}
           {showPrice && (
             <div className="text-center mt-2 mb-8">
-              <HandleDetails handle={handle} isSpo={isSpo} />
+              <HandleDetails
+                handle={handle}
+                cost={handleCost}
+                fetching={fetching}
+                isTestnet={isTestnet}
+              />
             </div>
           )}
         </>
