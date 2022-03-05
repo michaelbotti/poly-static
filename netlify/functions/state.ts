@@ -13,6 +13,7 @@ export interface StateData {
   accessWindowTimeoutMinutes?: number;
   paymentWindowTimeoutMinutes?: number;
   accessQueueSize: number;
+  dynamicPricingEnabled: boolean;
   handlePrices: {
     basic: number;
     common: number;

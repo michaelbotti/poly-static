@@ -150,15 +150,18 @@ export const getCachedState = async (): Promise<StateData | null> => {
     .doc('settings')
     .get();
 
+  const { chainLoad, totalHandles, accessQueueSize, handlePrices } = stateDoc.data() as StateData;
+  const { spoPageEnabled, accessWindowTimeoutMinutes, paymentWindowTimeoutMinutes, dynamicPricingEnabled } = settingsDoc.data() as StateData;
 
   const state = {
-    chainLoad: stateDoc.data().chainLoad,
-    totalHandles: stateDoc.data().totalHandles,
-    spoPageEnabled: settingsDoc.data().spoPageEnabled,
-    accessWindowTimeoutMinutes: settingsDoc.data().accessWindowTimeoutMinutes,
-    paymentWindowTimeoutMinutes: settingsDoc.data().paymentWindowTimeoutMinutes,
-    accessQueueSize: stateDoc.data().accessQueueSize,
-    handlePrices: stateDoc.data().handlePrices,
+    chainLoad,
+    totalHandles,
+    spoPageEnabled,
+    accessWindowTimeoutMinutes,
+    paymentWindowTimeoutMinutes,
+    accessQueueSize,
+    handlePrices,
+    dynamicPricingEnabled
   } as StateData;
   if (!state) {
     return null;

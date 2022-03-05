@@ -1,7 +1,6 @@
 import { CircularProgress } from "@mui/material";
 import React, { FC } from "react";
 import { getRarityHex, getRaritySlug } from "../../../src/lib/helpers/nfts";
-import { Loader } from "../Loader";
 
 interface HandleDetailProps {
   handle: string;
