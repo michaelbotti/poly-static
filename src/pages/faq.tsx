@@ -1,10 +1,14 @@
-import React from "react";
+import React, { useContext } from "react";
 
 import SEO from "../components/seo";
 import FAQ from "../components/faq";
 import { Link } from "gatsby";
+import { DynamicPricing } from "../components/FAQ/DynamicPricing";
+import { HandleMintContext } from "../context/mint";
 
 function FAQPage() {
+  const { stateData } = useContext(HandleMintContext);
+
   return (
     <>
       <SEO title="FAQ" />
@@ -109,34 +113,52 @@ function FAQPage() {
                 },
                 {
                   title: "How much does a Handle cost?",
-                  description: () => (
-                    <>
-                      <p>
-                        While we are continuing to fine-tune our rarity
-                        attributes to better help the secondary market
-                        accurately value their Handles, we settled on 5 tiers of
-                        pricing and rarity, determined simply by character
-                        length:
-                      </p>
-                      <ul>
-                        <li>
-                          Legendary (1 character): <strong>Auction Only</strong>
-                        </li>
-                        <li>
-                          Ultra Rare (2 characters): <strong>500 $ADA</strong>
-                        </li>
-                        <li>
-                          Rare (3 characters): <strong>100 $ADA</strong>
-                        </li>
-                        <li>
-                          Common (4–7): <strong>50 $ADA</strong>
-                        </li>
-                        <li>
-                          Basic (8–15): <strong>10 $ADA</strong>
-                        </li>
-                      </ul>
-                    </>
-                  ),
+                  description: () =>
+                    stateData?.dynamicPricingEnabled ? (
+                      <>
+                        <p>
+                          There are 5 tiers of rarity that define a Handle’s
+                          price. After 15,000 sales we’ve defined a fair value
+                          model called Stable Pricing.
+                        </p>
+                        <p>
+                          Stable Pricing is an algorithm-based pricing model
+                          that protects users from market volatility and will
+                          dynamically adjust as the value of ADA moves either
+                          higher or lower.
+                        </p>
+                        <p>Current Prices:</p>
+                        <DynamicPricing />
+                      </>
+                    ) : (
+                      <>
+                        <p>
+                          While we are continuing to fine-tune our rarity
+                          attributes to better help the secondary market
+                          accurately value their Handles, we settled on 5 tiers
+                          of pricing and rarity, determined simply by character
+                          length:
+                        </p>
+                        <ul>
+                          <li>
+                            Legendary (1 character):{" "}
+                            <strong>Auction Only</strong>
+                          </li>
+                          <li>
+                            Ultra Rare (2 characters): <strong>500 $ADA</strong>
+                          </li>
+                          <li>
+                            Rare (3 characters): <strong>100 $ADA</strong>
+                          </li>
+                          <li>
+                            Common (4–7): <strong>50 $ADA</strong>
+                          </li>
+                          <li>
+                            Basic (8–15): <strong>10 $ADA</strong>
+                          </li>
+                        </ul>
+                      </>
+                    ),
                 },
                 {
                   title: "What is the max supply?",

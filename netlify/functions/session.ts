@@ -14,9 +14,10 @@ import {
   HEADER_IS_SPO,
   MAX_SESSION_LENGTH_SPO,
   SPO_ADA_HANDLE_COST,
+  HEADER_HANDLE_COST,
 } from "../../src/lib/constants";
 import { ensureHandleAvailable, fetchNodeApp, getAccessTokenCookieName, getSessionTokenCookieName } from '../helpers/util';
-import { getRarityCost, isValid, normalizeNFTHandle } from "../../src/lib/helpers/nfts";
+import { isValid, normalizeNFTHandle } from "../../src/lib/helpers/nfts";
 import { getSecret } from "../helpers";
 import { verifyTwitterUser } from "../helpers";
 import { responseWithMessage, unauthorizedResponse } from "../helpers/response";
@@ -47,6 +48,7 @@ const handler: Handler = async (
   const { headers } = event;
 
   const headerHandle = headers[HEADER_HANDLE];
+  const headerHandleCost = headers[HEADER_HANDLE_COST];
   const headerIsSpo = headers[HEADER_IS_SPO] === 'true';
   const headerRecaptcha = headers[HEADER_RECAPTCHA];
   const headerTwitter = headers[HEADER_TWITTER_ACCESS_TOKEN];
@@ -60,7 +62,7 @@ const handler: Handler = async (
     return unauthorizedResponse;
   }
 
-  if (!handle || !validHandle) {
+  if (!handle || !validHandle || !headerHandleCost) {
     return responseWithMessage(400, 'Invalid handle format.', true);
   }
 
@@ -94,7 +96,7 @@ const handler: Handler = async (
     {
       iat: Date.now(),
       handle,
-      cost: headerIsSpo ? SPO_ADA_HANDLE_COST : getRarityCost(handle),
+      cost: headerIsSpo ? SPO_ADA_HANDLE_COST : headerHandleCost,
       emailAddress: headerIsSpo ? 'spos@adahandle.com' : emailAddress,
       isSPO: headerIsSpo
     },
