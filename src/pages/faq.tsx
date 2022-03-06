@@ -219,10 +219,11 @@ function FAQPage() {
                       We believe the community should decide what words should
                       or shouldn't be censored, and we have plans to move this
                       decision to a DAO. In the meantime, however, our lawyers
-                      have strongly advised us to filter out obscene phrases. As
-                      such we have written an algorithm that tries to filter
-                      some of these phrases, but it isn't perfect. Some will get
-                      through, and some may get blocked that shouldn't. Please
+                      have strongly advised us to filter out hate or predatory
+                      speech and obscene phrases. As such we have written an
+                      algorithm that tries to filter some of these phrases,
+                      but it isn't perfect. Some will get through,
+                      and some may get blocked that shouldn't. Please
                       contact us if we have blocked a Handle that is critical to
                       your brand, or otherwise a mistake.
                     </p>
