@@ -4,11 +4,16 @@ import { QueuePositionResponseBody } from "../../../netlify/functions/mintingQue
 import { VerifyResponseBody } from "../../../netlify/functions/verify";
 import { fetchAuthenticatedRequest } from "../../../netlify/helpers/fetchAuthenticatedRequest";
 import {
+  HEADER_ALL_SESSIONS,
   HEADER_IS_SPO,
   HEADER_JWT_ALL_SESSIONS_TOKEN,
 } from "../../lib/constants";
 import { getAllCurrentSessionCookie } from "../../lib/helpers/session";
 import Button from "../button";
+import {
+  SessionStatus,
+  SessionStatusType,
+} from "../HandleStatus/TypeAccordion";
 import { Loader } from "../Loader";
 
 interface Props {
@@ -44,24 +49,46 @@ export const PaymentStatus: React.FC<Props> = ({
       return;
     }
 
+    const allSessions = allSessionsCookie?.data?.sessions;
+    if (!allSessions.length) {
+      // no sessions available
+      return;
+    }
+
     const controller = new AbortController();
     const updateMintingQueuePosition = async () => {
-      await fetchAuthenticatedRequest<QueuePositionResponseBody>(
+      await fetchAuthenticatedRequest<{
+        error: boolean;
+        message?: string;
+        sessions: SessionStatus[];
+      }>(
         `/.netlify/functions/mintingQueuePosition`,
         {
           signal: controller.signal,
           headers: {
             [HEADER_IS_SPO]: isSPO ? "true" : "false",
             [HEADER_JWT_ALL_SESSIONS_TOKEN]: allSessionsCookie.token,
+            [HEADER_ALL_SESSIONS]: JSON.stringify(allSessions),
           },
         },
         isSPO
       )
         .then((res) => {
           if (!res.error) {
-            setMintingQueuePosition(res.mintingQueuePosition);
-            setMintingQueueMinutes(res.minutes);
             setFetchingMintingQueuePosition(false);
+            const waitingForMinting = res.sessions.find(
+              (session) =>
+                session.handle === handle &&
+                session.type === SessionStatusType.WAITING_FOR_MINING
+            );
+
+            // bail out if the handle is not waiting for minting
+            if (!waitingForMinting) return;
+
+            setMintingQueuePosition(
+              waitingForMinting?.mintingPosition?.position
+            );
+            setMintingQueueMinutes(waitingForMinting?.mintingPosition?.minutes);
             return;
           }
 
@@ -72,7 +99,7 @@ export const PaymentStatus: React.FC<Props> = ({
     };
 
     updateMintingQueuePosition();
-    const interval = setInterval(updateMintingQueuePosition, 5000);
+    const interval = setInterval(updateMintingQueuePosition, 10000);
 
     return () => {
       controller.abort();

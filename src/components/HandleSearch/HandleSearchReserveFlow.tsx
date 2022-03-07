@@ -60,12 +60,6 @@ export const HandleSearchReserveFlow = ({ className = "", ...rest }) => {
 
   useSyncAvailableStatus(debouncedHandle);
 
-  // Warm server.
-  useEffect(() => {
-    fetch("/.netlify/functions/search").catch();
-    fetch("/.netlify/functions/session").catch();
-  }, []);
-
   // Handles the input validation and updates.
   const onUpdateHandle = async (newHandle: string) => {
     const valid = isValid(newHandle);

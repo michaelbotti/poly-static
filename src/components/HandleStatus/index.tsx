@@ -1,12 +1,26 @@
 import React, { useEffect, useState } from "react";
-import { CircularProgress } from "@mui/material";
-import { QueuePositionResponseBody } from "../../../netlify/functions/mintingQueuePosition";
-import { fetchAuthenticatedRequest } from "../../../netlify/helpers/fetchAuthenticatedRequest";
 import {
+  Accordion,
+  AccordionDetails,
+  AccordionSummary,
+  CircularProgress,
+  List,
+  ListItem,
+  Typography,
+} from "@mui/material";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+
+import {
+  HEADER_ALL_SESSIONS,
   HEADER_IS_SPO,
   HEADER_JWT_ALL_SESSIONS_TOKEN,
 } from "../../lib/constants";
 import { getAllCurrentSessionCookie } from "../../lib/helpers/session";
+import {
+  SessionStatus,
+  SessionStatusType,
+  TypeAccordion,
+} from "./TypeAccordion";
 
 export const HandleStatus = () => {
   const [mintingQueuePositionResponse, setMintingQueuePositionResponse] =
@@ -21,12 +35,20 @@ export const HandleStatus = () => {
       return;
     }
 
+    const allSessions = allSessionsCookie?.data?.sessions;
+
+    if (!allSessions.length) {
+      // no sessions available
+      return;
+    }
+
     setFetchingMintingQueuePosition(true);
 
     const result = await fetch(`/.netlify/functions/mintingQueuePosition`, {
       headers: {
         [HEADER_IS_SPO]: "false",
         [HEADER_JWT_ALL_SESSIONS_TOKEN]: allSessionsCookie.token,
+        [HEADER_ALL_SESSIONS]: JSON.stringify(allSessions),
       },
     });
     const response = await result.json();
@@ -44,47 +66,67 @@ export const HandleStatus = () => {
     fetchMintingQueuePosition();
   }, []);
 
-  console.log("mintingQueuePositionResponse", mintingQueuePositionResponse);
-
   const renderSessions = () => {
-    if (!mintingQueuePositionResponse) {
+    if (!mintingQueuePositionResponse?.sessions) {
       return null;
     }
 
-    if (
-      mintingQueuePositionResponse.sessions.waitingForPayment.length === 0 &&
-      mintingQueuePositionResponse.sessions.waitingForMinting.length === 0 &&
-      mintingQueuePositionResponse.sessions.waitingForConfirmation.length ===
-        0 &&
-      mintingQueuePositionResponse.sessions.confirmed.length === 0
-    ) {
+    const sessions = mintingQueuePositionResponse.sessions as SessionStatus[];
+
+    if (sessions.length === 0) {
       return <p>No sessions found</p>;
     }
 
+    const items = sessions.reduce<Record<SessionStatusType, SessionStatus[]>>(
+      (r, v, _i, _a, k = v.type) => ((r[k] || (r[k] = [])).push(v), r),
+      {} as Record<SessionStatusType, SessionStatus[]>
+    );
+
+    const confirmedItems = items[SessionStatusType.CONFIRMED];
+    const waitingForConfirmationItems =
+      items[SessionStatusType.WAITING_FOR_CONFIRMATION];
+    const waitingForMiningItems = items[SessionStatusType.WAITING_FOR_MINING];
+    const waitingForPaymentItems = items[SessionStatusType.WAITING_FOR_PAYMENT];
+    const refundedItems = items[SessionStatusType.REFUNDED];
+
     return (
-      <div>
-        <div>Pending Payment</div>
-        <div>
-          {mintingQueuePositionResponse.sessions.waitingForPayment.map(
-            (session) => {
-              return <div>{session.sessionId}</div>;
-            }
-          )}
-        </div>
-      </div>
+      <>
+        {confirmedItems?.length > 0 && (
+          <TypeAccordion
+            items={confirmedItems}
+            type={SessionStatusType.CONFIRMED}
+          />
+        )}
+        {waitingForConfirmationItems?.length > 0 && (
+          <TypeAccordion
+            items={waitingForConfirmationItems}
+            type={SessionStatusType.WAITING_FOR_CONFIRMATION}
+          />
+        )}
+        {waitingForMiningItems?.length > 0 && (
+          <TypeAccordion
+            items={waitingForMiningItems}
+            type={SessionStatusType.WAITING_FOR_MINING}
+          />
+        )}
+        {waitingForPaymentItems?.length > 0 && (
+          <TypeAccordion
+            items={waitingForPaymentItems}
+            type={SessionStatusType.WAITING_FOR_PAYMENT}
+          />
+        )}
+        {refundedItems?.length > 0 && (
+          <TypeAccordion
+            items={refundedItems}
+            type={SessionStatusType.REFUNDED}
+          />
+        )}
+      </>
     );
   };
 
   return (
     <>
-      {/* 
-        Component is intended to check a users handle status.
-
-        If the user has a cookie, we can check all of their handle statuses
-        - If all of their handles have been minted show a success message 
-
-        If the user does not have a cookie, show an input field where they can add their transaction hash.
-    */}
       <h1 className="m-0 text-center inline-block mb-4 text-4xl font-bold leading-none">
         Check you handle(s) status
       </h1>
