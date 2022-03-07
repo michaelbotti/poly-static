@@ -22,6 +22,7 @@ import { HandleAcceptTerms } from "../components/HandleAcceptTerms";
 function MintPage() {
   const {
     handle,
+    handleCost,
     currentIndex,
     stateData,
     currentAccess,
@@ -117,6 +118,9 @@ function MintPage() {
                 <NFTPreview
                   handle={
                     currentIndex === 0 ? handle : currentSession.data.handle
+                  }
+                  handleCost={
+                    currentIndex === 0 ? handleCost : currentSession.data.cost
                   }
                   twitterOgNumber={handleResponse?.ogNumber ?? 0}
                 />

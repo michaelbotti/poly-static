@@ -1,9 +1,7 @@
 import Cookies from "js-cookie";
 import React, { useContext, useEffect, useState } from "react";
-import Countdown from "react-countdown";
 import { HandleMintContext } from "../../context/mint";
 import {
-  COOKIE_ACCESS_KEY,
   COOKIE_SESSION_PREFIX,
   HEADER_IS_SPO,
   REFUND_POLICY_DATE,
@@ -11,7 +9,7 @@ import {
   SPO_COOKIE_ACCESS_KEY,
   SPO_COOKIE_SESSION_PREFIX,
 } from "../../lib/constants";
-import { getRarityCost, getRarityHex } from "../../lib/helpers/nfts";
+import { getRarityHex } from "../../lib/helpers/nfts";
 import {
   getAccessTokenFromCookie,
   getSessionTokenFromCookie,
@@ -22,11 +20,11 @@ import { Loader } from "../Loader";
 import Button from "../button";
 import { SessionResponseBody } from "../../../netlify/functions/session";
 import { Link } from "gatsby";
-import { useLocation } from "@reach/router";
 import { VerifyResponseBody } from "../../../netlify/functions/verify";
 import { fetchAuthenticatedRequest } from "../../../netlify/helpers/fetchAuthenticatedRequest";
 import { PaymentStatus } from "./PaymentStatus";
 import { getSessionTokenCookieName } from "../../../netlify/helpers/util";
+import { useIsTestnet } from "../../lib/hooks/useIsTestnet";
 
 enum ConfirmPaymentStatusCode {
   CONFIRMED = "CONFIRMED",
@@ -57,7 +55,7 @@ export const HandleSession = ({
   sessionData: SessionResponseBody;
 }) => {
   const {
-    data: { isSPO, handle, cost, exp },
+    data: { isSPO, handle, cost },
     address,
     token,
   } = sessionData;
@@ -75,7 +73,6 @@ export const HandleSession = ({
   const [fetchingPayment, setFetchingPayment] = useState<boolean>(true);
   const [copying, setCopying] = useState<boolean>(false);
   const [retry, setRetry] = useState<boolean>(true);
-  const [isTestnet, setIsTestnet] = useState<boolean>(false);
   const [accessToken, setAccessToken] = useState<false | VerifyResponseBody>(
     false
   );
@@ -84,13 +81,7 @@ export const HandleSession = ({
   >(false);
   const [error, setError] = useState<boolean>(false);
 
-  const { hostname } = useLocation();
-
-  useEffect(() => {
-    if (hostname.includes("testnet") || hostname.includes("localhost")) {
-      setIsTestnet(true);
-    }
-  }, [hostname]);
+  const { isTestnet } = useIsTestnet();
 
   // Reset on index change.
   useEffect(() => {
@@ -140,21 +131,22 @@ export const HandleSession = ({
         isSPO
       )
         .then((res) => {
-          if (!res.error) {
-            if (!res.data.items) {
-              setPaymentStatus(res.data.statusCode);
-              setFetchingPayment(false);
-              return;
-            }
+          setFetchingPayment(false);
 
-            setPaymentStatus(res.data.items[0].statusCode);
-            setFetchingPayment(false);
+          if (res.error) {
+            setError(true);
+            setPaymentStatus(res.data.statusCode);
             return;
           }
 
-          setError(true);
-          setPaymentStatus(res.data.statusCode);
-          setFetchingPayment(false);
+          let status = res.data.items
+            ? res.data.items[0].statusCode
+            : res.data.statusCode;
+          setPaymentStatus(status);
+
+          if (status !== ConfirmPaymentStatusCode.PENDING) {
+            clearInterval(interval);
+          }
         })
         .catch((e) => {});
     };
@@ -300,8 +292,7 @@ export const HandleSession = ({
                   className="text-4xl mt-4 inline-block font-bold"
                   style={{ color: getRarityHex(handle) }}
                 >
-                  {isSPO ? SPO_ADA_HANDLE_COST : getRarityCost(handle)}{" "}
-                  {isTestnet ? "tADA" : "ADA"}
+                  {isSPO ? SPO_ADA_HANDLE_COST : cost} {isTestnet ? "t₳" : "₳"}
                 </strong>
               </h4>
               <div className="relative">

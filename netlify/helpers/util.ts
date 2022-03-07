@@ -1,6 +1,6 @@
 import { HandlerResponse } from '@netlify/functions';
 import { fetch } from 'cross-fetch';
-import { HEADER_HANDLE, HEADER_JWT_ACCESS_TOKEN, HEADER_JWT_SESSION_TOKEN, HEADER_JWT_SPO_ACCESS_TOKEN, HEADER_JWT_SPO_SESSION_TOKEN } from '../../src/lib/constants';
+import { HEADER_HANDLE, HEADER_JWT_ACCESS_TOKEN, HEADER_JWT_SESSION_TOKEN, HEADER_JWT_SPO_ACCESS_TOKEN, HEADER_JWT_SPO_SESSION_TOKEN, SPO_ADA_HANDLE_COST } from '../../src/lib/constants';
 import { buildUnavailableResponse, getDefaultResponseAvailable, getTwitterResponseUnvailable, HandleResponseBody } from '../../src/lib/helpers/search';
 
 export const getNodeEndpointUrl = () => process.env.NODEJS_APP_ENDPOINT;
@@ -28,6 +28,7 @@ export interface HandleAvailabilityResponse {
   reason?: string;
   duration?: number;
   ogNumber?: number;
+  cost?: number;
 }
 
 interface FetchSearchResponse {
@@ -80,13 +81,13 @@ export const ensureHandleAvailable = async (accessToken: string, handle: string,
     };
   }
 
-  const { available, message: responseMessage, link, type, reason, ogNumber } = response;
+  const { available, message: responseMessage, link, type, reason, ogNumber, cost } = response;
 
   // if it doesn't exist on chain and it's available, send message that it's available
   if (available) {
     return {
       statusCode: 200,
-      body: JSON.stringify(getDefaultResponseAvailable()),
+      body: JSON.stringify(getDefaultResponseAvailable({ cost })),
     };
   }
 
@@ -94,7 +95,7 @@ export const ensureHandleAvailable = async (accessToken: string, handle: string,
   if (isSPO && type === 'spo') {
     return {
       statusCode: 200,
-      body: JSON.stringify(getDefaultResponseAvailable()),
+      body: JSON.stringify(getDefaultResponseAvailable({ cost: SPO_ADA_HANDLE_COST })),
     };
   }
 

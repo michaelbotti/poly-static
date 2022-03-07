@@ -49,7 +49,7 @@ const getActiveAuthCode = (): string | null => {
 export const HandleAcceptTerms: React.FC<Props> = ({
   accessOpen,
 }): JSX.Element => {
-  const { stateData } = useContext(HandleMintContext);
+  const { stateLoading, stateData } = useContext(HandleMintContext);
   const [authenticating, setAuthenticating] = useState<boolean>(false);
   const [responseMessage, setResponseMessage] = useState<string>(null);
   const [expired, setExpired] = useState<boolean>(false);
@@ -116,7 +116,10 @@ export const HandleAcceptTerms: React.FC<Props> = ({
         <RedirectTo to={"/queue"} />
       ) : (
         <>
-          <HowItWorks />
+          <HowItWorks
+            stateLoading={stateLoading}
+            dynamicPricingEnabled={stateData?.dynamicPricingEnabled}
+          />
           <div className="col-span-12 md:col-span-6 relative z-10">
             <h3 className="text-2xl text-white text-center mb-4">
               Agree to the Terms

@@ -52,11 +52,13 @@ interface PaymentSession {
 
 export interface HandleMintContextType {
   handle: string;
+  handleCost: number | null;
   handleResponse: HandleResponseBody;
   fetching: boolean;
   setFetching: Dispatch<SetStateAction<boolean>>;
   twitterToken: string;
   setHandle: Dispatch<SetStateAction<string>>;
+  setHandleCost: Dispatch<SetStateAction<number | null>>;
   reservedHandles: ReservedHandlesType;
   pendingSessions: string[];
   paymentSessions: PaymentSession[];
@@ -85,6 +87,7 @@ export interface HandleMintContextType {
 
 export const defaultState: HandleMintContextType = {
   handle: "",
+  handleCost: null,
   fetching: false,
   handleResponse: null,
   isPurchasing: false,
@@ -101,6 +104,7 @@ export const defaultState: HandleMintContextType = {
   setHandleResponse: () => {},
   setFetching: () => {},
   setHandle: () => {},
+  setHandleCost: () => {},
   setIsPurchasing: () => {},
   setReservedHandles: () => {},
   setTwitterToken: () => {},
@@ -117,6 +121,7 @@ export const HandleMintContext =
 
 export const HandleMintContextProvider = ({ children, ...rest }) => {
   const [handle, setHandle] = useState<string>("");
+  const [handleCost, setHandleCost] = useState<number | null>(null);
   const [fetching, setFetching] = useState<boolean>(false);
   const [handleResponse, setHandleResponse] =
     useState<HandleResponseBody | null>(null);
@@ -164,6 +169,7 @@ export const HandleMintContextProvider = ({ children, ...rest }) => {
         ...defaultState,
         fetching,
         handle,
+        handleCost,
         handleResponse,
         twitterToken,
         isPurchasing,
@@ -174,6 +180,7 @@ export const HandleMintContextProvider = ({ children, ...rest }) => {
         stateData,
         setFetching,
         setHandle,
+        setHandleCost,
         setHandleResponse,
         setTwitterToken,
         setIsPurchasing,

@@ -11,7 +11,7 @@ import { getAccessTokenFromCookie, getSPOAccessTokenCookie } from "../helpers/se
 import { getAccessTokenCookieName } from "../../../netlify/helpers/util";
 
 export const useSyncAvailableStatus = async (unsanitizedHandle: string, isSpo = false) => {
-  const { setFetching, setHandleResponse } =
+  const { setFetching, setHandleResponse, setHandleCost } =
     useContext(HandleMintContext);
 
   useEffect(() => {
@@ -53,6 +53,7 @@ export const useSyncAvailableStatus = async (unsanitizedHandle: string, isSpo = 
 
       setFetching(false);
       setHandleResponse(res);
+      setHandleCost(res.cost ?? null);
     })();
   }, [unsanitizedHandle]);
 };

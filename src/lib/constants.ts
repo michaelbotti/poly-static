@@ -21,6 +21,7 @@ export const SPO_COOKIE_ACCESS_KEY = 'SPO_ADAHANDLE_HAS_ACCESS';
 
 // Headers.
 export const HEADER_HANDLE = 'x-handle';
+export const HEADER_HANDLE_COST = 'x-handle-cost';
 export const HEADER_IS_SPO = 'x-is-spo';
 export const HEADER_RECAPTCHA = 'x-recaptcha';
 export const HEADER_RECAPTCHA_FALLBACK = 'x-recaptcha-fallback';
