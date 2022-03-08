@@ -31,14 +31,7 @@ export const HandleStatus = () => {
 
   const fetchMintingQueuePosition = async () => {
     const allSessionsCookie = getAllCurrentSessionCookie();
-    if (!allSessionsCookie) {
-      return;
-    }
-
-    const allSessions = allSessionsCookie?.data?.sessions;
-
-    if (!allSessions.length) {
-      // no sessions available
+    if (!allSessionsCookie?.token) {
       return;
     }
 
@@ -48,7 +41,6 @@ export const HandleStatus = () => {
       headers: {
         [HEADER_IS_SPO]: "false",
         [HEADER_JWT_ALL_SESSIONS_TOKEN]: allSessionsCookie.token,
-        [HEADER_ALL_SESSIONS]: JSON.stringify(allSessions),
       },
     });
     const response = await result.json();
