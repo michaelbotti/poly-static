@@ -128,7 +128,7 @@ export const HandleStatus = () => {
   return (
     <>
       <h1 className="m-0 text-center inline-block mb-4 text-4xl font-bold leading-none">
-        Check you handle(s) status
+        Check your Handle status
       </h1>
       {fetchingMintingQueuePosition ? (
         <div>

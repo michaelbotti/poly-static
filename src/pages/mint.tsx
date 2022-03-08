@@ -18,6 +18,7 @@ import Countdown from "react-countdown";
 import Cookies from "js-cookie";
 import { COOKIE_ACCESS_KEY, COOKIE_SESSION_PREFIX } from "../lib/constants";
 import { HandleAcceptTerms } from "../components/HandleAcceptTerms";
+import { MintingClosed } from "../components/MintingClosed";
 
 function MintPage() {
   const {
@@ -25,6 +26,7 @@ function MintPage() {
     handleCost,
     currentIndex,
     stateData,
+    stateLoading,
     currentAccess,
     handleResponse,
     setCurrentIndex,
@@ -66,6 +68,26 @@ function MintPage() {
   const refreshPaymentSessions = () => {
     setPaymentSessions(getAllCurrentSessionData());
   };
+
+  if (stateLoading) {
+    return (
+      <>
+        <SEO title="Mint" />
+        <section id="top" className="max-w-5xl mx-auto flex">
+          <Loader />
+        </section>
+      </>
+    );
+  }
+
+  if (!stateData?.mintingPageEnabled) {
+    return (
+      <>
+        <SEO title="Mint" />
+        <MintingClosed />
+      </>
+    );
+  }
 
   return (
     <>

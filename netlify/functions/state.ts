@@ -14,6 +14,7 @@ export interface StateData {
   paymentWindowTimeoutMinutes?: number;
   accessQueueSize: number;
   dynamicPricingEnabled: boolean;
+  mintingPageEnabled: boolean;
   handlePrices: {
     basic: number;
     common: number;

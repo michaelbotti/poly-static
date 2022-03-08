@@ -7,14 +7,36 @@ import SEO from "../components/seo";
 import { HandleQueue } from "../components/HandleQueue";
 import { HowItWorks } from "../components/HowItWorks";
 import { RedirectTo } from "../components/RedirectTo";
+import { Loader } from "../components/Loader";
+import { MintingClosed } from "../components/MintingClosed";
 
-function MintPage() {
+function QueuePage() {
   const { stateLoading, stateData } = useContext(HandleMintContext);
 
   const [accessOpen] = useAccessOpen();
 
   if (accessOpen) {
     return <RedirectTo to={"/mint"} />;
+  }
+
+  if (stateLoading) {
+    return (
+      <>
+        <SEO title="Mint" />
+        <section id="top" className="max-w-5xl mx-auto flex">
+          <Loader />
+        </section>
+      </>
+    );
+  }
+
+  if (!stateData?.mintingPageEnabled) {
+    return (
+      <>
+        <SEO title="Mint" />
+        <MintingClosed />
+      </>
+    );
   }
 
   return (
@@ -43,4 +65,4 @@ function MintPage() {
   );
 }
 
-export default MintPage;
+export default QueuePage;
