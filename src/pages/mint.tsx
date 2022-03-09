@@ -69,7 +69,7 @@ function MintPage() {
     setPaymentSessions(getAllCurrentSessionData());
   };
 
-  if (stateLoading) {
+  if (stateLoading || !stateData) {
     return (
       <>
         <SEO title="Mint" />
@@ -80,11 +80,78 @@ function MintPage() {
     );
   }
 
-  if (!stateData?.mintingPageEnabled) {
+  const { mintingPageEnabled } = stateData;
+
+  if (mintingPageEnabled) {
     return (
       <>
         <SEO title="Mint" />
-        <MintingClosed />
+        <section id="top" className="max-w-5xl mx-auto">
+          {currentAccess && (
+            <Countdown
+              onComplete={() => setAccessOpen(false)}
+              date={new Date(currentAccess.data.exp * 1000)}
+              renderer={({ formatted }) => {
+                return (
+                  <p className="text-white text-right">
+                    Access Expires:{" "}
+                    {formatted.hours !== "00"
+                      ? `${formatted.hours}:${formatted.minutes}:${formatted.seconds}`
+                      : `${formatted.minutes}:${formatted.seconds}`}
+                  </p>
+                );
+              }}
+            />
+          )}
+          <HandleNavigation
+            paymentSessions={paymentSessions}
+            updatePaymentSessions={refreshPaymentSessions}
+          />
+          <div
+            className="grid grid-cols-12 gap-4 lg:gap-8 bg-dark-200 rounded-lg rounded-tl-none place-content-start p-4 lg:p-8"
+            style={{ minHeight: "40vh" }}
+          >
+            {(null === accessOpen || null === stateData) && (
+              <div className="col-span-12 md:col-span-6 md:col-start-4 relative z-10">
+                <div className="grid justify-center content-center h-full w-full p-8 flex-wrap">
+                  <p className="w-full text-center">Fetching details...</p>
+                  <Loader />
+                </div>
+              </div>
+            )}
+            {accessOpen ? (
+              <>
+                <div className="col-span-12 lg:col-span-6 relative z-10">
+                  <div className="p-8">
+                    {currentIndex === 0 ? (
+                      <HandleSearchReserveFlow />
+                    ) : (
+                      <HandleSession sessionData={currentSession} />
+                    )}
+                  </div>
+                </div>
+                <div className="col-span-12 lg:col-span-6 py-8">
+                  <NFTPreview
+                    handle={
+                      currentIndex === 0 ? handle : currentSession.data.handle
+                    }
+                    handleCost={
+                      currentIndex === 0 ? handleCost : currentSession.data.cost
+                    }
+                    twitterOgNumber={handleResponse?.ogNumber ?? 0}
+                  />
+                </div>
+              </>
+            ) : (
+              <HandleAcceptTerms accessOpen={accessOpen} />
+            )}
+          </div>
+          {accessOpen && stateData && (
+            <p className="text-white mt-4 text-center">
+              Current Chain Load: {`${(stateData.chainLoad * 100).toFixed(2)}%`}
+            </p>
+          )}
+        </section>
       </>
     );
   }
@@ -92,72 +159,7 @@ function MintPage() {
   return (
     <>
       <SEO title="Mint" />
-      <section id="top" className="max-w-5xl mx-auto">
-        {currentAccess && (
-          <Countdown
-            onComplete={() => setAccessOpen(false)}
-            date={new Date(currentAccess.data.exp * 1000)}
-            renderer={({ formatted }) => {
-              return (
-                <p className="text-white text-right">
-                  Access Expires:{" "}
-                  {formatted.hours !== "00"
-                    ? `${formatted.hours}:${formatted.minutes}:${formatted.seconds}`
-                    : `${formatted.minutes}:${formatted.seconds}`}
-                </p>
-              );
-            }}
-          />
-        )}
-        <HandleNavigation
-          paymentSessions={paymentSessions}
-          updatePaymentSessions={refreshPaymentSessions}
-        />
-        <div
-          className="grid grid-cols-12 gap-4 lg:gap-8 bg-dark-200 rounded-lg rounded-tl-none place-content-start p-4 lg:p-8"
-          style={{ minHeight: "40vh" }}
-        >
-          {(null === accessOpen || null === stateData) && (
-            <div className="col-span-12 md:col-span-6 md:col-start-4 relative z-10">
-              <div className="grid justify-center content-center h-full w-full p-8 flex-wrap">
-                <p className="w-full text-center">Fetching details...</p>
-                <Loader />
-              </div>
-            </div>
-          )}
-          {accessOpen ? (
-            <>
-              <div className="col-span-12 lg:col-span-6 relative z-10">
-                <div className="p-8">
-                  {currentIndex === 0 ? (
-                    <HandleSearchReserveFlow />
-                  ) : (
-                    <HandleSession sessionData={currentSession} />
-                  )}
-                </div>
-              </div>
-              <div className="col-span-12 lg:col-span-6 py-8">
-                <NFTPreview
-                  handle={
-                    currentIndex === 0 ? handle : currentSession.data.handle
-                  }
-                  handleCost={
-                    currentIndex === 0 ? handleCost : currentSession.data.cost
-                  }
-                  twitterOgNumber={handleResponse?.ogNumber ?? 0}
-                />
-              </div>
-            </>
-          ) : (
-            <HandleAcceptTerms accessOpen={accessOpen} />
-          )}
-        </div>
-        {accessOpen && stateData && (
-          <p className="text-white mt-4 text-center">
-            Current Chain Load: {`${(stateData.chainLoad * 100).toFixed(2)}%`}
-          </p>
-        )}
-      </section>
+      <MintingClosed />
     </>
   );
 }
