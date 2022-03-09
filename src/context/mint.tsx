@@ -139,7 +139,7 @@ export const HandleMintContextProvider = ({ children, ...rest }) => {
     false | VerifyResponseBody
   >(false);
   const [stateData, setStateData] = useState<StateResponseBody>(null);
-  const [stateLoading, setStateLoading] = useState<boolean>(false);
+  const [stateLoading, setStateLoading] = useState<boolean>(true);
 
   useEffect(() => {
     const updateStateData = async () => {
