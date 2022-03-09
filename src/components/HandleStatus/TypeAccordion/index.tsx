@@ -56,12 +56,23 @@ export const TypeAccordion: React.FC<Props> = ({ items, type }) => {
     }
 
     if (type === SessionStatusType.WAITING_FOR_MINING) {
-      return (
-        <>
-          Current position in Queue: {session.mintingPosition?.position}{" "}
-          expected wait time: {session.mintingPosition?.minutes} minutes
-        </>
-      );
+      if (
+        session.mintingPosition?.position > 0 &&
+        session.mintingPosition?.minutes > 0
+      ) {
+        return (
+          <span className="text-white">
+            Current position in queue is {session.mintingPosition?.position}.{" "}
+            Expected wait time is {session.mintingPosition?.minutes} minutes.
+          </span>
+        );
+      } else {
+        return (
+          <span className="text-white">
+            You're up next! We should be minting your Handle any second!
+          </span>
+        );
+      }
     }
 
     return null;

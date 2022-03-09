@@ -7,7 +7,9 @@ function HandleStatusPage() {
   return (
     <>
       <SEO title="Handle Status" />
-      <HandleStatus />
+      <section id="top" className="max-w-5xl mx-auto">
+        <HandleStatus />
+      </section>
     </>
   );
 }
