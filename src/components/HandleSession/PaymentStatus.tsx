@@ -105,6 +105,28 @@ export const PaymentStatus: React.FC<Props> = ({
     };
   }, [accessToken, validPayment]);
 
+  const renderPositionContent = () => {
+    if (!fetchingMintingQueuePosition && !error) {
+      if (mintingQueueMinutes > 0 && mintingQueuePosition > 0) {
+        return (
+          <p className="text-lg">
+            Based on our current minting queue, you are currently at position{" "}
+            {mintingQueuePosition}. This will take approximately{" "}
+            {mintingQueueMinutes} minutes to process.
+          </p>
+        );
+      } else {
+        return (
+          <p className="text-lg">
+            You're up next! We should be minting your Handle any second!
+          </p>
+        );
+      }
+    }
+
+    return null;
+  };
+
   return (
     <Countdown
       date={new Date(accessToken.data.exp * 1000)}
@@ -128,21 +150,7 @@ export const PaymentStatus: React.FC<Props> = ({
                   <h2 className="text-2xl font-bold mb-2">
                     <strong>Yay!</strong> Your payment was successful!
                   </h2>
-                  {/* TODO: Add details about current minting position */}
-                  <p className="text-lg">
-                    We're minting your Handle <strong>right now.</strong> Please
-                    allow up to a few hours to receive your NFT.
-                  </p>
-                  {!error &&
-                  !fetchingMintingQueuePosition &&
-                  mintingQueueMinutes &&
-                  mintingQueuePosition ? (
-                    <p className="text-lg">
-                      Based on our current minting queue, you are currently at
-                      position {mintingQueuePosition}. This will take
-                      approximately {mintingQueueMinutes} minutes to process.
-                    </p>
-                  ) : null}
+                  {renderPositionContent()}
                   <p className="text-lg">
                     Your unique URL:
                     <br />
