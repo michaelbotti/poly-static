@@ -33,9 +33,8 @@ const handler: Handler = async (
     const { headers } = event;
 
     const allSessionsToken = headers[HEADER_JWT_ALL_SESSIONS_TOKEN];
-    const allSessionsList = headers[HEADER_ALL_SESSIONS];
 
-    if (!allSessionsToken || !allSessionsList) {
+    if (!allSessionsToken) {
         return {
             statusCode: 401,
             body: JSON.stringify({
@@ -59,21 +58,10 @@ const handler: Handler = async (
         }
     });
 
-    // if JWT is valid, sign a new 30 day JWT with all the active sessions
-    const AllSessionJWT = jwt.sign(
-        {
-            sessions: JSON.parse(allSessionsList),
-        },
-        sessionSecret,
-        {
-            expiresIn: '30 days'
-        }
-    );
-
     const res: QueuePositionResponseBody = await fetchNodeApp('mintingQueuePosition', {
         method: 'POST',
         headers: {
-            [HEADER_JWT_ALL_SESSIONS_TOKEN]: AllSessionJWT,
+            [HEADER_JWT_ALL_SESSIONS_TOKEN]: allSessionsToken,
         }
     }).then(res => {
         return res.json();

@@ -49,8 +49,7 @@ export const PaymentStatus: React.FC<Props> = ({
       return;
     }
 
-    const allSessions = allSessionsCookie?.data?.sessions;
-    if (!allSessions.length) {
+    if (!allSessionsCookie?.token) {
       // no sessions available
       return;
     }
@@ -68,7 +67,6 @@ export const PaymentStatus: React.FC<Props> = ({
           headers: {
             [HEADER_IS_SPO]: isSPO ? "true" : "false",
             [HEADER_JWT_ALL_SESSIONS_TOKEN]: allSessionsCookie.token,
-            [HEADER_ALL_SESSIONS]: JSON.stringify(allSessions),
           },
         },
         isSPO

@@ -31,14 +31,7 @@ export const HandleStatus = () => {
 
   const fetchMintingQueuePosition = async () => {
     const allSessionsCookie = getAllCurrentSessionCookie();
-    if (!allSessionsCookie) {
-      return;
-    }
-
-    const allSessions = allSessionsCookie?.data?.sessions;
-
-    if (!allSessions.length) {
-      // no sessions available
+    if (!allSessionsCookie?.token) {
       return;
     }
 
@@ -48,7 +41,6 @@ export const HandleStatus = () => {
       headers: {
         [HEADER_IS_SPO]: "false",
         [HEADER_JWT_ALL_SESSIONS_TOKEN]: allSessionsCookie.token,
-        [HEADER_ALL_SESSIONS]: JSON.stringify(allSessions),
       },
     });
     const response = await result.json();
@@ -128,7 +120,7 @@ export const HandleStatus = () => {
   return (
     <>
       <h1 className="m-0 text-center inline-block mb-4 text-4xl font-bold leading-none">
-        Check you handle(s) status
+        Check your Handle status
       </h1>
       {fetchingMintingQueuePosition ? (
         <div>

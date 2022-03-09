@@ -43,6 +43,10 @@ const navItems: NavItem[] = [
     external: true,
   },
   {
+    route: "/handle-status",
+    title: "Handle Status",
+  },
+  {
     route: "https://ada-handle.gitbook.io/docs/",
     title: "Developers",
     external: true,

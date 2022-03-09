@@ -15,6 +15,7 @@ import {
   MAX_SESSION_LENGTH_SPO,
   SPO_ADA_HANDLE_COST,
   HEADER_HANDLE_COST,
+  HEADER_ALL_SESSIONS,
 } from "../../src/lib/constants";
 import { ensureHandleAvailable, fetchNodeApp, getAccessTokenCookieName, getSessionTokenCookieName } from '../helpers/util';
 import { isValid, normalizeNFTHandle } from "../../src/lib/helpers/nfts";
@@ -53,6 +54,7 @@ const handler: Handler = async (
   const headerRecaptcha = headers[HEADER_RECAPTCHA];
   const headerTwitter = headers[HEADER_TWITTER_ACCESS_TOKEN];
   const accessToken = headers[getAccessTokenCookieName(headerIsSpo)];
+  const allSessionsToken = headers[HEADER_ALL_SESSIONS];
 
   // Normalize and validate handle.
   const handle = headerHandle && normalizeNFTHandle(headerHandle);
@@ -129,19 +131,20 @@ const handler: Handler = async (
     }
   }
 
-  // If the session is successfully created, we append to the all sessions cookie
-  const AllSessionToken = jwt.sign(
-    {
-      sessions: [{ handle, dateAdded: Date.now(), status: 'pending' }]
-    },
+  const sessions = !allSessionsToken ?
+    [{ handle, dateAdded: Date.now() }] :
+    [...(decode(allSessionsToken) as JwtPayload).sessions, { handle, dateAdded: Date.now() }];
+
+  const updatedAllSessionsToken = jwt.sign(
+    { sessions },
     sessionSecret,
     {
       expiresIn: '30 days'
     }
-  );
+  )
 
-  mutatedRes.allSessionsToken = AllSessionToken;
-  mutatedRes.allSessionsData = decode(AllSessionToken) as JwtPayload;
+  mutatedRes.allSessionsToken = updatedAllSessionsToken;
+  mutatedRes.allSessionsData = decode(updatedAllSessionsToken) as JwtPayload;
 
   return {
     statusCode: 200,

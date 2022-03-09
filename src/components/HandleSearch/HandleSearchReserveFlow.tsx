@@ -12,6 +12,7 @@ import HelpIcon from "@mui/icons-material/Help";
 import Tooltip, { tooltipClasses } from "@mui/material/Tooltip";
 
 import {
+  HEADER_ALL_SESSIONS,
   HEADER_HANDLE,
   HEADER_HANDLE_COST,
   HEADER_RECAPTCHA,
@@ -97,6 +98,11 @@ export const HandleSearchReserveFlow = ({ className = "", ...rest }) => {
       headers.append(getAccessTokenCookieName(false), accessToken.token);
     }
 
+    const allSessionsCookieData = getAllCurrentSessionCookie();
+    if (allSessionsCookieData?.token) {
+      headers.append(HEADER_ALL_SESSIONS, allSessionsCookieData.token);
+    }
+
     /**
      * Add a Twitter auth token to verify on the server. This is
      * valid only if a user successfully reserved their handle
@@ -125,24 +131,10 @@ export const HandleSearchReserveFlow = ({ className = "", ...rest }) => {
           status: "pending",
         };
 
-        const allSessionsCookieData = getAllCurrentSessionCookie();
-        const allSessionsData: AllSessionsDataBody = !allSessionsCookieData
-          ? {
-              token: sessionResponse.allSessionsToken,
-              data: {
-                ...sessionResponse.allSessionsData,
-                sessions: [newSession],
-              },
-            }
-          : {
-              ...allSessionsCookieData,
-              data: {
-                ...allSessionsCookieData.data,
-                sessions: [...allSessionsCookieData.data.sessions, newSession],
-              },
-            };
-
-        setAllSessionsCookie(allSessionsData);
+        setAllSessionsCookie({
+          token: sessionResponse.allSessionsToken,
+          data: {},
+        });
 
         setTwitterToken(null);
         setCurrentIndex(nextIndex);
