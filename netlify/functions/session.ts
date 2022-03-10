@@ -69,11 +69,14 @@ const handler: Handler = async (
   }
 
   // Ensure no one is trying to force an existing Handle.
-  const { body } = await ensureHandleAvailable(accessToken, handle, headerIsSpo);
+  const { body, statusCode } = await ensureHandleAvailable(accessToken, handle, headerIsSpo);
   const data: HandleResponseBody = JSON.parse(body);
 
   if (!data.available && !data.twitter) {
-    return unauthorizedResponse;
+    return {
+      statusCode,
+      body
+    };
   }
 
   // Verified Twitter user if needed.
