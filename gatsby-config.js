@@ -14,13 +14,6 @@ module.exports = {
     `gatsby-plugin-react-helmet`,
     `gatsby-plugin-layout`,
     {
-      resolve: `gatsby-plugin-netlify`,
-      options: {
-        mergeLinkHeaders: false,
-        mergeCachingHeaders: false,
-      },
-    },
-    {
       resolve: `gatsby-plugin-recaptcha`,
       options: {
         async: true,
@@ -69,6 +62,22 @@ module.exports = {
         google: {
           families: ["Noto Sans:400,400italic,700,700italic"],
         },
+      },
+    },
+    {
+      resolve: `gatsby-plugin-netlify`,
+      options: {
+        headers: {
+          "/mint/*": [
+            "Basic-Auth: someuser:somepassword anotheruser:anotherpassword",
+          ],
+          "/queue/*": [
+            "Basic-Auth: someuser:somepassword anotheruser:anotherpassword",
+          ],
+          "/*": ["x-handle-test-xyz: xwz"],
+        },
+        mergeLinkHeaders: false,
+        mergeCachingHeaders: false,
       },
     },
   ],

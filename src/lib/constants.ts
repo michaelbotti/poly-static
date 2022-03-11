@@ -29,6 +29,7 @@ export const HEADER_TWITTER_ACCESS_TOKEN = 'x-twitter-token';
 export const TWITTER_UNLOCK_HEADER = 'x-twitter-credentials';
 export const HEADER_EMAIL = 'x-email';
 export const HEADER_EMAIL_AUTH = 'x-email-authcode';
+export const HEADER_PASSWORD_PROTECTION = 'x-password-protection';
 
 export const HEADER_JWT_ACCESS_TOKEN = 'x-access-token';
 export const HEADER_JWT_SESSION_TOKEN = 'x-session-token';

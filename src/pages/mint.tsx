@@ -31,6 +31,7 @@ function MintPage() {
     handleResponse,
     setCurrentIndex,
     setCurrentAccess,
+    passwordAllowed,
   } = useContext(HandleMintContext);
 
   const clearSession = () => {
@@ -81,8 +82,7 @@ function MintPage() {
   }
 
   const { mintingPageEnabled } = stateData;
-
-  if (mintingPageEnabled) {
+  if (mintingPageEnabled || passwordAllowed) {
     return (
       <>
         <SEO title="Mint" />

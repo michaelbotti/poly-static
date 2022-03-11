@@ -69,6 +69,8 @@ export interface HandleMintContextType {
   stateLoading: boolean;
   currentAccess: false | VerifyResponseBody;
   currentSPOAccess: false | VerifyResponseBody;
+  passwordAllowed: boolean;
+  setPasswordAllowed: Dispatch<SetStateAction<boolean>>;
   setReservedHandles: Dispatch<SetStateAction<ReservedHandlesType>>;
   setHandleResponse: Dispatch<SetStateAction<HandleResponseBody>>;
   setTwitterToken: Dispatch<SetStateAction<string>>;
@@ -101,6 +103,8 @@ export const defaultState: HandleMintContextType = {
   stateLoading: false,
   currentAccess: false,
   currentSPOAccess: false,
+  passwordAllowed: false,
+  setPasswordAllowed: () => {},
   setHandleResponse: () => {},
   setFetching: () => {},
   setHandle: () => {},
@@ -140,6 +144,7 @@ export const HandleMintContextProvider = ({ children, ...rest }) => {
   >(false);
   const [stateData, setStateData] = useState<StateResponseBody>(null);
   const [stateLoading, setStateLoading] = useState<boolean>(true);
+  const [passwordAllowed, setPasswordAllowed] = useState(false);
 
   useEffect(() => {
     const updateStateData = async () => {
@@ -178,6 +183,8 @@ export const HandleMintContextProvider = ({ children, ...rest }) => {
         paymentSessions,
         currentIndex,
         stateData,
+        passwordAllowed,
+        setPasswordAllowed,
         setFetching,
         setHandle,
         setHandleCost,

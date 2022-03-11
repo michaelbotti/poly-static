@@ -1,4 +1,5 @@
 import React from "react";
+import { PasswordProtection } from "./PasswordProtection";
 
 export const MintingClosed = () => {
   return (
@@ -15,6 +16,7 @@ export const MintingClosed = () => {
           <p className="text-lg text-dark-350 text-center mt-4">
             Check back at a later date!
           </p>
+          <PasswordProtection />
         </div>
       </div>
     </section>
