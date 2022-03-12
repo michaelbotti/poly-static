@@ -13,7 +13,7 @@ export const useIsProduction = (): boolean => {
   const [isProduction, setIsProduction] = useState<boolean>(false);
 
   useEffect(() => {
-    if (window.location.hostname === 'adahandle.com') {
+    if (process.env.GATSBY_IS_PRODUCTION === 'true') {
       setIsProduction(true);
     }
   }, []);

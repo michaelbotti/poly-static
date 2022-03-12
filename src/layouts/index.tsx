@@ -5,11 +5,7 @@ import { useLocation } from "@reach/router";
 import Header from "../components/header";
 import Form from "../components/mailchimp";
 import { HandleMintContextProvider } from "../context/mint";
-import {
-  useCardanoscanDomain,
-  usePolicyID,
-  useIsProduction,
-} from "../lib/helpers/env";
+import { useCardanoscanDomain, usePolicyID } from "../lib/helpers/env";
 
 const Layout: FC = ({ children }): JSX.Element => {
   const [mintPage, setMintPage] = useState<boolean>(false);
