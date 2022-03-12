@@ -3,22 +3,32 @@ import { HandleMintContext } from "../../context/mint";
 
 import Background from "../../images/code.svg";
 import FullLogo from "../../images/logo-dark.svg";
-import { normalizeNFTHandle } from "../../lib/helpers/nfts";
+import { useIsTestnet } from "../../lib/hooks/useIsTestnet";
 import { HandleDetails } from "../HandleSearch";
 import Logo from "./logo";
 
 interface NFTPreviewProps {
   handle: string;
+  handleCost: number | null;
   showPrice?: boolean;
   showHeader?: boolean;
+  isSpo?: boolean;
+  twitterOgNumber?: number;
 }
+
+const TWITTER_OG_SIZE = 2438;
 
 const NFTPreview: FC<NFTPreviewProps> = ({
   handle,
+  handleCost,
   showPrice = true,
   showHeader = true,
+  isSpo = false,
+  twitterOgNumber = 0,
 }) => {
-  const { isPurchasing, reservedHandles, primed } = useContext(HandleMintContext);
+  const { isPurchasing, fetching } = useContext(HandleMintContext);
+
+  const { isTestnet } = useIsTestnet();
 
   const textSize = () => {
     if (handle.length < 3) {
@@ -39,15 +49,21 @@ const NFTPreview: FC<NFTPreviewProps> = ({
           {showHeader && <p className="m-0 text-center">Your NFT Preview</p>}
           {showPrice && (
             <div className="text-center mt-2 mb-8">
-              <HandleDetails handle={handle} />
+              <HandleDetails
+                handle={handle}
+                cost={handleCost}
+                fetching={fetching}
+                isTestnet={isTestnet}
+              />
             </div>
           )}
         </>
       )}
       <div className="flex justify-center h-full w-full">
         <div
-          className={`${handle.length > 0 ? "" : "opacity-50"
-            } bg-dark-100 text-white relative overflow-hidden mx-auto w-96 h-96 max-w-full max-h-full border border-2 border-dark-200 shadow-xl rounded-lg`}
+          className={`${
+            handle.length > 0 ? "" : "opacity-50"
+          } bg-dark-100 text-white relative overflow-hidden mx-auto w-96 h-96 max-w-full max-h-full border border-2 border-dark-200 shadow-xl rounded-lg`}
         >
           <img
             src={Background}
@@ -64,11 +80,16 @@ const NFTPreview: FC<NFTPreviewProps> = ({
             <p className="m-0 text-xs font-bold absolute bottom-6 right-6">
               handle.me/{handle}
             </p>
-            {primed && reservedHandles?.twitter.includes(normalizeNFTHandle(handle)) && (
-              <p className="m-0 text-xs font-bold absolute bottom-6 left-6" style={{
-                color: '#FFCD59'
-              }}>OG {primed && reservedHandles?.twitter.indexOf(handle)}/{primed && reservedHandles?.twitter.length}</p>
-            )}
+            {twitterOgNumber !== 0 ? (
+              <p
+                className="m-0 text-xs font-bold absolute bottom-6 left-6"
+                style={{
+                  color: "#FFCD59",
+                }}
+              >
+                OG {twitterOgNumber}/{TWITTER_OG_SIZE}
+              </p>
+            ) : null}
           </div>
         </div>
       </div>

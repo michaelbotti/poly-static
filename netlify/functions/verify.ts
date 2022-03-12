@@ -41,7 +41,7 @@ const handler: Handler = async (
   await initFirebase();
 
   try {
-    const data = await fetchNodeApp(`/verify`, {
+    const data = await fetchNodeApp(`verify`, {
       method: 'GET',
       headers: {
         [HEADER_EMAIL]: headers[HEADER_EMAIL],

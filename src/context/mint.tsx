@@ -1,24 +1,49 @@
-import React, { createContext, Dispatch, SetStateAction, useEffect, useState } from "react";
+import React, {
+  createContext,
+  Dispatch,
+  SetStateAction,
+  useEffect,
+  useState,
+} from "react";
 
 import { SessionResponseBody } from "../../netlify/functions/session";
 import { StateResponseBody } from "../../netlify/functions/state";
+import { VerifyResponseBody } from "../../netlify/functions/verify";
+import { Status, WorkflowStatus } from "../../netlify/helpers/util";
 import { HandleResponseBody } from "../lib/helpers/search";
+import {
+  getAccessTokenFromCookie,
+  getSPOAccessTokenCookie,
+} from "../lib/helpers/session";
 
 export interface ReservedHandlesType {
-  blacklist: string[],
+  blacklist: string[];
   twitter: string[];
   manual: string[];
   spos: string[];
 }
 
+export enum CreatedBySystem {
+  UI = "UI",
+  CLI = "CLI",
+  SPO = "SPO",
+}
+
 export interface ActiveSessionType {
   emailAddress: string;
   cost: number;
+  refundAmount?: number;
   handle: string;
-  start: number;
-  walletIndex: number;
   paymentAddress: string;
+  returnAddress?: string;
+  start: number;
+  id?: string;
   txId?: string;
+  createdBySystem: CreatedBySystem;
+  status?: Status;
+  workflowStatus?: WorkflowStatus;
+  attempts?: number;
+  dateAdded?: number;
 }
 
 interface PaymentSession {
@@ -27,19 +52,25 @@ interface PaymentSession {
 
 export interface HandleMintContextType {
   handle: string;
+  handleCost: number | null;
   handleResponse: HandleResponseBody;
   fetching: boolean;
   setFetching: Dispatch<SetStateAction<boolean>>;
   twitterToken: string;
   setHandle: Dispatch<SetStateAction<string>>;
+  setHandleCost: Dispatch<SetStateAction<number | null>>;
   reservedHandles: ReservedHandlesType;
   pendingSessions: string[];
   paymentSessions: PaymentSession[];
   currentIndex: number;
-  betaState: StateResponseBody;
+  stateData: StateResponseBody;
   primed: boolean;
   isPurchasing: boolean;
-  setPrimed: Dispatch<SetStateAction<boolean>>;
+  stateLoading: boolean;
+  currentAccess: false | VerifyResponseBody;
+  currentSPOAccess: false | VerifyResponseBody;
+  passwordAllowed: boolean;
+  setPasswordAllowed: Dispatch<SetStateAction<boolean>>;
   setReservedHandles: Dispatch<SetStateAction<ReservedHandlesType>>;
   setHandleResponse: Dispatch<SetStateAction<HandleResponseBody>>;
   setTwitterToken: Dispatch<SetStateAction<string>>;
@@ -47,11 +78,18 @@ export interface HandleMintContextType {
   setPendingSessions: Dispatch<SetStateAction<string[]>>;
   setPaymentSessions: Dispatch<SetStateAction<PaymentSession[]>>;
   setCurrentIndex: Dispatch<SetStateAction<number>>;
-  setBetaState: Dispatch<SetStateAction<StateResponseBody>>;
+  setStateData: Dispatch<SetStateAction<StateResponseBody>>;
+  setCurrentAccess: React.Dispatch<
+    React.SetStateAction<false | VerifyResponseBody>
+  >;
+  setCurrentSPOAccess: React.Dispatch<
+    React.SetStateAction<false | VerifyResponseBody>
+  >;
 }
 
 export const defaultState: HandleMintContextType = {
   handle: "",
+  handleCost: null,
   fetching: false,
   handleResponse: null,
   isPurchasing: false,
@@ -61,18 +99,25 @@ export const defaultState: HandleMintContextType = {
   twitterToken: null,
   primed: false,
   currentIndex: 0,
-  betaState: null,
+  stateData: null,
+  stateLoading: false,
+  currentAccess: false,
+  currentSPOAccess: false,
+  passwordAllowed: false,
+  setPasswordAllowed: () => {},
   setHandleResponse: () => {},
   setFetching: () => {},
   setHandle: () => {},
+  setHandleCost: () => {},
   setIsPurchasing: () => {},
   setReservedHandles: () => {},
   setTwitterToken: () => {},
-  setPrimed: () => {},
   setPendingSessions: () => {},
   setPaymentSessions: () => {},
   setCurrentIndex: () => {},
-  setBetaState: () => {}
+  setStateData: () => {},
+  setCurrentAccess: () => {},
+  setCurrentSPOAccess: () => {},
 };
 
 export const HandleMintContext =
@@ -80,60 +125,85 @@ export const HandleMintContext =
 
 export const HandleMintContextProvider = ({ children, ...rest }) => {
   const [handle, setHandle] = useState<string>("");
+  const [handleCost, setHandleCost] = useState<number | null>(null);
   const [fetching, setFetching] = useState<boolean>(false);
-  const [handleResponse, setHandleResponse] = useState<HandleResponseBody|null>(null);
-  const [twitterToken, setTwitterToken] = useState<string|null>(null);
+  const [handleResponse, setHandleResponse] =
+    useState<HandleResponseBody | null>(null);
+  const [twitterToken, setTwitterToken] = useState<string | null>(null);
   const [isPurchasing, setIsPurchasing] = useState<boolean>(false);
-  const [reservedHandles, setReservedHandles] = useState<ReservedHandlesType|null>(null);
+  const [reservedHandles, setReservedHandles] =
+    useState<ReservedHandlesType | null>(null);
   const [pendingSessions, setPendingSessions] = useState<string[]>(null);
   const [paymentSessions, setPaymentSessions] = useState<PaymentSession[]>([]);
-  const [primed, setPrimed] = useState<boolean>(false);
   const [currentIndex, setCurrentIndex] = useState<number>(0);
-  const [betaState, setBetaState] = useState<StateResponseBody>(null);
+  const [currentAccess, setCurrentAccess] = useState<
+    false | VerifyResponseBody
+  >(false);
+  const [currentSPOAccess, setCurrentSPOAccess] = useState<
+    false | VerifyResponseBody
+  >(false);
+  const [stateData, setStateData] = useState<StateResponseBody>(null);
+  const [stateLoading, setStateLoading] = useState<boolean>(true);
+  const [passwordAllowed, setPasswordAllowed] = useState(false);
 
   useEffect(() => {
-    const updateBetaState = async () => {
+    const updateStateData = async () => {
       await fetch("/.netlify/functions/state")
         .then(async (res) => {
           const data: StateResponseBody = await res.json();
-          setBetaState(data);
+          setStateData(data);
         })
         .catch((e) => {
-          setBetaState(null);
+          setStateData(null);
           console.log(e);
+        })
+        .finally(() => {
+          setStateLoading(false);
         });
-    }
+    };
 
-    updateBetaState();
+    setCurrentAccess(getAccessTokenFromCookie());
+    setCurrentSPOAccess(getSPOAccessTokenCookie());
+    setStateLoading(true);
+    updateStateData();
   }, []);
 
   return (
-    <HandleMintContext.Provider value={{
-      ...defaultState,
-      fetching,
-      handle,
-      handleResponse,
-      twitterToken,
-      isPurchasing,
-      reservedHandles,
-      pendingSessions,
-      paymentSessions,
-      currentIndex,
-      betaState,
-      primed,
-      setFetching,
-      setHandle,
-      setHandleResponse,
-      setTwitterToken,
-      setIsPurchasing,
-      setReservedHandles,
-      setPrimed,
-      setPendingSessions,
-      setPaymentSessions,
-      setCurrentIndex,
-      setBetaState
-    }}>
+    <HandleMintContext.Provider
+      value={{
+        ...defaultState,
+        fetching,
+        handle,
+        handleCost,
+        handleResponse,
+        twitterToken,
+        isPurchasing,
+        reservedHandles,
+        pendingSessions,
+        paymentSessions,
+        currentIndex,
+        stateData,
+        passwordAllowed,
+        setPasswordAllowed,
+        setFetching,
+        setHandle,
+        setHandleCost,
+        setHandleResponse,
+        setTwitterToken,
+        setIsPurchasing,
+        setReservedHandles,
+        setPendingSessions,
+        setPaymentSessions,
+        setCurrentIndex,
+        setStateData,
+        stateLoading,
+        currentAccess,
+        setCurrentAccess,
+        currentSPOAccess,
+        setCurrentSPOAccess,
+      }}
+    >
       {children}
     </HandleMintContext.Provider>
-  )
-}
+  );
+};

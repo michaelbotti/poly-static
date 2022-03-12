@@ -5,6 +5,18 @@ import { getS3 } from "./aws";
 import { buildCollectionNameWithSuffix } from "./util";
 import { StateData } from '../functions/state';
 
+interface StakePool {
+  id: string; // pool id e.g. pool1lvsa...
+  ticker: string;
+  stakeKey: string;
+  ownerHashes: string[];
+}
+
+interface RefundableSession {
+  amount: number;
+  handle: string;
+}
+
 let firebase: admin.app.App;
 export const initFirebase = async (): Promise<admin.app.App> => {
   if (firebase) {
@@ -42,25 +54,6 @@ export const verifyTwitterUser = async (token: string): Promise<number | false> 
     console.log(e);
     return false;
   }
-}
-
-export const getMintedHandles = async (): Promise<{ handleName: string }[] | false> => {
-  return firebase
-    .firestore()
-    .collection(buildCollectionNameWithSuffix("/mintedHandles"))
-    .get()
-    .then(snapshot => {
-      if (snapshot.empty) {
-        return false;
-      }
-
-      const handles = snapshot?.docs?.map(doc => doc?.data() as { handleName: string });
-      if (handles.length === 0) {
-        return false;
-      }
-
-      return handles;
-    });
 }
 
 export const getReservedHandles = async (): Promise<ReservedHandlesType | false> => {
@@ -116,7 +109,8 @@ export const getActiveSessionByHandle = async (handle: string): Promise<ActiveSe
 export const getPaidSessionByHandle = async (handle: string): Promise<ActiveSessionType | null> => {
   return firebase
     .firestore()
-    .collection(buildCollectionNameWithSuffix("/paidSessions"))
+    .collection(buildCollectionNameWithSuffix("/activeSessions"))
+    .where("status", "==", "paid")
     .where("handle", "==", handle).limit(1)
     .get()
     .then(snapshot => {
@@ -128,18 +122,66 @@ export const getPaidSessionByHandle = async (handle: string): Promise<ActiveSess
     });
 }
 
-export const getCachedState = async (): Promise<StateData | false> => {
-  const doc = await admin
+export const getRefundedSessionByHandle = async (handle: string): Promise<RefundableSession | null> => {
+  return firebase
+    .firestore()
+    .collection(buildCollectionNameWithSuffix("/activeSessions"))
+    .where("status", "==", "refundable")
+    .where("handle", "==", handle).limit(1)
+    .get()
+    .then(snapshot => {
+      if (snapshot.empty) {
+        return null;
+      }
+
+      return snapshot?.docs[0]?.data() as RefundableSession;
+    });
+}
+
+export const getCachedState = async (): Promise<StateData | null> => {
+  const stateDoc = await admin
     .firestore()
     .collection(buildCollectionNameWithSuffix("/stateData"))
     .doc('state')
     .get();
+  const settingsDoc = await admin
+    .firestore()
+    .collection(buildCollectionNameWithSuffix("/stateData"))
+    .doc('settings')
+    .get();
 
+  const { chainLoad, totalHandles, accessQueueSize, handlePrices } = stateDoc.data() as StateData;
+  const { spoPageEnabled, accessWindowTimeoutMinutes, paymentWindowTimeoutMinutes, dynamicPricingEnabled, mintingPageEnabled } = settingsDoc.data() as StateData;
 
-  const state = doc.data() as StateData;
+  const state = {
+    chainLoad,
+    totalHandles,
+    spoPageEnabled,
+    accessWindowTimeoutMinutes,
+    paymentWindowTimeoutMinutes,
+    accessQueueSize,
+    handlePrices,
+    dynamicPricingEnabled,
+    mintingPageEnabled
+  } as StateData;
   if (!state) {
-    return false;
+    return null;
   }
 
   return state;
+}
+
+export const getStakePoolsByTicker = async (ticker: string): Promise<StakePool[]> => {
+  const snapshot = await admin
+    .firestore()
+    .collection(buildCollectionNameWithSuffix("/stakePools"))
+    .where('ticker', '==', ticker)
+    .get();
+
+
+  if (snapshot.empty) {
+    return [];
+  }
+
+  return snapshot.docs.map(doc => doc.data() as StakePool);
 }

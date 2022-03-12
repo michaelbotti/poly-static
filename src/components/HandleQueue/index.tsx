@@ -1,20 +1,25 @@
-import React, { useRef, useState, useContext, useEffect } from "react";
-import { Link, navigate } from "gatsby";
-import { useLocation } from '@reach/router';
-import { parse } from 'query-string';
+import React, { useRef, useState, useContext } from "react";
+import { Link } from "gatsby";
+import { useLocation } from "@reach/router";
+import { parse } from "query-string";
 
-import { VerifyResponseBody } from "../../../netlify/functions/verify";
-import { HEADER_EMAIL, HEADER_EMAIL_AUTH, HEADER_RECAPTCHA, HEADER_RECAPTCHA_FALLBACK, RECAPTCHA_SITE_KEY_FALLBACK } from "../../lib/constants";
+import {
+  HEADER_EMAIL,
+  HEADER_RECAPTCHA,
+  HEADER_RECAPTCHA_FALLBACK,
+  RECAPTCHA_SITE_KEY_FALLBACK,
+} from "../../lib/constants";
 import Button from "../button";
-import { getRecaptchaToken, setAccessTokenCookie } from "../../lib/helpers/session";
+import { getRecaptchaToken } from "../../lib/helpers/session";
 import { HandleMintContext } from "../../context/mint";
 import { buildClientAgentInfo } from "../../lib/helpers/clientInfo";
-
+import { EmailInputs } from "./EmailInputs";
 
 const validateEmail = (email: string): boolean => {
-  const res = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+  const res =
+    /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
   return res.test(String(email).toLowerCase());
-}
+};
 
 const getActiveEmail = (): string | null => {
   let value = null;
@@ -27,7 +32,7 @@ const getActiveEmail = (): string | null => {
   }
 
   return value;
-}
+};
 
 const getActiveAuthCode = (): string | null => {
   let value = null;
@@ -38,22 +43,20 @@ const getActiveAuthCode = (): string | null => {
   }
 
   return value;
-}
+};
 
 export const HandleQueue = (): JSX.Element => {
-  const { betaState } = useContext(HandleMintContext);
+  const { stateData } = useContext(HandleMintContext);
   const [savingSpot, setSavingSpot] = useState<boolean>(false);
   const [authenticating, setAuthenticating] = useState<boolean>(false);
   const [verifyingRecaptcha, setVerifyingRecaptcha] = useState<boolean>(false);
   const [submitted, setSubmitted] = useState<boolean>(false);
   const [responseMessage, setResponseMessage] = useState<string>(null);
   const [emailInput, setEmailInput] = useState<string>("");
-  const [authInput, setAuthInput] = useState<string>("");
   const [expired, setExpired] = useState<boolean>(false);
   const [emailChecked, setEmailChecked] = useState<boolean>(false);
-  const [touChecked, setTouChecked] = useState<boolean>(false);
-  const [refundsChecked, setRefundsChecked] = useState<boolean>(false);
-  const [recaptchaFallbackToken, setRecaptchaFallbackToken] = useState<string>(null);
+  const [recaptchaFallbackToken, setRecaptchaFallbackToken] =
+    useState<string>(null);
   const [recaptchaRendered, setRecaptchaRendered] = useState<boolean>(false);
 
   const fallbackRecaptcha = useRef(null);
@@ -61,12 +64,6 @@ export const HandleQueue = (): JSX.Element => {
   const activeEmail = getActiveEmail();
   const activeAuthCode = getActiveAuthCode();
   const form = useRef(null);
-
-  useEffect(() => {
-    if (activeAuthCode) {
-      setAuthInput(activeAuthCode);
-    }
-  }, []);
 
   const setTimeoutResponseMessage = (message: string) => {
     setResponseMessage(message);
@@ -76,46 +73,53 @@ export const HandleQueue = (): JSX.Element => {
   };
 
   const handleOnChange = (value: string) => {
-    if (value.includes('+')) {
-      setTimeoutResponseMessage("Sorry, we do not support email addresses with the (+) character. Try again!");
+    if (value.includes("+")) {
+      setTimeoutResponseMessage(
+        "Sorry, we do not support email addresses with the (+) character. Try again!"
+      );
       return;
     }
 
     setEmailInput(value);
-  }
+  };
 
   const handleSavingResponse = (res) => {
     // Clear the input field for email.
     if (res?.updated) {
-      setEmailInput('');
+      setEmailInput("");
 
       // Update response state.
-      setResponseMessage(`You have successfully been entered into the queue! Check your email for further instructions about your access link.`);
+      const message =
+        res?.accessQueuePosition && res.accessQueuePosition.minutes > 3
+          ? `Your approximate position in the access queue is ${res?.accessQueuePosition?.position} out of ${res?.accessQueueSize}. At our current queue processing rate, it should be about ${res?.accessQueuePosition?.minutes} minutes until you receive an email with an access code.`
+          : "You should receive an email in a few minutes with your access code.";
+      setResponseMessage(
+        `You have successfully been entered into the queue! ${message}`
+      );
       setSubmitted(true);
     } else if (res?.bot && !recaptchaFallbackToken) {
-      setResponseMessage('One more thing, we just need to confirm you are real:');
+      setResponseMessage(
+        "One more thing, we just need to confirm you are real:"
+      );
       setVerifyingRecaptcha(true);
       if (recaptchaRendered) {
-        window.grecaptcha.reset(fallbackRecaptcha.current);
+        (window as any).grecaptcha.reset(fallbackRecaptcha.current);
       } else {
-        window.grecaptcha.render(
-          fallbackRecaptcha.current,
-          {
-            sitekey: RECAPTCHA_SITE_KEY_FALLBACK,
-            theme: 'dark',
-            callback: async (token: string) => {
-              setSavingSpot(true);
-              const res = await handleSubmitToQueue(token);
-              handleSavingResponse(res);
-            },
-            'expired-callback': () => {
-              fallbackRecaptcha.current.firstElementChild.remove();
-              setVerifyingRecaptcha(false);
-              setRecaptchaFallbackToken(null);
-              setResponseMessage('Your ReCaptcha expired. Please try again.');
-            }
-          }
-        );
+        (window as any).grecaptcha.render(fallbackRecaptcha.current, {
+          sitekey: RECAPTCHA_SITE_KEY_FALLBACK,
+          theme: "dark",
+          callback: async (token: string) => {
+            setSavingSpot(true);
+            const res = await handleSubmitToQueue(token);
+            handleSavingResponse(res);
+          },
+          "expired-callback": () => {
+            fallbackRecaptcha.current.firstElementChild.remove();
+            setVerifyingRecaptcha(false);
+            setRecaptchaFallbackToken(null);
+            setResponseMessage("Your ReCaptcha expired. Please try again.");
+          },
+        });
         setRecaptchaRendered(true);
       }
     } else {
@@ -123,7 +127,7 @@ export const HandleQueue = (): JSX.Element => {
     }
 
     setSavingSpot(false);
-  }
+  };
 
   const handleSubmitToQueue = async (token: string = null) => {
     const recaptchaToken: string = await getRecaptchaToken();
@@ -133,7 +137,7 @@ export const HandleQueue = (): JSX.Element => {
       headers: {
         [HEADER_EMAIL]: emailInput,
         [HEADER_RECAPTCHA]: recaptchaToken,
-        [HEADER_RECAPTCHA_FALLBACK]: token || recaptchaFallbackToken
+        [HEADER_RECAPTCHA_FALLBACK]: token || recaptchaFallbackToken,
       },
       body: JSON.stringify({
         clientAgent: encodedClientAgentInfo,
@@ -142,8 +146,8 @@ export const HandleQueue = (): JSX.Element => {
       .then((res) => res.json())
       .catch((e) => console.log(e));
 
-      return res;
-  }
+    return res;
+  };
 
   // Send the user's email to a queue.
   const handleSaving = async (e: Event | null) => {
@@ -159,13 +163,17 @@ export const HandleQueue = (): JSX.Element => {
       return;
     }
 
-    if (emailInput.includes('+')) {
-      setTimeoutResponseMessage("Sorry, we do not support email addresses with the (+) character. Try again!");
+    if (emailInput.includes("+")) {
+      setTimeoutResponseMessage(
+        "Sorry, we do not support email addresses with the (+) character. Try again!"
+      );
       return;
     }
 
     if (!emailChecked) {
-      setTimeoutResponseMessage("Sorry, you must agree to receive email alerts!");
+      setTimeoutResponseMessage(
+        "Sorry, you must agree to receive email alerts!"
+      );
       return;
     }
 
@@ -175,73 +183,40 @@ export const HandleQueue = (): JSX.Element => {
     handleSavingResponse(res);
   };
 
-  // Sends the user's email and auth code (via URL params) to the server for verification.
-  const handleAuthenticating = async (e: Event) => {
-    e.preventDefault();
-
-    if (authInput.length !== 6) {
-      setResponseMessage("Auth code must be 6 digits.");
-      return;
-    }
-
-    setAuthenticating(true);
-    try {
-      const res: VerifyResponseBody = await fetch(
-        "/.netlify/functions/verify",
-        {
-          headers: {
-            [HEADER_EMAIL]: activeEmail,
-            [HEADER_EMAIL_AUTH]: activeAuthCode,
-          },
-        }
-      )
-        .then((res) => res.json())
-        .catch((e) => console.log(e));
-
-      const { error, verified, message, token, data } = res;
-      if (!error && verified && token && data) {
-        setAccessTokenCookie(res, data.exp);
-        window.location.href = '/mint';
-      }
-
-      if (!verified && error && message) {
-        setResponseMessage(message);
-        setExpired(true);
-      }
-    } catch (e) {
-      setTimeoutResponseMessage("Hmm, try that again. Something went wrong.");
-      console.log(e);
-    }
-
-    setAuthenticating(false);
-  };
+  const showWaitlist = stateData?.accessQueueSize > 500;
 
   return (
     <>
       <div className="flex items-center justify-between mb-8 lg:mb-12">
-        <div className="w-1/2 text-center">
+        <div className={`${showWaitlist ? "w-1/2" : "w-full"} text-center`}>
           <h4 className="text-lg text-dark-350 mb-4">Blockchain Load</h4>
           <span
             className={`font-bold text-4xl ${
-              betaState?.chainLoad > 0.8 ? "" : "text-primary-100"
+              stateData?.chainLoad > 0.8 ? "" : "text-primary-100"
             }`}
             style={{
-              color: betaState?.chainLoad > 0.8 ? "red" : "",
+              color: stateData?.chainLoad > 0.8 ? "red" : "",
             }}
           >
-            {null === betaState && "Loading..."}
-            {null !== betaState && !betaState.error && `${(betaState.chainLoad * 100).toFixed(2)}%`}
-            {null !== betaState && betaState.error && "N/A"}
+            {null === stateData && "Loading..."}
+            {null !== stateData &&
+              !stateData.error &&
+              `${(stateData.chainLoad * 100).toFixed(2)}%`}
+            {null !== stateData && stateData.error && "N/A"}
           </span>
         </div>
-        <div className="w-1/2 text-center">
-          <h4 className="text-lg text-dark-350 mb-4">Current Waitlist</h4>
-          <span className={`font-bold text-4xl text-primary-100`}>
-            {null === betaState && "Loading..."}
-            {null !== betaState && !betaState.error && betaState.position.toLocaleString('en-US')}
-            {null !== betaState && betaState.error && "N/A"}
-          </span>
-        </div>
+        {showWaitlist ? (
+          <div className="w-1/2 text-center">
+            <h4 className="text-lg text-dark-350 mb-4">Current Waitlist</h4>
+            <span className={`font-bold text-4xl text-primary-100`}>
+              {null === stateData && "Loading..."}
+              {null !== stateData && !stateData.error && (
+                <span>{stateData.accessQueueSize ?? 0}</span>
+              )}
+              {null !== stateData && stateData.error && "N/A"}
+            </span>
+          </div>
+        ) : null}
       </div>
       {submitted ? (
         <div className="bg-dark-100 rounded-lg shadow-lg p-8 block">
@@ -252,119 +227,84 @@ export const HandleQueue = (): JSX.Element => {
             Success!
           </h3>
           <p className="text-lg text-center text-dark-350">{responseMessage}</p>
-          <p className="text-center text-lg">Make sure to <strong className="underline">add hello@adahandle.com to your safe-senders list, as well as check your spam folder!</strong></p>
-          <p className="text-center text-lg font-bold">You may close this window!</p>
+          <p className="text-center text-lg">
+            Make sure to{" "}
+            <strong className="underline">
+              add hello@adahandle.com to your safe-senders list, as well as
+              check your spam folder!
+            </strong>
+          </p>
+          <p className="text-center text-lg font-bold">
+            You may close this window!
+          </p>
         </div>
       ) : (
         <>
           <h3 className="text-2xl text-white text-center mb-4">
-            {activeEmail && activeAuthCode ? <>Agree to the Terms</> : <>Enter the Queue</>}
+            Enter the Queue
           </h3>
-          {!activeEmail && !activeAuthCode && betaState?.chainLoad > 0.8 && <p className="text-center">You may experienced delayed delivery times while we wait for the blockchain load to fall below 80%.</p>}
-          {activeEmail && activeAuthCode && <p className="text-lg text-center">Almost there! Just make sure to agree to the terms of use before purchasing your Handles. This information is important!</p>}
-          <form onSubmit={(e) => e.preventDefault()} ref={form} className="bg-dark-100 border-dark-300 rounded-t-lg">
-            {!activeEmail && !activeAuthCode && (
-              <>
-                <input
-                  name="email"
-                  disabled={savingSpot}
-                  placeholder={"Your email address..."}
-                  className={`focus:ring-0 focus:ring-opacity-0 border-2 outline-none form-input bg-dark-100 border-dark-300 rounded-t-lg px-6 py-4 text-xl w-full`}
-                  value={emailInput}
-                  // @ts-ignore
-                  onChange={(e) => handleOnChange(e.target.value)}
-                />
-                <div className="flex items-center text-sm bg-dark-100 border-dark-300 border-l-2 border-r-2 px-4 py-2">
-                  <input
-                    className="form-checkbox p-2 text-primary-200 rounded focus:ring-primary-200 cursor-pointer"
-                    id="acceptEmail"
-                    name="acceptEmail"
-                    type="checkbox"
-                    checked={emailChecked}
-                    onChange={() => setEmailChecked(!emailChecked)}
-                  />
-                  <label className="ml-2 text-white py-3 cursor-pointer" htmlFor="acceptEmail">
-                    I agree to receive email notifications.
-                  </label>
-                </div>
-              </>
-            )}
-            {activeEmail && activeAuthCode && (
-              <>
-                <input
-                  name="auth"
-                  data-lpignore="true"
-                  disabled={authenticating}
-                  placeholder={"Your 6 digit code..."}
-                  type="number"
-                  onChange={(e) => setAuthInput(e.target.value)}
-                  value={authInput}
-                  className={`hidden focus:ring-0 focus:ring-opacity-0 border-2 outline-none form-input bg-dark-100 border-dark-300 px-6 py-4 text-xl w-full appearance-none rounded-t-lg`}
-                />
-                <div className="flex items-center text-sm bg-dark-100 border-dark-300 border-2 rounded-t-lg p-4 pt-2 pb-0">
-                  <input
-                    className="form-checkbox p-2 text-primary-200 rounded focus:ring-primary-200 cursor-pointer"
-                    id="tou"
-                    name="tou"
-                    type="checkbox"
-                    checked={touChecked}
-                    onChange={() => setTouChecked(!touChecked)}
-                  />
-                  <label className="ml-2 text-white py-3 cursor-pointer" htmlFor="tou">
-                    I have read and agree to the ADA Handle {" "}
-                    <Link to="/tou" className="text-primary-100">
-                      Terms of Use
-                    </Link>
-                  </label>
-                </div>
-                <div className="flex items-center text-sm bg-dark-100 border-dark-300 border-l-2 border-r-2 p-4 pb-2 pt-0">
-                  <input
-                    className="form-checkbox p-2 text-primary-200 rounded focus:ring-primary-200 cursor-pointer"
-                    id="refunds"
-                    name="refunds"
-                    type="checkbox"
-                    checked={refundsChecked}
-                    onChange={() => setRefundsChecked(!refundsChecked)}
-                  />
-                  <label className="ml-2 text-white py-3 cursor-pointer" htmlFor="refunds">
-                    You agree to our <Link className="text-primary-100" to="/refund-policy">Refund Policy</Link> and <strong className="underline">14-day processing time!</strong>
-                  </label>
-                </div>
-              </>
-            )}
-            {activeEmail ? (
-              <Button
-                className={`w-full rounded-t-none`}
-                buttonStyle={"primary"}
-                type="submit"
-                disabled={authenticating || !touChecked || !refundsChecked}
-                onClick={handleAuthenticating}
-              >
-                {authenticating && "Authenticating..."}
-                {!authenticating && "Enter Minting Portal"}
-              </Button>
-            ) : (
-              <Button
-                className={`w-full rounded-t-none`}
-                buttonStyle={"primary"}
-                type="submit"
-                disabled={savingSpot || !emailChecked || verifyingRecaptcha}
-                onClick={handleSaving}
-              >
-                {savingSpot && "Entering queue..."}
-                {!savingSpot && verifyingRecaptcha && "Waiting..."}
-                {!authenticating && !savingSpot && !verifyingRecaptcha && "Submit"}
-              </Button>
-            )}
+          {/* TODO: use state chain load param */}
+          {!activeEmail && !activeAuthCode && stateData?.chainLoad > 0.8 && (
+            <p className="text-center">
+              You may experienced delayed delivery times while we wait for the
+              blockchain load to fall below 80%.
+            </p>
+          )}
+          <form
+            onSubmit={(e) => e.preventDefault()}
+            ref={form}
+            className="bg-dark-100 border-dark-300 rounded-t-lg"
+          >
+            <EmailInputs
+              savingSpot={savingSpot}
+              emailInput={emailInput}
+              emailChecked={emailChecked}
+              handleOnChange={handleOnChange}
+              setEmailChecked={setEmailChecked}
+            />
+            <Button
+              className={`w-full rounded-t-none`}
+              buttonStyle={"primary"}
+              type="submit"
+              disabled={savingSpot || !emailChecked || verifyingRecaptcha}
+              onClick={handleSaving}
+            >
+              {savingSpot && "Entering queue..."}
+              {!savingSpot && verifyingRecaptcha && "Waiting..."}
+              {!authenticating &&
+                !savingSpot &&
+                !verifyingRecaptcha &&
+                "Submit"}
+            </Button>
           </form>
-          {responseMessage && <p className="my-2 text-center">{responseMessage}</p>}
-          <div className="flex items-center justify-center my-4" ref={fallbackRecaptcha} />
-          {activeEmail && activeAuthCode && !expired && <p className="text-center mt-2"><Link to={'/mint/'} className="text-primary-100">Start Over</Link></p>}
-          {expired && <p className="my-2 text-center"><Link to="/mint" onClick={() => {
-            setResponseMessage('');
-            setAuthInput(null);
-            setEmailInput(null);
-          }} className="text-primary-100">Re-Enter the Queue</Link></p>}
+          {responseMessage && (
+            <p className="my-2 text-center">{responseMessage}</p>
+          )}
+          <div
+            className="flex items-center justify-center my-4"
+            ref={fallbackRecaptcha}
+          />
+          {activeEmail && activeAuthCode && !expired && (
+            <p className="text-center mt-2">
+              <Link to={"/mint/"} className="text-primary-100">
+                Start Over
+              </Link>
+            </p>
+          )}
+          {expired && (
+            <p className="my-2 text-center">
+              <Link
+                to="/mint"
+                onClick={() => {
+                  setResponseMessage("");
+                  setEmailInput(null);
+                }}
+                className="text-primary-100"
+              >
+                Re-Enter the Queue
+              </Link>
+            </p>
+          )}
         </>
       )}
     </>

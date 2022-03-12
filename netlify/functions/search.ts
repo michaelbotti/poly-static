@@ -6,23 +6,14 @@ import {
   HandlerResponse,
 } from "@netlify/functions";
 import {
-  getDefaultActiveSessionUnvailable,
-  getDefaultResponseAvailable,
-  getDefaultResponseUnvailable,
-  getPaidSessionUnavailable,
-  getReservedUnavailable,
-  getSPOUnavailable,
-  getTwitterResponseUnvailable,
   HandleResponseBody,
 } from "../../src/lib/helpers/search";
 import { normalizeNFTHandle } from "../../src/lib/helpers/nfts";
 import {
   HEADER_HANDLE,
-  HEADER_JWT_ACCESS_TOKEN,
+  HEADER_IS_SPO,
 } from "../../src/lib/constants";
-import { getActiveSessionByHandle, getActiveSessionsByEmail, getMintedHandles, getPaidSessionByHandle, getReservedHandles, initFirebase } from "../helpers/firebase";
-import { ensureHandleAvailable, fetchNodeApp } from "../helpers/util";
-import { AccessTokenPayload, decodeAccessToken } from "../helpers/jwt";
+import { ensureHandleAvailable, getAccessTokenCookieName } from "../helpers/util";
 
 // Main handler function for GET requests.
 const handler: Handler = async (
@@ -33,7 +24,8 @@ const handler: Handler = async (
   const { headers } = event;
 
   const headerHandle = headers[HEADER_HANDLE];
-  const headerAccess = headers[HEADER_JWT_ACCESS_TOKEN];
+  const isSPO = headers[HEADER_IS_SPO] === 'true';
+  const headerAccess = headers[getAccessTokenCookieName(isSPO)];
 
   if (!headerAccess || !headerHandle) {
     return {
@@ -45,23 +37,8 @@ const handler: Handler = async (
     };
   }
 
-  await initFirebase();
-
   const handle = normalizeNFTHandle(headerHandle);
-
-  const { emailAddress } = decodeAccessToken(headerAccess) as AccessTokenPayload;
-  const activeSessionsByEmail = await getActiveSessionsByEmail(emailAddress);
-  if (activeSessionsByEmail.length > 3) {
-    return {
-      statusCode: 403,
-      body: JSON.stringify({
-        message: "Too many sessions open! Try again after one expires.",
-        available: false,
-      } as HandleResponseBody),
-    };
-  }
-
-  return ensureHandleAvailable(handle);
+  return ensureHandleAvailable(headerAccess, handle, isSPO);
 };
 
 export { handler };

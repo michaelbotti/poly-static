@@ -1,26 +1,39 @@
-const RESPONSE_UNAVAILABLE_DEFAULT = 'Sorry! This handle is unavailable.';
+const RESPONSE_UNAVAILABLE_DEFAULT = 'Sorry! This Handle is unavailable.';
 const RESPONSE_UNAVAILABLE_PAID = 'Sorry! This Handle is pending mint.';
 const RESPONSE_UNAVAILABLE_TWITTER = 'Reserved! Please unlock with Twitter below.';
-const RESPONSE_AVAILABLE_DEFAULT = 'Yay! This handle is available.';
-const RESPONSE_BETA_PHASE_UNAVAILABLE = 'Legendary handles are not available yet.';
+const RESPONSE_AVAILABLE_DEFAULT = 'Yay! This Handle is available.';
+const RESPONSE_BETA_PHASE_UNAVAILABLE = 'Legendary Handles are not available yet.';
 const RESPONSE_ACTIVE_SESSION_UNAVAILABLE = 'Pending purchase. Try again soon!';
 const RESPONSE_SESSION_COUNT_UNAVAILABLE = 'Sorry! You can only have 3 active sessions at a time.';
 const RESPONSE_SPO_HANDLE_UNAVAILABLE = 'Reserved for the stake pool. Email private@adahandle.com to claim!';
 const RESPONSE_RESERVED_HANDLE_UNAVAILABLE = 'This Handle is reserved. Send an email to private@adahandle.com to claim it.';
+const RESPONSE_SPO_HANDLE_NOT_FOUND = 'Stake pool not found. Send an email to private@adahandle.com if you believe this is incorrect.';
+const RESPONSE_SPO_MULTIPLE_TICKER = 'Ticker belongs to multiple stake pools. Send an email to private@adahandle.com.';
 
 export interface HandleResponseBody {
   available: boolean;
   message: string;
   twitter: boolean;
+  ogNumber?: number;
+  cost?: number;
   link?: string;
+  reason?: string;
+  mintingQueueSize?: number;
+  mintingQueuePosition?: number;
+  mintingQueueMinutes?: number;
 }
 
-export const getDefaultResponseAvailable = (link?: string): HandleResponseBody => ({
-  message: RESPONSE_AVAILABLE_DEFAULT,
-  available: true,
-  twitter: false,
-  link
-});
+interface DefaultResponseInput { link?: string, cost?: number }
+export const getDefaultResponseAvailable = (input?: DefaultResponseInput): HandleResponseBody => {
+  const { link, cost } = input;
+  return {
+    message: RESPONSE_AVAILABLE_DEFAULT,
+    available: true,
+    twitter: false,
+    cost,
+    link
+  }
+};
 
 export const getDefaultResponseUnvailable = (link?: string): HandleResponseBody => ({
   message: RESPONSE_UNAVAILABLE_DEFAULT,
@@ -43,17 +56,18 @@ export const getDefaultActiveSessionUnvailable = (link?: string): HandleResponse
 });
 
 export const getTwitterResponseAvailable = (link?: string): HandleResponseBody => ({
-    message: RESPONSE_AVAILABLE_DEFAULT,
-    available: true,
-    twitter: true,
-    link
+  message: RESPONSE_AVAILABLE_DEFAULT,
+  available: true,
+  twitter: true,
+  link
 });
 
-export const getTwitterResponseUnvailable = (link?: string): HandleResponseBody => ({
-    message: RESPONSE_UNAVAILABLE_TWITTER,
-    available: false,
-    twitter: true,
-    link
+export const getTwitterResponseUnvailable = ({ link, ogNumber }: { link?: string, ogNumber?: number }): HandleResponseBody => ({
+  message: RESPONSE_UNAVAILABLE_TWITTER,
+  available: false,
+  twitter: true,
+  link,
+  ogNumber
 });
 
 export const getBetaPhaseResponseUnavailable = (link?: string): HandleResponseBody => ({
@@ -82,4 +96,26 @@ export const getSPOUnavailable = (link?: string): HandleResponseBody => ({
   available: false,
   twitter: false,
   link
+});
+
+export const getStakePoolNotFoundResponse = (link?: string): HandleResponseBody => ({
+  message: RESPONSE_SPO_HANDLE_NOT_FOUND,
+  available: false,
+  twitter: false,
+  link
+});
+
+export const getMultipleStakePoolResponse = (link?: string): HandleResponseBody => ({
+  message: RESPONSE_SPO_MULTIPLE_TICKER,
+  available: false,
+  twitter: false,
+  link
+});
+
+export const buildUnavailableResponse = (message: string, reason: string, link?: string): HandleResponseBody => ({
+  message,
+  reason,
+  link,
+  available: false,
+  twitter: false
 });

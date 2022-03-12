@@ -6,12 +6,21 @@ import {
 } from "@netlify/functions";
 import { getCachedState, initFirebase } from "../helpers/firebase";
 
-import { fetchNodeApp } from "../helpers/util";
-
 export interface StateData {
   chainLoad?: number | null;
-  position?: number;
   totalHandles?: number;
+  spoPageEnabled?: boolean;
+  accessWindowTimeoutMinutes?: number;
+  paymentWindowTimeoutMinutes?: number;
+  accessQueueSize: number;
+  dynamicPricingEnabled: boolean;
+  mintingPageEnabled: boolean;
+  handlePrices: {
+    basic: number;
+    common: number;
+    rare: number;
+    ultraRare: number;
+  }
 }
 
 export interface StateResponseBody extends StateData {

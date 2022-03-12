@@ -11,8 +11,13 @@ import { fetchNodeApp } from "../helpers/util";
 import { HEADER_CLIENT_IP, HEADER_EMAIL, HEADER_RECAPTCHA, HEADER_RECAPTCHA_FALLBACK } from "../../src/lib/constants";
 
 interface AppendAccessResponse {
-  updated: boolean;
-  alreadyExists: boolean;
+  updated?: boolean;
+  alreadyExists?: boolean;
+  accessQueueSize?: number;
+  accessQueuePosition?: {
+    position: number;
+    minutes: number;
+  },
 }
 
 export interface QueueResponseBody extends AppendAccessResponse {
@@ -24,14 +29,6 @@ const handler: Handler = async (
   event: HandlerEvent,
   context: HandlerContext
 ): Promise<HandlerResponse> => {
-  return {
-    statusCode: 400,
-    body: JSON.stringify({
-      error: true,
-      message: 'Beta Sale has ended!'
-    } as QueueResponseBody)
-  }
-
   const { headers, body } = event;
   const headerRecaptcha = headers[HEADER_RECAPTCHA];
   const headerRecaptchaFallback = headers[HEADER_RECAPTCHA_FALLBACK];

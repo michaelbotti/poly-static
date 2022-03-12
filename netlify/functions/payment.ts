@@ -6,10 +6,9 @@ import {
 } from "@netlify/functions";
 import jwt from 'jsonwebtoken';
 
-import { HEADER_JWT_ACCESS_TOKEN, HEADER_JWT_SESSION_TOKEN } from "../../src/lib/constants";
+import { HEADER_IS_SPO } from "../../src/lib/constants";
 import { getSecret } from "../helpers";
-import { initFirebase } from "../helpers/firebase";
-import { fetchNodeApp } from "../helpers/util";
+import { fetchNodeApp, getAccessTokenCookieName, getSessionTokenCookieName } from "../helpers/util";
 
 export interface PaymentAddressResponse {
   address: string;
@@ -47,8 +46,10 @@ const handler: Handler = async (
   const { headers, queryStringParameters } = event;
 
   const addresses = queryStringParameters?.addresses;
-  const accessToken = headers[HEADER_JWT_ACCESS_TOKEN];
-  const sessionToken = headers[HEADER_JWT_SESSION_TOKEN];
+  const isSPO = headers[HEADER_IS_SPO] === 'true';
+
+  const accessToken = headers[getAccessTokenCookieName(isSPO)];
+  const sessionToken = headers[getSessionTokenCookieName(isSPO)];
 
   if (!accessToken || !sessionToken || !addresses) {
     return {
@@ -97,10 +98,10 @@ const handler: Handler = async (
     }
   }
 
-  const res: GraphqlPaymentAddressesResponse = await fetchNodeApp(`/payment?addresses=${addresses}`, {
+  const res: GraphqlPaymentAddressesResponse = await fetchNodeApp(`payment?addresses=${addresses}`, {
     headers: {
-      [HEADER_JWT_ACCESS_TOKEN]: accessToken,
-      [HEADER_JWT_SESSION_TOKEN]: sessionToken
+      [getAccessTokenCookieName(isSPO)]: accessToken,
+      [getSessionTokenCookieName(isSPO)]: sessionToken
     }
   }).then(res => res.json())
 
