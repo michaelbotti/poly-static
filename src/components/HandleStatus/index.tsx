@@ -1,17 +1,7 @@
 import React, { useEffect, useState } from "react";
-import {
-  Accordion,
-  AccordionDetails,
-  AccordionSummary,
-  CircularProgress,
-  List,
-  ListItem,
-  Typography,
-} from "@mui/material";
-import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import { CircularProgress } from "@mui/material";
 
 import {
-  HEADER_ALL_SESSIONS,
   HEADER_IS_SPO,
   HEADER_JWT_ALL_SESSIONS_TOKEN,
 } from "../../lib/constants";
@@ -77,7 +67,7 @@ export const HandleStatus = () => {
     const confirmedItems = items[SessionStatusType.CONFIRMED];
     const waitingForConfirmationItems =
       items[SessionStatusType.WAITING_FOR_CONFIRMATION];
-    const waitingForMiningItems = items[SessionStatusType.WAITING_FOR_MINING];
+    const waitingForMiningItems = items[SessionStatusType.WAITING_FOR_MINTING];
     const waitingForPaymentItems = items[SessionStatusType.WAITING_FOR_PAYMENT];
     const refundedItems = items[SessionStatusType.REFUNDED];
 
@@ -98,7 +88,7 @@ export const HandleStatus = () => {
         {waitingForMiningItems?.length > 0 && (
           <TypeAccordion
             items={waitingForMiningItems}
-            type={SessionStatusType.WAITING_FOR_MINING}
+            type={SessionStatusType.WAITING_FOR_MINTING}
           />
         )}
         {waitingForPaymentItems?.length > 0 && (
