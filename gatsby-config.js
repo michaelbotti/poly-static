@@ -1,5 +1,17 @@
 const tailwindConfig = require("./tailwind.config.js");
 
+const authHeaders =
+  process.env.APP_ENV === "development"
+    ? {}
+    : {
+        "/mint/*": [
+          `Basic-Auth: ${process.env.NODEJS_APP_USERNAME}:${process.env.NODEJS_APP_PASSWORD}`,
+        ],
+        "/queue/*": [
+          `Basic-Auth: ${process.env.NODEJS_APP_USERNAME}:${process.env.NODEJS_APP_PASSWORD}`,
+        ],
+      };
+
 module.exports = {
   flags: {
     LMDB_STORE: true,
@@ -13,13 +25,6 @@ module.exports = {
     `gatsby-plugin-material-ui`,
     `gatsby-plugin-react-helmet`,
     `gatsby-plugin-layout`,
-    {
-      resolve: `gatsby-plugin-netlify`,
-      options: {
-        mergeLinkHeaders: false,
-        mergeCachingHeaders: false,
-      },
-    },
     {
       resolve: `gatsby-plugin-recaptcha`,
       options: {
@@ -57,9 +62,7 @@ module.exports = {
         postCssPlugins: [
           require(`tailwindcss`)(tailwindConfig),
           require(`autoprefixer`),
-          ...(process.env.NODE_ENV === `production`
-            ? [require(`cssnano`)]
-            : []),
+          ...(process.env.APP_ENV === `production` ? [require(`cssnano`)] : []),
         ],
       },
     },
@@ -69,6 +72,14 @@ module.exports = {
         google: {
           families: ["Noto Sans:400,400italic,700,700italic"],
         },
+      },
+    },
+    {
+      resolve: `gatsby-plugin-netlify`,
+      options: {
+        headers: authHeaders,
+        mergeLinkHeaders: false,
+        mergeCachingHeaders: false,
       },
     },
   ],

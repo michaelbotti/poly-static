@@ -11,7 +11,8 @@ import { Loader } from "../components/Loader";
 import { MintingClosed } from "../components/MintingClosed";
 
 function QueuePage() {
-  const { stateLoading, stateData } = useContext(HandleMintContext);
+  const { stateLoading, stateData, passwordAllowed } =
+    useContext(HandleMintContext);
 
   const [accessOpen] = useAccessOpen();
 
@@ -31,8 +32,7 @@ function QueuePage() {
   }
 
   const { mintingPageEnabled } = stateData;
-
-  if (mintingPageEnabled) {
+  if (mintingPageEnabled || passwordAllowed) {
     return (
       <>
         <SEO title="Mint" />
