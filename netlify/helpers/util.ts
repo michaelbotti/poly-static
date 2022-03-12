@@ -137,16 +137,15 @@ export const fetchNodeApp = async (
 }
 
 export const isProduction = (): boolean => {
-  // currently NODE_ENV is not set to 'master' in buddy
-  return process.env.NODE_ENV?.trim() === 'production' || process.env.NODE_ENV?.trim() === 'master';
+  return process.env.APP_ENV?.trim() === 'production';
 }
 
 export const isTesting = (): boolean => {
-  return process.env.NODE_ENV?.trim() === 'test';
+  return process.env.APP_ENV?.trim() === 'test';
 }
 
 export const isLocal = (): boolean => {
-  return process.env.NODE_ENV?.trim() === 'local';
+  return process.env.APP_ENV?.trim() === 'local';
 }
 
 export const buildCollectionNameWithSuffix = (collectionName: string): string => {

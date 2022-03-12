@@ -1,7 +1,7 @@
 const tailwindConfig = require("./tailwind.config.js");
 
 const authHeaders =
-  process.env.NODE_ENV === "test" || process.env.NODE_ENV === "local"
+  process.env.APP_ENV === "development"
     ? {}
     : {
         "/mint/*": [
@@ -62,9 +62,7 @@ module.exports = {
         postCssPlugins: [
           require(`tailwindcss`)(tailwindConfig),
           require(`autoprefixer`),
-          ...(process.env.NODE_ENV === `production`
-            ? [require(`cssnano`)]
-            : []),
+          ...(process.env.APP_ENV === `production` ? [require(`cssnano`)] : []),
         ],
       },
     },
