@@ -1,5 +1,17 @@
 const tailwindConfig = require("./tailwind.config.js");
 
+const authHeaders =
+  process.env.NODE_ENV === "test" || process.env.NODE_ENV === "local"
+    ? {}
+    : {
+        "/mint/*": [
+          `Basic-Auth: ${process.env.NODEJS_APP_USERNAME}:${process.env.NODEJS_APP_PASSWORD}`,
+        ],
+        "/queue/*": [
+          `Basic-Auth: ${process.env.NODEJS_APP_USERNAME}:${process.env.NODEJS_APP_PASSWORD}`,
+        ],
+      };
+
 module.exports = {
   flags: {
     LMDB_STORE: true,
@@ -67,14 +79,7 @@ module.exports = {
     {
       resolve: `gatsby-plugin-netlify`,
       options: {
-        headers: {
-          "/mint/*": [
-            `Basic-Auth: ${process.env.NODEJS_APP_USERNAME}:${process.env.NODEJS_APP_PASSWORD}`,
-          ],
-          "/queue/*": [
-            `Basic-Auth: ${process.env.NODEJS_APP_USERNAME}:${process.env.NODEJS_APP_PASSWORD}`,
-          ],
-        },
+        headers: authHeaders,
         mergeLinkHeaders: false,
         mergeCachingHeaders: false,
       },
