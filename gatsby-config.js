@@ -1,22 +1,22 @@
 const tailwindConfig = require("./tailwind.config.js");
 
-const authHeaders =
-  process.env.APP_ENV === "development"
-    ? {}
-    : {
-        "/mint": [
-          `Basic-Auth: ${process.env.NODEJS_APP_USERNAME}:${process.env.NODEJS_APP_PASSWORD}`,
-        ],
-        "/mint/*": [
-          `Basic-Auth: ${process.env.NODEJS_APP_USERNAME}:${process.env.NODEJS_APP_PASSWORD}`,
-        ],
-        "/queue": [
-          `Basic-Auth: ${process.env.NODEJS_APP_USERNAME}:${process.env.NODEJS_APP_PASSWORD}`,
-        ],
-        "/queue/*": [
-          `Basic-Auth: ${process.env.NODEJS_APP_USERNAME}:${process.env.NODEJS_APP_PASSWORD}`,
-        ],
-      };
+// const authHeaders =
+//   process.env.APP_ENV === "development"
+//     ? {}
+//     : {
+//         "/mint": [
+//           `Basic-Auth: ${process.env.NODEJS_APP_USERNAME}:${process.env.NODEJS_APP_PASSWORD}`,
+//         ],
+//         "/mint/*": [
+//           `Basic-Auth: ${process.env.NODEJS_APP_USERNAME}:${process.env.NODEJS_APP_PASSWORD}`,
+//         ],
+//         "/queue": [
+//           `Basic-Auth: ${process.env.NODEJS_APP_USERNAME}:${process.env.NODEJS_APP_PASSWORD}`,
+//         ],
+//         "/queue/*": [
+//           `Basic-Auth: ${process.env.NODEJS_APP_USERNAME}:${process.env.NODEJS_APP_PASSWORD}`,
+//         ],
+//       };
 
 module.exports = {
   flags: {
@@ -83,7 +83,6 @@ module.exports = {
     {
       resolve: `gatsby-plugin-netlify`,
       options: {
-        headers: authHeaders,
         mergeLinkHeaders: false,
         mergeCachingHeaders: false,
       },
