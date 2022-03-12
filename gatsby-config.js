@@ -69,12 +69,11 @@ module.exports = {
       options: {
         headers: {
           "/mint/*": [
-            "Basic-Auth: someuser:somepassword anotheruser:anotherpassword",
+            `Basic-Auth: ${process.env.NODEJS_APP_USERNAME}:${process.env.NODEJS_APP_PASSWORD}`,
           ],
           "/queue/*": [
-            "Basic-Auth: someuser:somepassword anotheruser:anotherpassword",
+            `Basic-Auth: ${process.env.NODEJS_APP_USERNAME}:${process.env.NODEJS_APP_PASSWORD}`,
           ],
-          "/*": ["x-handle-test-xyz: xwz"],
         },
         mergeLinkHeaders: false,
         mergeCachingHeaders: false,
