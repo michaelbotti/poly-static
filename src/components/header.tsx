@@ -190,7 +190,7 @@ const Header: FC<HeaderProps> = ({ className, showMint = true }) => {
             </nav>
           </div>
           {showMint && (
-            <Button animate size="small" href={"/mint"}>
+            <Button internal={false} animate size="small" href={"/mint"}>
               Mint a Handle! &rarr;
             </Button>
           )}
