@@ -53,11 +53,14 @@ const handler: Handler = async (
       statusCode: 200,
       body: JSON.stringify(data),
     };
-  } catch (e) {
-    console.log(e)
+  } catch (error) {
+    console.log(error);
     return {
       statusCode: 500,
-      body: JSON.stringify(e)
+      body: JSON.stringify({
+        error: true,
+        message: 'Unexpected error.',
+      }),
     };
   }
 };

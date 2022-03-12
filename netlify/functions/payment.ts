@@ -43,84 +43,96 @@ const handler: Handler = async (
   event: HandlerEvent,
   context: HandlerContext
 ): Promise<HandlerResponse> => {
-  const { headers, queryStringParameters } = event;
+  try {
+    const { headers, queryStringParameters } = event;
 
-  const addresses = queryStringParameters?.addresses;
-  const isSPO = headers[HEADER_IS_SPO] === 'true';
+    const addresses = queryStringParameters?.addresses;
+    const isSPO = headers[HEADER_IS_SPO] === 'true';
 
-  const accessToken = headers[getAccessTokenCookieName(isSPO)];
-  const sessionToken = headers[getSessionTokenCookieName(isSPO)];
+    const accessToken = headers[getAccessTokenCookieName(isSPO)];
+    const sessionToken = headers[getSessionTokenCookieName(isSPO)];
 
-  if (!accessToken || !sessionToken || !addresses) {
+    if (!accessToken || !sessionToken || !addresses) {
+      return {
+        statusCode: 400,
+        body: JSON.stringify({
+          error: true,
+          message: 'Missing required headers and parameters.'
+        } as PaymentResponseBody)
+      };
+    }
+
+    const accessSecret = await getSecret('access');
+    const sessionSecret = await getSecret('session');
+
+    if (!sessionSecret || !accessSecret) {
+      return {
+        statusCode: 500,
+        body: JSON.stringify({
+          error: true,
+          message: 'Something went wrong with access secrets.'
+        } as PaymentResponseBody)
+      }
+    }
+
+    // Validate access token.
+    const validAccessToken = jwt.verify(accessToken as string, accessSecret);
+    if (!validAccessToken) {
+      return {
+        statusCode: 403,
+        body: JSON.stringify({
+          error: true,
+          message: 'Provided access token was invalid or expired.'
+        } as PaymentResponseBody)
+      }
+    }
+
+    // Validate session token.
+    const sessionData = jwt.verify(sessionToken as string, sessionSecret);
+    if (!sessionData) {
+      return {
+        statusCode: 403,
+        body: JSON.stringify({
+          error: true,
+          message: 'Provided session token was invalid or expired.'
+        } as PaymentResponseBody)
+      }
+    }
+
+    const res: GraphqlPaymentAddressesResponse = await fetchNodeApp(`payment?addresses=${addresses}`, {
+      headers: {
+        [getAccessTokenCookieName(isSPO)]: accessToken,
+        [getSessionTokenCookieName(isSPO)]: sessionToken
+      }
+    }).then(res => res.json())
+
+    if (res.error) {
+      return {
+        statusCode: 500,
+        body: JSON.stringify({
+          error: true,
+          message: res.message || ''
+        } as PaymentResponseBody)
+      }
+    }
+
     return {
-      statusCode: 400,
+      statusCode: 200,
       body: JSON.stringify({
+        error: false,
+        data: res
+      })
+    }
+  } catch (error) {
+    console.log(error);
+    return {
+      statusCode: 500,
+      body: JSON.stringify({
+        available: false,
         error: true,
-        message: 'Missing required headers and parameters.'
-      } as PaymentResponseBody)
+        message: 'Unexpected error.',
+      }),
     };
-  }
-
-  const accessSecret = await getSecret('access');
-  const sessionSecret = await getSecret('session');
-
-  if (!sessionSecret || !accessSecret) {
-    return {
-      statusCode: 500,
-      body: JSON.stringify({
-        error: true,
-        message: 'Something went wrong with access secrets.'
-      } as PaymentResponseBody)
-    }
-  }
-
-  // Validate access token.
-  const validAccessToken = jwt.verify(accessToken as string, accessSecret);
-  if (!validAccessToken) {
-    return {
-      statusCode: 403,
-      body: JSON.stringify({
-        error: true,
-        message: 'Provided access token was invalid or expired.'
-      } as PaymentResponseBody)
-    }
-  }
-
-  // Validate session token.
-  const sessionData = jwt.verify(sessionToken as string, sessionSecret);
-  if (!sessionData) {
-    return {
-      statusCode: 403,
-      body: JSON.stringify({
-        error: true,
-        message: 'Provided session token was invalid or expired.'
-      } as PaymentResponseBody)
-    }
-  }
-
-  const res: GraphqlPaymentAddressesResponse = await fetchNodeApp(`payment?addresses=${addresses}`, {
-    headers: {
-      [getAccessTokenCookieName(isSPO)]: accessToken,
-      [getSessionTokenCookieName(isSPO)]: sessionToken
-    }
-  }).then(res => res.json())
-
-  if (res.error) {
-    return {
-      statusCode: 500,
-      body: JSON.stringify({
-        error: true,
-        message: res.message || ''
-      } as PaymentResponseBody)
-    }
-  }
-
-  return {
-    statusCode: 200,
-    body: JSON.stringify({
-      error: false,
-      data: res
-    })
   }
 }
 

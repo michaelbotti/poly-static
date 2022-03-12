@@ -43,13 +43,14 @@ const handler: Handler = async (
       statusCode: 200,
       body: JSON.stringify(data),
     };
-  } catch (e) {
+  } catch (error) {
+    console.log(error);
     return {
       statusCode: 500,
       body: JSON.stringify({
         error: true,
-        message: e.toString()
-      } as StateResponseBody)
+        message: 'Unexpected error.',
+      }),
     };
   }
 };

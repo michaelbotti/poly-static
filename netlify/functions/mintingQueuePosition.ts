@@ -30,46 +30,58 @@ const handler: Handler = async (
     context: HandlerContext,
     callback: HandlerCallback
 ): Promise<HandlerResponse> => {
-    const { headers } = event;
+    try {
+        const { headers } = event;
 
-    const allSessionsToken = headers[HEADER_JWT_ALL_SESSIONS_TOKEN];
+        const allSessionsToken = headers[HEADER_JWT_ALL_SESSIONS_TOKEN];
 
-    if (!allSessionsToken) {
-        return {
-            statusCode: 401,
-            body: JSON.stringify({
-                available: false,
-                message: "Unauthorized. Missing request headers.",
-            } as HandleResponseBody),
-        };
-    }
-
-    // verify JWT
-    const sessionSecret = await getSecret('session');
-    jwt.verify(allSessionsToken, sessionSecret, (err, decoded) => {
-        if (err) {
+        if (!allSessionsToken) {
             return {
                 statusCode: 401,
                 body: JSON.stringify({
                     available: false,
-                    message: "Unauthorized. JWT invalid.",
+                    message: "Unauthorized. Missing request headers.",
                 } as HandleResponseBody),
             };
         }
-    });
 
-    const res: QueuePositionResponseBody = await fetchNodeApp('mintingQueuePosition', {
-        method: 'POST',
-        headers: {
-            [HEADER_JWT_ALL_SESSIONS_TOKEN]: allSessionsToken,
+        // verify JWT
+        const sessionSecret = await getSecret('session');
+        jwt.verify(allSessionsToken, sessionSecret, (err, decoded) => {
+            if (err) {
+                return {
+                    statusCode: 401,
+                    body: JSON.stringify({
+                        available: false,
+                        message: "Unauthorized. JWT invalid.",
+                    } as HandleResponseBody),
+                };
+            }
+        });
+
+        const res: QueuePositionResponseBody = await fetchNodeApp('mintingQueuePosition', {
+            method: 'POST',
+            headers: {
+                [HEADER_JWT_ALL_SESSIONS_TOKEN]: allSessionsToken,
+            }
+        }).then(res => {
+            return res.json();
+        });
+
+        return {
+            statusCode: 200,
+            body: JSON.stringify(res),
         }
-    }).then(res => {
-        return res.json();
-    });
-
-    return {
-        statusCode: 200,
-        body: JSON.stringify(res),
+    } catch (error) {
+        console.log(error);
+        return {
+            statusCode: 500,
+            body: JSON.stringify({
+                available: false,
+                error: true,
+                message: 'Unexpected error.',
+            }),
+        };
     }
 };
 
