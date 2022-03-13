@@ -9,11 +9,11 @@ export const MintingClosed = () => {
       >
         <div className="col-span-12 md:col-span-6 md:col-start-4 relative z-10">
           <h2 className="text-5xl text-center text-primary-200 mt-auto w-full">
-            <span className="font-bold text-white">Minting Closed.</span>
+            <span className="font-bold text-white">Minting paused for maintenance.</span>
             <br />
           </h2>
           <p className="text-lg text-dark-350 text-center mt-4">
-            Check back at a later date!
+            Please excuse the disruption.
           </p>
         </div>
       </div>
