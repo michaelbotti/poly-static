@@ -55,7 +55,7 @@ const handler: Handler = async (
       }
     }).then(res => res.json());
 
-    if (resultData.activeSessions) {
+    if (resultData.activeSessions && resultData.activeSessions.length > 0) {
       const sessionSecret = await getSecret('session');
       const data = await getCachedState();
       const expiresIn = data?.accessWindowTimeoutMinutes * 60 * 1000 ?? MAX_SESSION_LENGTH;
