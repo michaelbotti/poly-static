@@ -152,7 +152,7 @@ export const HandleSession = ({
     };
 
     updatePaymentStatus();
-    const interval = setInterval(updatePaymentStatus, 5000);
+    const interval = setInterval(updatePaymentStatus, 30000);
 
     if (!retry) {
       clearInterval(interval);

@@ -17,7 +17,7 @@ import {
   HEADER_HANDLE_COST,
   HEADER_ALL_SESSIONS,
 } from "../../src/lib/constants";
-import { ensureHandleAvailable, fetchNodeApp, getAccessTokenCookieName, getSessionTokenCookieName } from '../helpers/util';
+import { ensureHandleAvailable, fetchNodeApp, getAccessTokenCookieName, getSessionTokenCookieName, isNumeric } from '../helpers/util';
 import { isValid, normalizeNFTHandle } from "../../src/lib/helpers/nfts";
 import { getSecret } from "../helpers";
 import { verifyTwitterUser } from "../helpers";
@@ -65,9 +65,13 @@ const handler: Handler = async (
       return unauthorizedResponse;
     }
 
-    if (!handle || !validHandle || !headerHandleCost) {
+    if (!handle || !validHandle) {
       return responseWithMessage(400, 'Invalid handle format.', true);
     }
+
+    if (!headerHandleCost || !isNumeric(headerHandleCost)) {
+      return responseWithMessage(400, 'Invalid handle cost.', true);
+    };
 
     // Ensure no one is trying to force an existing Handle.
     const { body, statusCode } = await ensureHandleAvailable(accessToken, handle, headerIsSpo);

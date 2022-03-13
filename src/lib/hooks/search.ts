@@ -53,7 +53,7 @@ export const useSyncAvailableStatus = async (unsanitizedHandle: string, isSpo = 
 
       setFetching(false);
       setHandleResponse(res);
-      setHandleCost(res.cost ?? null);
+      setHandleCost(res.cost || null);
     })();
   }, [unsanitizedHandle]);
 };

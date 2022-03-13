@@ -87,6 +87,14 @@ export const HandleSearchReserveFlow = ({ className = "", ...rest }) => {
   const handleOnSubmit = async (e: FormEvent) => {
     e.preventDefault();
 
+    if (!handleCost) {
+      setHandleResponse({
+        available: false,
+        message: "Unable to determine handle cost.",
+        twitter: false,
+      });
+    }
+
     const recaptchaToken: string = await getRecaptchaToken();
 
     const headers = new Headers();
