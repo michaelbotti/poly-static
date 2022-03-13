@@ -12,8 +12,15 @@ import { normalizeNFTHandle } from "../../src/lib/helpers/nfts";
 import {
   HEADER_HANDLE,
   HEADER_IS_SPO,
+  MAX_SESSION_LENGTH,
+  MAX_SESSION_LENGTH_SPO,
+  SPO_ADA_HANDLE_COST,
 } from "../../src/lib/constants";
 import { ensureHandleAvailable, getAccessTokenCookieName } from "../helpers/util";
+import { getSecret } from "../helpers";
+import { getCachedState, initFirebase } from "../helpers/firebase";
+
+import jwt, { decode, JwtPayload } from "jsonwebtoken";
 
 // Main handler function for GET requests.
 const handler: Handler = async (
@@ -39,7 +46,47 @@ const handler: Handler = async (
 
   try {
     const handle = normalizeNFTHandle(headerHandle);
-    return ensureHandleAvailable(headerAccess, handle, isSPO);
+    const result = await ensureHandleAvailable(headerAccess, handle, isSPO);
+    const resultData: HandleResponseBody = JSON.parse(result.body);
+
+    if (resultData.tooMany) {
+      await initFirebase();
+      const sessionSecret = await getSecret('session');
+      const data = await getCachedState();
+      const expiresIn = isSPO ? MAX_SESSION_LENGTH_SPO : data?.accessWindowTimeoutMinutes * 60 * 1000 ?? MAX_SESSION_LENGTH;
+      const tokens = resultData.sessions?.map(session => {
+        const jwtToken = jwt.sign(
+          {
+            iat: Date.now(),
+            handle: session.handle,
+            // cost is coming in from the session so it will be lovelace
+            cost: isSPO ? SPO_ADA_HANDLE_COST : session.cost / 1000000,
+            emailAddress: isSPO ? 'spos@adahandle.com' : session.emailAddress,
+            isSPO: isSPO
+          },
+          sessionSecret,
+          {
+            expiresIn: (expiresIn * 1000).toString()
+          }
+        );
+        return {
+          token: jwtToken,
+          data: jwt.decode(jwtToken),
+          address: session.paymentAddress,
+        }
+      });
+
+      return {
+        statusCode: result.statusCode,
+        body: JSON.stringify({
+          ...resultData,
+          tokens
+        })
+      }
+    }
+
+
+    return result;
   } catch (error) {
     console.log(error);
     return {
