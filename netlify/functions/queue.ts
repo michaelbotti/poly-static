@@ -70,6 +70,8 @@ const handler: Handler = async (
     const clientIp = headers[Object.keys(headers).find(key => key.toLowerCase() === HEADER_CLIENT_IP.toLowerCase())];
     const requestBody = { ...parsedBody, clientIp: clientIp ?? 'unknown' } // <- What should we really do here if this header doesn't exist?
 
+    console.log('CHECKING QUEUE');
+
     const data: QueueResponseBody = await fetchNodeApp(`queue`, {
       method: 'POST',
       headers: {
@@ -77,7 +79,10 @@ const handler: Handler = async (
         'Content-Type': 'application/json'
       },
       body: JSON.stringify(requestBody)
-    }).then(res => res.json())
+    }).then(res => {
+      console.log('QUEUE RESPONSE', res);
+      return res.json();
+    })
       .catch(e => console.log(e));
 
     return {
