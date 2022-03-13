@@ -16,6 +16,7 @@ export enum SessionStatusType {
   WAITING_FOR_CONFIRMATION = "WAITING_FOR_CONFIRMATION",
   CONFIRMED = "CONFIRMED",
   REFUNDED = "REFUNDED",
+  INVALID_OR_NO_PAYMENTS = "INVALID_OR_NO_PAYMENTS",
 }
 
 export interface SessionStatus {

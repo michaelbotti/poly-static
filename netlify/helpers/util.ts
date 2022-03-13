@@ -136,6 +136,10 @@ export const fetchNodeApp = async (
   )
 }
 
+export const isNumeric = (n: string) => {
+  return !isNaN(parseFloat(n)) && isFinite(parseFloat(n));
+}
+
 export const isProduction = (): boolean => {
   return process.env.APP_ENV?.trim() === 'production';
 }

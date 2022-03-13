@@ -77,7 +77,9 @@ const handler: Handler = async (
         'Content-Type': 'application/json'
       },
       body: JSON.stringify(requestBody)
-    }).then(res => res.json())
+    }).then(res => {
+      return res.json();
+    })
       .catch(e => console.log(e));
 
     return {

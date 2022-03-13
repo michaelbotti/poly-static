@@ -81,8 +81,7 @@ function MintPage() {
     );
   }
 
-  // const { mintingPageEnabled } = stateData;
-  const mintingPageEnabled = false;
+  const { mintingPageEnabled } = stateData;
 
   if (mintingPageEnabled || passwordAllowed) {
     return (
