@@ -99,7 +99,6 @@ export const HandleSearchReserveFlow = ({ className = "", ...rest }) => {
 
     const headers = new Headers();
     headers.append(HEADER_HANDLE, handle);
-    headers.append(HEADER_HANDLE_COST, handleCost?.toString());
     headers.append(HEADER_RECAPTCHA, recaptchaToken);
     const accessToken = getAccessTokenFromCookie();
     if (accessToken) {
