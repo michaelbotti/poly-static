@@ -33,6 +33,7 @@ function QueuePage() {
 
   // const { mintingPageEnabled } = stateData;
   const mintingPageEnabled = false;
+
   if (mintingPageEnabled || passwordAllowed) {
     return (
       <>
