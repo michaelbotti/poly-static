@@ -106,7 +106,7 @@ export const HandleStatus = () => {
         {refundedItems?.length > 0 && (
           <TypeAccordion
             items={refundedItems}
-            type={SessionStatusType.REFUNDED}
+            type={SessionStatusType.INVALID_OR_NO_PAYMENTS}
           />
         )}
       </>
