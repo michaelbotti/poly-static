@@ -56,15 +56,18 @@ function MintPage() {
   const [paymentSessions, setPaymentSessions] =
     useState<(false | SessionResponseBody)[]>();
   const [accessOpen, setAccessOpen] = useAccessOpen();
+  const [currentSession, setCurrentSession] =
+    useState<SessionResponseBody>(null);
 
   useEffect(() => {
     setPaymentSessions(getAllCurrentSessionData());
-  }, [currentIndex, setPaymentSessions]);
 
-  const currentSession =
-    currentIndex > 0
-      ? (getSessionTokenFromCookie(currentIndex) as SessionResponseBody)
-      : null;
+    const current =
+      currentIndex > 0
+        ? (getSessionTokenFromCookie(currentIndex) as SessionResponseBody)
+        : null;
+    setCurrentSession(current);
+  }, [currentIndex, setPaymentSessions, handleResponse]);
 
   const refreshPaymentSessions = () => {
     setPaymentSessions(getAllCurrentSessionData());
@@ -82,6 +85,16 @@ function MintPage() {
   }
 
   const { mintingPageEnabled } = stateData;
+
+  const renderSessionsOrReserve = () => {
+    if (currentIndex === 0) {
+      return <HandleSearchReserveFlow />;
+    } else if (currentSession) {
+      return <HandleSession sessionData={currentSession} />;
+    }
+
+    return null;
+  };
 
   if (mintingPageEnabled || passwordAllowed) {
     return (
@@ -123,21 +136,17 @@ function MintPage() {
             {accessOpen ? (
               <>
                 <div className="col-span-12 lg:col-span-6 relative z-10">
-                  <div className="p-8">
-                    {currentIndex === 0 ? (
-                      <HandleSearchReserveFlow />
-                    ) : (
-                      <HandleSession sessionData={currentSession} />
-                    )}
-                  </div>
+                  <div className="p-8">{renderSessionsOrReserve()}</div>
                 </div>
                 <div className="col-span-12 lg:col-span-6 py-8">
                   <NFTPreview
                     handle={
-                      currentIndex === 0 ? handle : currentSession.data.handle
+                      currentIndex === 0 ? handle : currentSession?.data?.handle
                     }
                     handleCost={
-                      currentIndex === 0 ? handleCost : currentSession.data.cost
+                      currentIndex === 0
+                        ? handleCost
+                        : currentSession?.data?.cost
                     }
                     twitterOgNumber={handleResponse?.ogNumber ?? 0}
                   />

@@ -69,7 +69,19 @@ export const ensureHandleAvailable = async (accessToken: string, handle: string,
   const { status } = searchResponse;
   const results = await searchResponse.json() as FetchSearchResponse;
 
-  const { error, message, response } = results;
+  const { error, message, response, sessions } = results as any;
+
+  if (error && message === 'Too many sessions open! Try again after one expires.') {
+    return {
+      statusCode: 403,
+      body: JSON.stringify({
+        available: false,
+        tooMany: true,
+        sessions,
+        message: 'Too many sessions open! Try again after one expires.',
+      } as any),
+    };
+  }
 
   if (error || !response) {
     return {
