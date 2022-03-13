@@ -50,7 +50,6 @@ const handler: Handler = async (
     const { headers } = event;
 
     const headerHandle = headers[HEADER_HANDLE];
-    const headerHandleCost = headers[HEADER_HANDLE_COST];
     const headerIsSpo = headers[HEADER_IS_SPO] === 'true';
     const headerRecaptcha = headers[HEADER_RECAPTCHA];
     const headerTwitter = headers[HEADER_TWITTER_ACCESS_TOKEN];
@@ -69,13 +68,13 @@ const handler: Handler = async (
       return responseWithMessage(400, 'Invalid handle format.', true);
     }
 
-    if (!headerHandleCost || !isNumeric(headerHandleCost)) {
-      return responseWithMessage(400, 'Invalid handle cost.', true);
-    };
-
     // Ensure no one is trying to force an existing Handle.
     const { body, statusCode } = await ensureHandleAvailable(accessToken, handle, headerIsSpo);
     const data: HandleResponseBody = JSON.parse(body);
+
+    if (!data.cost || !isNumeric(data.cost.toString())) {
+      return responseWithMessage(400, 'Invalid handle cost.', true);
+    }
 
     if (!data.available && !data.twitter) {
       return {
@@ -106,7 +105,7 @@ const handler: Handler = async (
       {
         iat: Date.now(),
         handle,
-        cost: headerIsSpo ? SPO_ADA_HANDLE_COST : headerHandleCost,
+        cost: headerIsSpo ? SPO_ADA_HANDLE_COST : data.cost,
         emailAddress: headerIsSpo ? 'spos@adahandle.com' : emailAddress,
         isSPO: headerIsSpo
       },
