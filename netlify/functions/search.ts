@@ -37,8 +37,20 @@ const handler: Handler = async (
     };
   }
 
-  const handle = normalizeNFTHandle(headerHandle);
-  return ensureHandleAvailable(headerAccess, handle, isSPO);
+  try {
+    const handle = normalizeNFTHandle(headerHandle);
+    return ensureHandleAvailable(headerAccess, handle, isSPO);
+  } catch (error) {
+    console.log(error);
+    return {
+      statusCode: 500,
+      body: JSON.stringify({
+        available: false,
+        error: true,
+        message: 'Unexpected error.',
+      }),
+    };
+  }
 };
 
 export { handler };
