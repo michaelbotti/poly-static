@@ -42,6 +42,10 @@ const NFTPreview: FC<NFTPreviewProps> = ({
     return "text-3xl";
   };
 
+  if (!handle || !handleCost) {
+    return null;
+  }
+
   return (
     <>
       {!isPurchasing && (
