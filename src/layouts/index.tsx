@@ -56,7 +56,7 @@ const Layout: FC = ({ children }): JSX.Element => {
               rel="noopener nofollow"
             >
               {policyID}
-            </a>
+            </a>{" "}
             • Version: 1.1.0
           </p>
         </footer>
