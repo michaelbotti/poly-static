@@ -115,7 +115,7 @@ export const ensureHandleAvailable = async (accessToken: string, handle: string,
   if (type === 'twitter') {
     return {
       statusCode: 200,
-      body: JSON.stringify(getTwitterResponseUnvailable({ ogNumber })),
+      body: JSON.stringify(getTwitterResponseUnvailable({ ogNumber, cost })),
     };
   }
 
