@@ -5,7 +5,7 @@ import { useTwitter } from "../../lib/hooks/twitter";
 
 export const HandleSearchConnectTwitter = () => {
   const [isConnecting, setIsConnecting] = useState<boolean>(false);
-  const { setHandleResponse } = useContext(HandleMintContext);
+  const { setHandleResponse, handleResponse } = useContext(HandleMintContext);
   const [checkHandleAgainstUser] = useTwitter();
 
   return (
@@ -28,7 +28,10 @@ export const HandleSearchConnectTwitter = () => {
             };
 
         setIsConnecting(false);
-        setHandleResponse(res);
+        setHandleResponse({
+          ...handleResponse,
+          ...res,
+        });
       }}
     >
       {!isConnecting ? (

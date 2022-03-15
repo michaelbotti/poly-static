@@ -75,10 +75,11 @@ export const getTwitterResponseAvailable = (link?: string): HandleResponseBody =
   link
 });
 
-export const getTwitterResponseUnvailable = ({ link, ogNumber }: { link?: string, ogNumber?: number }): HandleResponseBody => ({
+export const getTwitterResponseUnvailable = ({ link, ogNumber, cost }: { link?: string, ogNumber?: number, cost: number }): HandleResponseBody => ({
   message: RESPONSE_UNAVAILABLE_TWITTER,
   available: false,
   twitter: true,
+  cost,
   link,
   ogNumber
 });
