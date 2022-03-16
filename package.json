@@ -1,7 +1,7 @@
 {
   "name": "adahandle-static",
   "description": "The official static site for adahandle.com",
-  "version": "1.1.1",
+  "version": "1.1.3",
   "author": "Calvin Koepke <calvin@adahandle.com",
   "dependencies": {
     "@emotion/react": "^11.7.1",
@@ -48,7 +48,7 @@
     "netlify:dev": "netlify dev",
     "netlify:build": "netlify build",
     "netlify:local": "NODEJS_APP_ENDPOINT=http://localhost:3000 yarn netlify:dev",
-    "build": "gatsby build",
+    "build": "npm run clean && gatsby build",
     "serve": "gatsby serve",
     "clean": "gatsby clean",
     "test": "jest --passWithNoTests"
