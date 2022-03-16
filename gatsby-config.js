@@ -31,7 +31,7 @@ module.exports = {
     `gatsby-plugin-material-ui`,
     `gatsby-plugin-react-helmet`,
     `gatsby-plugin-layout`,
-    `custom-fingerprint`,
+    `custom-fingerprints`,
     {
       resolve: `gatsby-plugin-recaptcha`,
       options: {
