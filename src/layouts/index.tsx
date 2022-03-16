@@ -57,7 +57,7 @@ const Layout: FC = ({ children }): JSX.Element => {
             >
               {policyID}
             </a>{" "}
-            • Version: 1.1.3
+            • Version: 1.1.5
           </p>
         </footer>
       </div>
