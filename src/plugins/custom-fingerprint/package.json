@@ -1,0 +1,19 @@
+{
+    "name": "custom-fingerprint",
+    "version": "0.0.2",
+    "description": "Gatsby plugin",
+    "keywords": [
+        "gatsby",
+        "gatsby-plugin",
+        "remove",
+        "fingerprints",
+        "netlify"
+    ],
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/narative/gatsby-plugin-remove-fingerprints.git"
+    },
+    "author": "GuavaJelly",
+    "license": "MIT",
+    "main": "gatsby-node.js"
+}
