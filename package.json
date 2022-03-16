@@ -1,7 +1,7 @@
 {
   "name": "adahandle-static",
   "description": "The official static site for adahandle.com",
-  "version": "1.1.6",
+  "version": "1.1.7",
   "author": "Calvin Koepke <calvin@adahandle.com",
   "dependencies": {
     "@emotion/react": "^11.7.1",
