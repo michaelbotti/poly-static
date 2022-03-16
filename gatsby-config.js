@@ -31,6 +31,7 @@ module.exports = {
     `gatsby-plugin-material-ui`,
     `gatsby-plugin-react-helmet`,
     `gatsby-plugin-layout`,
+    `gatsby-plugin-remove-fingerprints`,
     {
       resolve: `gatsby-plugin-recaptcha`,
       options: {
