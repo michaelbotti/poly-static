@@ -9,8 +9,8 @@ exports.onCreateWebpackConfig = (
     const newWebpackConfig = {
       ...getConfig(),
       output: {
-        filename: `[name]${hash}.js?v=${hash}`,
-        chunkFilename: `[name]${hash}.js?v=${hash}`,
+        filename: `[name].js`,
+        chunkFilename: `[name].js`,
         path: getConfig().output.path,
         publicPath: getConfig().output.publicPath,
       },
