@@ -139,8 +139,8 @@ const handler: Handler = async (
     }
 
     const sessions = !allSessionsToken ?
-      [{ handle, dateAdded: Date.now() }] :
-      [...(decode(allSessionsToken) as JwtPayload).sessions, { handle, dateAdded: Date.now() }];
+      [{ handle, address: res?.address, dateAdded: Date.now() }] :
+      [...(decode(allSessionsToken) as JwtPayload).sessions, { handle, address: res?.address, dateAdded: Date.now() }];
 
     const updatedAllSessionsToken = jwt.sign(
       { sessions },
