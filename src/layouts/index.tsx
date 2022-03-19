@@ -44,7 +44,7 @@ const Layout: FC = ({ children }): JSX.Element => {
 
         <footer className="bg-dark-100 pt-16">
           <p className="text-center text-dark-350">
-            &copy; 2021 ADA Handle •{" "}
+            &copy; {new Date().getFullYear()} ADA Handle •{" "}
             <Link className="text-primary-100" to="/tou">
               Terms of Use
             </Link>{" "}
@@ -57,7 +57,7 @@ const Layout: FC = ({ children }): JSX.Element => {
             >
               {policyID}
             </a>{" "}
-            • Version: 1.1.8
+            • Version: 1.2.0
           </p>
         </footer>
       </div>
