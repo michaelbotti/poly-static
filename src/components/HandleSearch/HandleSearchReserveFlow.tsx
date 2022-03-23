@@ -128,8 +128,9 @@ export const HandleSearchReserveFlow = ({ className = "", ...rest }) => {
       if (!sessionResponse.error) {
         setHandle("");
         setHandleCost(null);
+        const { token, data, address } = sessionResponse;
         setSessionTokenCookie(
-          sessionResponse,
+          { token, data, address },
           new Date(sessionResponse.data.exp),
           nextIndex
         );
