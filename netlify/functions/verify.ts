@@ -21,7 +21,6 @@ export interface VerifyResponseBody {
     token: string;
     data: JwtPayload
   }[];
-
 }
 
 const handler: Handler = async (
