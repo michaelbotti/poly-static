@@ -134,7 +134,7 @@ const Form: FC<Form> = ({ subscribe, message, status }): JSX.Element => {
 const MailchimpForm = (): JSX.Element => (
   <MailchimpSubscribe
     url={
-      "https://clvnk.us2.list-manage.com/subscribe/post?u=946526142d903ddb83f252eca&amp;id=28722b6d9e"
+      "https://adahandle.us14.list-manage.com/subscribe/post?u=a0b3b523b885ad625fbe9a7e9&amp;id=d98fd6288c"
     }
     render={({ subscribe, status, message }) => (
       <Form subscribe={subscribe} status={status} message={message} />
