@@ -35,7 +35,7 @@ function IndexPage() {
         <div className="grid grid-cols-12 content-center overflow-hidden max-w-5xl mx-auto">
           <div className="col-span-12 lg:col-span-8 lg:col-start-3 relative z-10 text-center">
             <h2 className="inline-block mt-8 mb-4 text-5xl font-bold leading-none">
-              <span className="font-bold text-center text-primary-200 m-0">{stateData?.totalHandles}</span> custom Cardano addresses and counting.
+              <span className="font-bold text-center text-primary-200 m-0">{stateData?.totalHandles?.toLocaleString("en-US")}</span> custom Cardano addresses and counting.
             </h2>
             <div className="mt-4">
               <p className="text-xl mb-8 lg:pr-8 text-dark-350">
