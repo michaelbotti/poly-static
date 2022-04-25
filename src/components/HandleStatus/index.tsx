@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { CircularProgress } from "@mui/material";
 
 import {
+  BASIC_ERROR_TEXT,
   HEADER_IS_SPO,
   HEADER_JWT_ALL_SESSIONS_TOKEN,
 } from "../../lib/constants";
@@ -27,21 +28,26 @@ export const HandleStatus = () => {
 
     setFetchingMintingQueuePosition(true);
 
-    const result = await fetch(`/.netlify/functions/mintingQueuePosition`, {
-      headers: {
-        [HEADER_IS_SPO]: "false",
-        [HEADER_JWT_ALL_SESSIONS_TOKEN]: allSessionsCookie.token,
-      },
-    });
-    const response = await result.json();
-    if (!response.error) {
-      setMintingQueuePositionResponse(response);
-      setFetchingMintingQueuePosition(false);
-      return;
-    }
+    try {
+      const result = await fetch(`/.netlify/functions/mintingQueuePosition`, {
+        headers: {
+          [HEADER_IS_SPO]: "false",
+          [HEADER_JWT_ALL_SESSIONS_TOKEN]: allSessionsCookie.token,
+        },
+      });
+      const response = await result.json();
+      if (!response.error) {
+        setMintingQueuePositionResponse(response);
+        setFetchingMintingQueuePosition(false);
+        return;
+      }
 
-    setError(true);
-    setFetchingMintingQueuePosition(false);
+      setError(true);
+      setFetchingMintingQueuePosition(false);
+    } catch (error) {
+      setError(true);
+      setFetchingMintingQueuePosition(false);
+    }
   };
 
   useEffect(() => {
@@ -100,7 +106,7 @@ export const HandleStatus = () => {
         {refundedItems?.length > 0 && (
           <TypeAccordion
             items={refundedItems}
-            type={SessionStatusType.REFUNDED}
+            type={SessionStatusType.INVALID_OR_NO_PAYMENTS}
           />
         )}
       </>
@@ -112,6 +118,7 @@ export const HandleStatus = () => {
       <h1 className="m-0 text-center inline-block mb-4 text-4xl font-bold leading-none">
         Check your Handle status
       </h1>
+      {error && <p>{BASIC_ERROR_TEXT}</p>}
       {fetchingMintingQueuePosition ? (
         <div>
           <CircularProgress />

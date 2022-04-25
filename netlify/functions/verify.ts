@@ -4,10 +4,11 @@ import {
   HandlerContext,
   HandlerResponse,
 } from "@netlify/functions";
-import { JwtPayload } from 'jsonwebtoken';
+import jwt, { JwtPayload } from 'jsonwebtoken';
 
-import { HEADER_EMAIL, HEADER_EMAIL_AUTH } from "../../src/lib/constants";
-import { initFirebase } from "../helpers/firebase";
+import { HEADER_EMAIL, HEADER_EMAIL_AUTH, MAX_SESSION_LENGTH } from "../../src/lib/constants";
+import { getSecret } from "../helpers";
+import { getCachedState, initFirebase } from "../helpers/firebase";
 import { fetchNodeApp } from "../helpers/util";
 
 export interface VerifyResponseBody {
@@ -16,6 +17,10 @@ export interface VerifyResponseBody {
   data?: JwtPayload;
   verified?: boolean;
   message?: string;
+  tokens?: {
+    token: string;
+    data: JwtPayload
+  }[];
 }
 
 const handler: Handler = async (
@@ -41,7 +46,7 @@ const handler: Handler = async (
   await initFirebase();
 
   try {
-    const data = await fetchNodeApp(`verify`, {
+    const resultData = await fetchNodeApp(`verify`, {
       method: 'GET',
       headers: {
         [HEADER_EMAIL]: headers[HEADER_EMAIL],
@@ -49,15 +54,53 @@ const handler: Handler = async (
       }
     }).then(res => res.json());
 
+    if (resultData.activeSessions && resultData.activeSessions.length > 0) {
+      const sessionSecret = await getSecret('session');
+      const data = await getCachedState();
+      const expiresIn = data?.accessWindowTimeoutMinutes * 60 * 1000 ?? MAX_SESSION_LENGTH;
+      const tokens = resultData.activeSessions?.map(session => {
+        const jwtToken = jwt.sign(
+          {
+            iat: Date.now(),
+            handle: session.handle,
+            // cost is coming in from the session so it will be lovelace
+            cost: session.cost / 1000000,
+            emailAddress: session.emailAddress,
+            isSPO: false
+          },
+          sessionSecret,
+          {
+            expiresIn: (expiresIn * 1000).toString()
+          }
+        );
+        return {
+          token: jwtToken,
+          data: jwt.decode(jwtToken),
+          address: session.paymentAddress,
+        }
+      });
+
+      return {
+        statusCode: 200,
+        body: JSON.stringify({
+          ...resultData,
+          tokens
+        })
+      }
+    }
+
     return {
       statusCode: 200,
-      body: JSON.stringify(data),
+      body: JSON.stringify(resultData),
     };
-  } catch (e) {
-    console.log(e)
+  } catch (error) {
+    console.log(error);
     return {
       statusCode: 500,
-      body: JSON.stringify(e)
+      body: JSON.stringify({
+        error: true,
+        message: 'Unexpected error.',
+      }),
     };
   }
 };

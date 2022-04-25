@@ -1,7 +1,7 @@
 {
   "name": "adahandle-static",
   "description": "The official static site for adahandle.com",
-  "version": "1.0.0",
+  "version": "1.2.2",
   "author": "Calvin Koepke <calvin@adahandle.com",
   "dependencies": {
     "@emotion/react": "^11.7.1",
@@ -23,9 +23,11 @@
     "gatsby-plugin-postcss": "^4.14.0",
     "gatsby-plugin-react-helmet": "^4.14.0",
     "gatsby-plugin-recaptcha": "^1.0.5",
+    "gatsby-plugin-remove-fingerprints": "^0.0.2",
     "gatsby-plugin-web-font-loader": "^1.0.4",
     "js-cookie": "^3.0.1",
     "jsonwebtoken": "^8.5.1",
+    "md5": "^2.3.0",
     "query-string": "^7.0.1",
     "react": "^17.0.2",
     "react-countdown": "^2.3.2",
@@ -48,7 +50,7 @@
     "netlify:dev": "netlify dev",
     "netlify:build": "netlify build",
     "netlify:local": "NODEJS_APP_ENDPOINT=http://localhost:3000 yarn netlify:dev",
-    "build": "gatsby build",
+    "build": "npm run clean && gatsby build",
     "serve": "gatsby serve",
     "clean": "gatsby clean",
     "test": "jest --passWithNoTests"

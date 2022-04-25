@@ -6,11 +6,15 @@ import { parse } from "query-string";
 import { VerifyResponseBody } from "../../../netlify/functions/verify";
 import { HEADER_EMAIL, HEADER_EMAIL_AUTH } from "../../lib/constants";
 import Button from "../button";
-import { setAccessTokenCookie } from "../../lib/helpers/session";
+import {
+  setAccessTokenCookie,
+  setSessionTokenCookie,
+} from "../../lib/helpers/session";
 import { HandleMintContext } from "../../context/mint";
 import { AgreeInputs } from "./AgreeInputs";
 import { HowItWorks } from "../HowItWorks";
 import { RedirectTo } from "../RedirectTo";
+import { SessionResponseBody } from "../../../netlify/functions/session";
 
 interface Props {
   accessOpen: boolean | null;
@@ -90,6 +94,17 @@ export const HandleAcceptTerms: React.FC<Props> = ({
       const { error, verified, message, token, data } = res;
       if (!error && verified && token && data) {
         setAccessTokenCookie(res, data.exp);
+
+        if (res.tokens) {
+          res.tokens.forEach((token, index) => {
+            setSessionTokenCookie(
+              token as SessionResponseBody, // TODO: change SessionResponseBody
+              new Date(token.data.exp),
+              index + 1
+            );
+          });
+        }
+
         window.location.href = "/mint";
       }
 

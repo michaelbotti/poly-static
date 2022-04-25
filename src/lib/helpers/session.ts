@@ -75,7 +75,7 @@ export const getSessionTokenFromCookie = (index: number, isSPO = false): Session
   return JSON.parse(data);
 };
 
-export const setSessionTokenCookie = (data: SessionResponseBody, exp: Date, index: number, isSPO = false) => {
+export const setSessionTokenCookie = (data: { token: string, data: JwtPayload, address: string }, exp: Date, index: number, isSPO = false) => {
   const cookieName = isSPO ? `${SPO_COOKIE_SESSION_PREFIX}_${index}` : `${COOKIE_SESSION_PREFIX}_${index}`;
   Cookie.set(
     cookieName,

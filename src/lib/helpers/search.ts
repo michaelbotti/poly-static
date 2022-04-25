@@ -1,3 +1,5 @@
+import { JwtPayload } from "jsonwebtoken";
+
 const RESPONSE_UNAVAILABLE_DEFAULT = 'Sorry! This Handle is unavailable.';
 const RESPONSE_UNAVAILABLE_PAID = 'Sorry! This Handle is pending mint.';
 const RESPONSE_UNAVAILABLE_TWITTER = 'Reserved! Please unlock with Twitter below.';
@@ -21,6 +23,17 @@ export interface HandleResponseBody {
   mintingQueueSize?: number;
   mintingQueuePosition?: number;
   mintingQueueMinutes?: number;
+  tooMany?: boolean;
+  sessions?: {
+    cost: number;
+    emailAddress: string;
+    handle: string;
+    paymentAddress: string;
+  }[];
+  tokens?: {
+    token: string;
+    data: JwtPayload
+  }[];
 }
 
 interface DefaultResponseInput { link?: string, cost?: number }
@@ -62,10 +75,11 @@ export const getTwitterResponseAvailable = (link?: string): HandleResponseBody =
   link
 });
 
-export const getTwitterResponseUnvailable = ({ link, ogNumber }: { link?: string, ogNumber?: number }): HandleResponseBody => ({
+export const getTwitterResponseUnvailable = ({ link, ogNumber, cost }: { link?: string, ogNumber?: number, cost: number }): HandleResponseBody => ({
   message: RESPONSE_UNAVAILABLE_TWITTER,
   available: false,
   twitter: true,
+  cost,
   link,
   ogNumber
 });

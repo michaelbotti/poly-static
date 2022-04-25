@@ -152,7 +152,7 @@ export const HandleSession = ({
     };
 
     updatePaymentStatus();
-    const interval = setInterval(updatePaymentStatus, 5000);
+    const interval = setInterval(updatePaymentStatus, 30000);
 
     if (!retry) {
       clearInterval(interval);
@@ -295,10 +295,10 @@ export const HandleSession = ({
                   {isSPO ? SPO_ADA_HANDLE_COST : cost} {isTestnet ? "t₳" : "₳"}
                 </strong>
               </h4>
-              <div className="relative">
-                <pre className="p-4 rounded-none rounded-tr-lg rounded-tl-lg shadow-inner shadow-lg bg-dark-300 overflow-hidden overflow-scroll pr-24 border-2 border-b-0 border-primary-100">
+              <div className="relative" style={{ paddingRight: "64px" }}>
+                <div className="overflow-hidden overflow-x-auto p-4 rounded-none rounded-tl-lg shadow-inner shadow-lg bg-dark-300 overflow-hidden pr-24 border-2 border-b-0 border-primary-100">
                   {address}
-                </pre>
+                </div>
                 <button
                   onClick={handleCopy}
                   className="absolute top-0 right-0 h-full w-16 bg-primary-100 rounded-tr-lg"

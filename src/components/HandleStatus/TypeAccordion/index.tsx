@@ -16,6 +16,7 @@ export enum SessionStatusType {
   WAITING_FOR_CONFIRMATION = "WAITING_FOR_CONFIRMATION",
   CONFIRMED = "CONFIRMED",
   REFUNDED = "REFUNDED",
+  INVALID_OR_NO_PAYMENTS = "INVALID_OR_NO_PAYMENTS",
 }
 
 export interface SessionStatus {
@@ -26,6 +27,7 @@ export interface SessionStatus {
   handle: string;
   txId?: string;
   type: SessionStatusType;
+  address: string;
 }
 
 interface Props {
@@ -53,6 +55,10 @@ export const TypeAccordion: React.FC<Props> = ({ items, type }) => {
           {session.txId}
         </a>
       );
+    }
+
+    if (type === SessionStatusType.WAITING_FOR_PAYMENT) {
+      return <pre className="text-white w-3/5">{session.address}</pre>;
     }
 
     if (type === SessionStatusType.WAITING_FOR_MINTING) {

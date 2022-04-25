@@ -17,7 +17,7 @@ import {
   HEADER_HANDLE_COST,
   HEADER_ALL_SESSIONS,
 } from "../../src/lib/constants";
-import { ensureHandleAvailable, fetchNodeApp, getAccessTokenCookieName, getSessionTokenCookieName } from '../helpers/util';
+import { ensureHandleAvailable, fetchNodeApp, getAccessTokenCookieName, getSessionTokenCookieName, isNumeric } from '../helpers/util';
 import { isValid, normalizeNFTHandle } from "../../src/lib/helpers/nfts";
 import { getSecret } from "../helpers";
 import { verifyTwitterUser } from "../helpers";
@@ -46,112 +46,126 @@ const handler: Handler = async (
   event: HandlerEvent,
   context: HandlerContext
 ): Promise<HandlerResponse> => {
-  const { headers } = event;
+  try {
+    const { headers } = event;
 
-  const headerHandle = headers[HEADER_HANDLE];
-  const headerHandleCost = headers[HEADER_HANDLE_COST];
-  const headerIsSpo = headers[HEADER_IS_SPO] === 'true';
-  const headerRecaptcha = headers[HEADER_RECAPTCHA];
-  const headerTwitter = headers[HEADER_TWITTER_ACCESS_TOKEN];
-  const accessToken = headers[getAccessTokenCookieName(headerIsSpo)];
-  const allSessionsToken = headers[HEADER_ALL_SESSIONS];
+    const headerHandle = headers[HEADER_HANDLE];
+    const headerIsSpo = headers[HEADER_IS_SPO] === 'true';
+    const headerRecaptcha = headers[HEADER_RECAPTCHA];
+    const headerTwitter = headers[HEADER_TWITTER_ACCESS_TOKEN];
+    const accessToken = headers[getAccessTokenCookieName(headerIsSpo)];
+    const allSessionsToken = headers[HEADER_ALL_SESSIONS];
 
-  // Normalize and validate handle.
-  const handle = headerHandle && normalizeNFTHandle(headerHandle);
-  const validHandle = handle && isValid(handle);
+    // Normalize and validate handle.
+    const handle = headerHandle && normalizeNFTHandle(headerHandle);
+    const validHandle = handle && isValid(handle);
 
-  if (!headerRecaptcha || !accessToken) {
-    return unauthorizedResponse;
-  }
-
-  if (!handle || !validHandle || !headerHandleCost) {
-    return responseWithMessage(400, 'Invalid handle format.', true);
-  }
-
-  // Ensure no one is trying to force an existing Handle.
-  const { body, statusCode } = await ensureHandleAvailable(accessToken, handle, headerIsSpo);
-  const data: HandleResponseBody = JSON.parse(body);
-
-  if (!data.available && !data.twitter) {
-    return {
-      statusCode,
-      body
-    };
-  }
-
-  // Verified Twitter user if needed.
-  if (data.available && data.twitter && headerTwitter) {
-    const exp = headerTwitter && (await verifyTwitterUser(headerTwitter));
-    if (!exp || exp > Date.now()) {
+    if (!headerRecaptcha || !accessToken) {
       return unauthorizedResponse;
     }
-  }
 
-  const { emailAddress } = decode(accessToken) as AccessTokenPayload;
-
-  /**
-   * We sign a session JWT tokent to authorize the purchase,
-   * and include the access email address to limit request.
-   */
-  await initFirebase();
-  const stateData = await getCachedState();
-  const expiresIn = headerIsSpo ? MAX_SESSION_LENGTH_SPO : stateData?.accessWindowTimeoutMinutes * 60 * 1000 ?? MAX_SESSION_LENGTH;
-  const sessionSecret = await getSecret('session');
-  const sessionToken = jwt.sign(
-    {
-      iat: Date.now(),
-      handle,
-      cost: headerIsSpo ? SPO_ADA_HANDLE_COST : headerHandleCost,
-      emailAddress: headerIsSpo ? 'spos@adahandle.com' : emailAddress,
-      isSPO: headerIsSpo
-    },
-    sessionSecret,
-    {
-      expiresIn: (expiresIn * 1000).toString()
+    if (!handle || !validHandle) {
+      return responseWithMessage(400, 'Invalid handle format.', true);
     }
-  );
 
-  // Get payment details from server.
-  const res: NodeSessionResponseBody = await fetchNodeApp('session', {
-    headers: {
-      [getAccessTokenCookieName(headerIsSpo)]: accessToken,
-      [getSessionTokenCookieName(headerIsSpo)]: sessionToken,
+    // Ensure no one is trying to force an existing Handle.
+    const { body, statusCode } = await ensureHandleAvailable(accessToken, handle, headerIsSpo);
+    const data: HandleResponseBody = JSON.parse(body);
+
+    if (!data.cost || !isNumeric(data.cost.toString())) {
+      return responseWithMessage(400, 'Invalid handle cost.', true);
     }
-  }).then(res => res.json());
 
-  const mutatedRes: SessionResponseBody = {
-    error: res.error,
-    message: res?.message || '',
-    address: res?.address || '',
-    token: sessionToken,
-    data: decode(sessionToken) as JwtPayload,
-  }
+    if (!data.available && !data.twitter) {
+      return {
+        statusCode,
+        body
+      };
+    }
 
-  if (res.error) {
+    // Verified Twitter user if needed.
+    if (data.available && data.twitter && headerTwitter) {
+      const exp = headerTwitter && (await verifyTwitterUser(headerTwitter));
+      if (!exp || exp > Date.now()) {
+        return unauthorizedResponse;
+      }
+    }
+
+    const { emailAddress } = decode(accessToken) as AccessTokenPayload;
+
+    /**
+     * We sign a session JWT tokent to authorize the purchase,
+     * and include the access email address to limit request.
+     */
+    await initFirebase();
+    const stateData = await getCachedState();
+    const expiresIn = headerIsSpo ? MAX_SESSION_LENGTH_SPO : stateData?.accessWindowTimeoutMinutes * 60 * 1000 ?? MAX_SESSION_LENGTH;
+    const sessionSecret = await getSecret('session');
+    const sessionToken = jwt.sign(
+      {
+        iat: Date.now(),
+        handle,
+        cost: headerIsSpo ? SPO_ADA_HANDLE_COST : data.cost,
+        emailAddress: headerIsSpo ? 'spos@adahandle.com' : emailAddress,
+        isSPO: headerIsSpo
+      },
+      sessionSecret,
+      {
+        expiresIn: (expiresIn * 1000).toString()
+      }
+    );
+
+    // Get payment details from server.
+    const res: NodeSessionResponseBody = await fetchNodeApp('session', {
+      headers: {
+        [getAccessTokenCookieName(headerIsSpo)]: accessToken,
+        [getSessionTokenCookieName(headerIsSpo)]: sessionToken,
+      }
+    }).then(res => res.json());
+
+    const mutatedRes: SessionResponseBody = {
+      error: res.error,
+      message: res?.message || '',
+      address: res?.address || '',
+      token: sessionToken,
+      data: decode(sessionToken) as JwtPayload,
+    }
+
+    if (res.error) {
+      return {
+        statusCode: 500,
+        body: JSON.stringify(mutatedRes),
+      }
+    }
+
+    const sessions = !allSessionsToken ?
+      [{ handle, address: res?.address, dateAdded: Date.now() }] :
+      [...(decode(allSessionsToken) as JwtPayload).sessions, { handle, address: res?.address, dateAdded: Date.now() }];
+
+    const updatedAllSessionsToken = jwt.sign(
+      { sessions },
+      sessionSecret,
+      {
+        expiresIn: '30 days'
+      }
+    )
+
+    mutatedRes.allSessionsToken = updatedAllSessionsToken;
+    mutatedRes.allSessionsData = decode(updatedAllSessionsToken) as JwtPayload;
+
     return {
-      statusCode: 500,
+      statusCode: 200,
       body: JSON.stringify(mutatedRes),
     }
-  }
-
-  const sessions = !allSessionsToken ?
-    [{ handle, dateAdded: Date.now() }] :
-    [...(decode(allSessionsToken) as JwtPayload).sessions, { handle, dateAdded: Date.now() }];
-
-  const updatedAllSessionsToken = jwt.sign(
-    { sessions },
-    sessionSecret,
-    {
-      expiresIn: '30 days'
-    }
-  )
-
-  mutatedRes.allSessionsToken = updatedAllSessionsToken;
-  mutatedRes.allSessionsData = decode(updatedAllSessionsToken) as JwtPayload;
-
-  return {
-    statusCode: 200,
-    body: JSON.stringify(mutatedRes),
+  } catch (error) {
+    console.log(error);
+    return {
+      statusCode: 500,
+      body: JSON.stringify({
+        error: true,
+        message: 'Unexpected error.',
+      }),
+    };
   }
 };
 

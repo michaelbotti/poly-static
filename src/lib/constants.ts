@@ -41,6 +41,7 @@ export const HEADER_ALL_SESSIONS = 'x-all-sessions';
 
 export const HEADER_CLIENT_IP = 'x-nf-client-connection-ip';
 export const REFUND_POLICY_DATE = '14 days';
+export const BASIC_ERROR_TEXT = "Error occurred. We're looking into the issue."
 
 /**
  * a-z

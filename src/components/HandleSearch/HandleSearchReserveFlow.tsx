@@ -14,7 +14,6 @@ import Tooltip, { tooltipClasses } from "@mui/material/Tooltip";
 import {
   HEADER_ALL_SESSIONS,
   HEADER_HANDLE,
-  HEADER_HANDLE_COST,
   HEADER_RECAPTCHA,
   HEADER_TWITTER_ACCESS_TOKEN,
 } from "../../../src/lib/constants";
@@ -26,8 +25,6 @@ import { HandleSearchConnectTwitter } from "./";
 import { Loader } from "../Loader";
 import { SessionResponseBody } from "../../../netlify/functions/session";
 import {
-  AllSessionsData,
-  AllSessionsDataBody,
   getAccessTokenFromCookie,
   getAllCurrentSessionCookie,
   getAllCurrentSessionData,
@@ -53,15 +50,20 @@ export const HandleSearchReserveFlow = ({ className = "", ...rest }) => {
   } = useContext(HandleMintContext);
   const { setCurrentIndex } = useContext(HandleMintContext);
   const [fetchingSession, setFetchingSession] = useState<boolean>(false);
+  const [currentActiveSessions, setCurrentActiveSessions] = useState<
+    (false | SessionResponseBody)[]
+  >([]);
+  const [nextIndex, setNextIndex] = useState(1);
   const [debouncedHandle] = useDebounce(handle, 600);
   const handleInputRef = useRef(null);
 
-  const currentSessions = getAllCurrentSessionData();
-  const currentActiveSessions = currentSessions.filter(
-    (session) => session !== false
-  );
-  const nextIndex =
-    currentSessions.findIndex((session) => session === false) + 1;
+  useEffect(() => {
+    const currentSessions = getAllCurrentSessionData();
+    setCurrentActiveSessions(
+      currentSessions.filter((session) => session !== false)
+    );
+    setNextIndex(currentSessions.findIndex((session) => session === false) + 1);
+  }, [handleResponse]);
 
   useSyncAvailableStatus(debouncedHandle);
 
@@ -87,11 +89,18 @@ export const HandleSearchReserveFlow = ({ className = "", ...rest }) => {
   const handleOnSubmit = async (e: FormEvent) => {
     e.preventDefault();
 
+    if (!handleCost) {
+      setHandleResponse({
+        available: false,
+        message: "Unable to determine handle cost.",
+        twitter: false,
+      });
+    }
+
     const recaptchaToken: string = await getRecaptchaToken();
 
     const headers = new Headers();
     headers.append(HEADER_HANDLE, handle);
-    headers.append(HEADER_HANDLE_COST, handleCost?.toString());
     headers.append(HEADER_RECAPTCHA, recaptchaToken);
     const accessToken = getAccessTokenFromCookie();
     if (accessToken) {
@@ -119,17 +128,12 @@ export const HandleSearchReserveFlow = ({ className = "", ...rest }) => {
       if (!sessionResponse.error) {
         setHandle("");
         setHandleCost(null);
+        const { token, data, address } = sessionResponse;
         setSessionTokenCookie(
-          sessionResponse,
+          { token, data, address },
           new Date(sessionResponse.data.exp),
           nextIndex
         );
-
-        const newSession: AllSessionsData = {
-          handle,
-          dateAdded: Date.now(),
-          status: "pending",
-        };
 
         setAllSessionsCookie({
           token: sessionResponse.allSessionsToken,

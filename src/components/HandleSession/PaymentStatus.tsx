@@ -77,7 +77,7 @@ export const PaymentStatus: React.FC<Props> = ({
             const waitingForMinting = res.sessions.find(
               (session) =>
                 session.handle === handle &&
-                session.type === SessionStatusType.WAITING_FOR_MINING
+                session.type === SessionStatusType.WAITING_FOR_MINTING
             );
 
             // bail out if the handle is not waiting for minting
@@ -97,7 +97,7 @@ export const PaymentStatus: React.FC<Props> = ({
     };
 
     updateMintingQueuePosition();
-    const interval = setInterval(updateMintingQueuePosition, 10000);
+    const interval = setInterval(updateMintingQueuePosition, 30000);
 
     return () => {
       controller.abort();

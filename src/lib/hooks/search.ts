@@ -7,8 +7,9 @@ import {
 } from "../constants";
 import { HandleMintContext } from "../../context/mint";
 import { normalizeNFTHandle } from "../helpers/nfts";
-import { getAccessTokenFromCookie, getSPOAccessTokenCookie } from "../helpers/session";
+import { getAccessTokenFromCookie, getSPOAccessTokenCookie, setSessionTokenCookie } from "../helpers/session";
 import { getAccessTokenCookieName } from "../../../netlify/helpers/util";
+import { SessionResponseBody } from "../../../netlify/functions/session";
 
 export const useSyncAvailableStatus = async (unsanitizedHandle: string, isSpo = false) => {
   const { setFetching, setHandleResponse, setHandleCost } =
@@ -51,9 +52,19 @@ export const useSyncAvailableStatus = async (unsanitizedHandle: string, isSpo = 
         await fetch(`/.netlify/functions/search`, { headers })
       ).json();
 
+      if (res.tokens) {
+        res.tokens.forEach((token, index) => {
+          setSessionTokenCookie(
+            token as SessionResponseBody,
+            new Date(token.data.exp),
+            index + 1
+          );
+        });
+      }
+
       setFetching(false);
       setHandleResponse(res);
-      setHandleCost(res.cost ?? null);
+      setHandleCost(res.cost || null);
     })();
   }, [unsanitizedHandle]);
 };

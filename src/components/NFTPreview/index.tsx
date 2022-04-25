@@ -31,11 +31,11 @@ const NFTPreview: FC<NFTPreviewProps> = ({
   const { isTestnet } = useIsTestnet();
 
   const textSize = () => {
-    if (handle.length < 3) {
+    if (handle?.length < 3) {
       return "text-jumbo";
     }
 
-    if (handle.length < 6) {
+    if (handle?.length < 6) {
       return "text-5xl";
     }
 
@@ -47,7 +47,7 @@ const NFTPreview: FC<NFTPreviewProps> = ({
       {!isPurchasing && (
         <>
           {showHeader && <p className="m-0 text-center">Your NFT Preview</p>}
-          {showPrice && (
+          {showPrice && handle && (
             <div className="text-center mt-2 mb-8">
               <HandleDetails
                 handle={handle}
@@ -62,7 +62,7 @@ const NFTPreview: FC<NFTPreviewProps> = ({
       <div className="flex justify-center h-full w-full">
         <div
           className={`${
-            handle.length > 0 ? "" : "opacity-50"
+            handle && handle.length > 0 ? "" : "opacity-50"
           } bg-dark-100 text-white relative overflow-hidden mx-auto w-96 h-96 max-w-full max-h-full border border-2 border-dark-200 shadow-xl rounded-lg`}
         >
           <img
@@ -76,7 +76,9 @@ const NFTPreview: FC<NFTPreviewProps> = ({
             >
               {handle || <span>&nbsp;</span>}
             </p>
-            <Logo handle={handle} className="absolute top-6 right-6 w-12" />
+            {handle && (
+              <Logo handle={handle} className="absolute top-6 right-6 w-12" />
+            )}
             <p className="m-0 text-xs font-bold absolute bottom-6 right-6">
               handle.me/{handle}
             </p>
