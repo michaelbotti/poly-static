@@ -48,6 +48,10 @@ const Layout: FC = ({ children }): JSX.Element => {
             <Link className="text-primary-100" to="/tou">
               Terms of Use
             </Link>{" "}
+            •{" "}
+            <Link className="text-primary-100" to="/verified-partners">
+              Verified Partners
+            </Link>{" "}
             • PolicyID:{" "}
             <a
               className="text-primary-100"
@@ -57,7 +61,7 @@ const Layout: FC = ({ children }): JSX.Element => {
             >
               {policyID}
             </a>{" "}
-            • Version: 1.2.2
+            • Version: 1.2.3
           </p>
         </footer>
       </div>
