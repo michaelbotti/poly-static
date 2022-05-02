@@ -1,5 +1,6 @@
 import { Link } from "gatsby";
 import React, { useContext, useRef, useState } from "react";
+import { SpoAcceptTermsResponseBody } from "../../../../netlify/functions/spoAcceptTerms";
 import { SpoVerifyResponseBody } from "../../../../netlify/functions/spoVerify";
 import { HandleMintContext } from "../../../context/mint";
 
@@ -39,8 +40,8 @@ export const EnterForm = (): JSX.Element => {
     headers.append(HEADER_RECAPTCHA_FALLBACK, token);
 
     try {
-      const res: SpoVerifyResponseBody = await fetch(
-        "/.netlify/functions/spoVerify",
+      const res: SpoAcceptTermsResponseBody = await fetch(
+        "/.netlify/functions/spoAcceptTerms",
         {
           headers,
         }

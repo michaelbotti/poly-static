@@ -5,19 +5,19 @@ import {
     HandlerResponse,
 } from "@netlify/functions";
 
-import jwt, { JwtPayload } from "jsonwebtoken";
+import jwt, { decode, JwtPayload } from "jsonwebtoken";
+import { MAX_SESSION_LENGTH_SPO } from "../../src/lib/constants";
+import { getSecret } from "../helpers/jwt";
 
-import { passesRecaptcha } from "../helpers/recaptcha";
-import { botResponse, unauthorizedResponse } from "../helpers/response";
-import { HEADER_RECAPTCHA, HEADER_RECAPTCHA_FALLBACK, MAX_ACCESS_LENGTH, MAX_ACCESS_LENGTH_SPO } from "../../src/lib/constants";
-import { getSecret } from "../helpers";
+import { unauthorizedResponse } from "../helpers/response";
+import { getAccessTokenCookieName } from "../helpers/util";
 
 export interface SpoVerifyResponseBody {
     error: boolean;
-    token?: string;
-    data?: JwtPayload;
-    verified?: boolean;
     message?: string;
+    token?: string;
+    address?: string;
+    data?: JwtPayload;
 }
 
 const handler: Handler = async (
@@ -25,43 +25,49 @@ const handler: Handler = async (
     context: HandlerContext
 ): Promise<HandlerResponse> => {
     const { headers } = event;
-    const headerRecaptcha = headers[HEADER_RECAPTCHA];
-    const headerRecaptchaFallback = headers[HEADER_RECAPTCHA_FALLBACK];
 
-    if (!headerRecaptcha) {
+    const headerAccess = headers[getAccessTokenCookieName(true)];
+    if (!headerAccess) {
         return unauthorizedResponse;
     }
 
-    // Anti-bot.
-    const useFallback = null !== headerRecaptchaFallback;
-    const token = headerRecaptchaFallback || headerRecaptcha;
-    const reCaptchaValidated = await passesRecaptcha(token, useFallback);
-    if (!reCaptchaValidated) {
-        return botResponse;
+    await new Promise(resolve => setTimeout(resolve, 3000));
+
+    // TODO: Verify SPO.
+    const mockedResult = {
+        error: false,
+        message: '',
+        handle: 'blade',
+        cost: 250,
+        address: 'addr123123nskdaj2knk'
     }
 
-    const secretKey = await getSecret('access');
-    const jwtToken = secretKey && jwt.sign(
+    const sessionSecret = await getSecret('session');
+    const sessionToken = jwt.sign(
         {
+            iat: Date.now(),
+            handle: mockedResult.handle,
+            cost: mockedResult.cost,
             emailAddress: 'spos@adahandle.com',
-            isSPO: true,
+            isSPO: true
         },
-        secretKey,
+        sessionSecret,
         {
-            expiresIn: Math.floor(MAX_ACCESS_LENGTH_SPO / 1000)
+            expiresIn: (MAX_SESSION_LENGTH_SPO * 1000).toString()
         }
     );
 
-    const result = {
-        error: false,
-        verified: true,
-        token: jwtToken,
-        data: jwt.decode(jwtToken)
+    const response = {
+        error: mockedResult.error,
+        message: mockedResult?.message || '',
+        address: mockedResult?.address || '',
+        token: sessionToken,
+        data: decode(sessionToken) as JwtPayload,
     }
 
     return {
         statusCode: 200,
-        body: JSON.stringify(result),
+        body: JSON.stringify(response),
     };
 };
 

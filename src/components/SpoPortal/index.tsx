@@ -20,6 +20,7 @@ import {
   SPO_COOKIE_ACCESS_KEY,
   SPO_COOKIE_SESSION_PREFIX,
 } from "../../lib/constants";
+import { VerifyForm } from "./VerifyForm";
 
 export const SpoPortalPage = (): JSX.Element => {
   const {
@@ -31,6 +32,8 @@ export const SpoPortalPage = (): JSX.Element => {
     setCurrentIndex,
     currentSPOAccess,
     setCurrentSPOAccess,
+    poolVerified,
+    poolChallenged,
   } = useContext(HandleMintContext);
   const [currentSession, setCurrentSession] = useState<
     false | SessionResponseBody
@@ -48,6 +51,8 @@ export const SpoPortalPage = (): JSX.Element => {
     Cookies.remove(SPO_COOKIE_ACCESS_KEY);
   };
 
+  // TODO: Fix current index. If you refresh, it will always be 0.
+
   useEffect(() => {
     setPaymentSessions(getAllCurrentSPOSessionData());
 
@@ -60,51 +65,29 @@ export const SpoPortalPage = (): JSX.Element => {
     setPaymentSessions(getAllCurrentSPOSessionData());
   }, [setPaymentSessions, getAllCurrentSPOSessionData]);
 
+  console.log("currentIndex", currentIndex);
+  console.log("currentSession", currentSession);
+
   const renderContent = () => {
     if (!currentSPOAccess) {
       return <EnterForm />;
     }
 
-    if (currentIndex === 0 && paymentSessions[0]) {
-      return (
-        <div className="col-span-12 relative z-10">
-          <div className="p-8">
-            <h2 className="font-bold text-3xl text-primary-100 mb-2">
-              You have secured a your Handle!
-            </h2>
-            <hr className="w-12 border-dark-300 border-2 block my-8" />
-            <p>
-              We're currently only allowing 1 Handle per sessions. Once we
-              confirm payment, you'll have the option to start a new session.
-            </p>
-          </div>
-        </div>
-      );
+    if (!currentSession) {
+      return <VerifyForm />;
     }
 
     return (
       <>
         <div className="col-span-12 lg:col-span-6 relative z-10">
           <div className="p-8">
-            {currentIndex === 0 || !currentSession ? (
-              <HandleSearch />
-            ) : (
-              <HandleSession sessionData={currentSession} />
-            )}
+            <HandleSession sessionData={currentSession} />
           </div>
         </div>
         <div className="col-span-12 lg:col-span-6 py-8">
           <NFTPreview
-            handle={
-              currentIndex === 0
-                ? handle
-                : currentSession && currentSession.data.handle
-            }
-            handleCost={
-              currentIndex === 0
-                ? handleCost
-                : currentSession && currentSession.data.handle
-            }
+            handle={currentSession.data.handle}
+            handleCost={currentSession.data.handle}
             isSpo={true}
           />
         </div>

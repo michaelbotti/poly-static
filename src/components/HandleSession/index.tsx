@@ -131,6 +131,7 @@ export const HandleSession = ({
         isSPO
       )
         .then((res) => {
+          console.log("res", res);
           setFetchingPayment(false);
 
           if (res.error) {
@@ -176,6 +177,9 @@ export const HandleSession = ({
       Cookies.remove(`${COOKIE_SESSION_PREFIX}_${currentIndex}`);
     }
   };
+
+  console.log("paymentStatus", paymentStatus);
+  console.log("accessToken", accessToken);
 
   const waitingForPayment = paymentStatus === ConfirmPaymentStatusCode.PENDING;
   const validPayment = paymentStatus === ConfirmPaymentStatusCode.CONFIRMED;
