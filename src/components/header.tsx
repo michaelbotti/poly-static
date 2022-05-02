@@ -33,7 +33,7 @@ const navItems: NavItem[] = [
     title: "Contact",
   },
   {
-    route: "https://github.com/adahandle",
+    route: "https://github.com/koralabs",
     title: "GitHub",
     external: true,
   },

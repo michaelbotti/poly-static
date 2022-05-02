@@ -1,6 +1,7 @@
-import React from "react";
+import React, { useContext } from "react";
 
 import SEO from "../components/seo";
+import { HandleMintContext } from '../context/mint';
 
 import Cardano from '../images/cardano.svg';
 import Payment from '../images/payment-simple.svg';
@@ -8,7 +9,7 @@ import Ecosystem from '../images/ecosystem.svg';
 import NonCustodial from '../images/non-custodial.svg';
 import App from '../images/app-bg.png';
 import b58 from '../images/logo_b58_wallet_flat.png';
-import Maladex from '../images/maladex-logo-small.png';
+import Maladex from '../images/maladex-mal-small.webp';
 import SundaeSwap from '../images/sundae.png';
 import Nami from '../images/nami.svg';
 import Gero from '../images/gerowallet.png';
@@ -18,10 +19,12 @@ import NFTMaker from '../images/nft-maker.png';
 import Cardax from '../images/cardax.png';
 import WM from '../images/wm.png';
 import Indigo from '../images/Eye-white.png';
-import CC from '../images/ccw-logo-384.png';
-import Photochromic from '../images/photochromic.png';
+import Eternl from '../images/eternl.png';
 
 function IndexPage() {
+
+  const { stateData } = useContext(HandleMintContext)
+
   return (
     <>
       <SEO
@@ -32,7 +35,7 @@ function IndexPage() {
         <div className="grid grid-cols-12 content-center overflow-hidden max-w-5xl mx-auto">
           <div className="col-span-12 lg:col-span-8 lg:col-start-3 relative z-10 text-center">
             <h2 className="inline-block mt-8 mb-4 text-5xl font-bold leading-none">
-              <em>Custom</em> Cardano addresses for everyone.
+              <span className="font-bold text-center text-primary-200 m-0">{stateData?.totalHandles?.toLocaleString("en-US") || '...'}</span> custom Cardano addresses and counting.
             </h2>
             <div className="mt-4">
               <p className="text-xl mb-8 lg:pr-8 text-dark-350">
@@ -54,7 +57,7 @@ function IndexPage() {
       </section>
       <div className="bg-dark-200 -mx-8">
         <section id="integrations" className="mb-48 z-10 relative w-full max-w-5xl px-4 pt-4 pb-8 mx-auto lg:px-8 lg:pt-16">
-          <h2 className="text-white text-4xl font-bold leading-tight text-center">Partners</h2>
+          <h2 className="text-white text-4xl font-bold leading-tight text-center">25+ Integrations &amp; Partnerships</h2>
           <div className="grid grid-cols-12 mt-8 place-content-center gap-8 px-4 lg:px-0">
             <a href="https://maladex.com" className="block col-span-6 lg:col-span-4 shadow-lg rounded-lg bg-dark-100 p-8 lg:p-16 flex items-center justify-center transform hover:-translate-y-2" rel="nofollow noopener" target="_blank">
               <img className="w-48" src={Maladex} alt="Maladex" />
@@ -89,11 +92,8 @@ function IndexPage() {
             <a href="https://indigoprotocol.io/" className="block col-span-6 lg:col-span-4 shadow-lg rounded-lg bg-dark-100 p-8 lg:p-16 flex items-center justify-center transform hover:-translate-y-2" rel="nofollow noopener" target="_blank">
               <img className="w-32" src={Indigo} alt="Indigo Protocol" />
             </a>
-            <a href="https://ccvault.io/" className="block col-span-6 lg:col-span-4 shadow-lg rounded-lg bg-dark-100 p-8 lg:p-16 flex items-center justify-center transform hover:-translate-y-2" rel="nofollow noopener" target="_blank">
-              <img className="w-36" src={CC} alt="CC Vault" />
-            </a>
-            <a href="https://photochromic.io/" className="block col-span-6 lg:col-span-4 shadow-lg rounded-lg bg-dark-100 p-8 lg:p-16 flex items-center justify-center transform hover:-translate-y-2" rel="nofollow noopener" target="_blank">
-              <img className="w-36" src={Photochromic} alt="Photochromic" />
+            <a href="https://eternl.io/" className="block col-span-6 lg:col-span-4 shadow-lg rounded-lg bg-dark-100 p-8 lg:p-16 flex items-center justify-center transform hover:-translate-y-2" rel="nofollow noopener" target="_blank">
+              <img className="w-36" src={Eternl} alt="Eternl" />
             </a>
           </div>
         </section>
