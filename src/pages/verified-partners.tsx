@@ -36,12 +36,12 @@ function VerifiedPartnersPage() {
                 </li>
               </ol>
             </li>
-            <li>
+            {/* <li>
               If a $handle NFT image is used as a wallet avatar, the partner
               must display the $handle that has the "default" flag in the
               metadata. If more than one $handle has a default flag, the one
               with the most recent timestamp will be used.
-            </li>
+            </li> */}
           </ul>
         </div>
       </section>
