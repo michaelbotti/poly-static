@@ -169,11 +169,11 @@ export const VerifyForm = (): JSX.Element => {
                 We need you to prove that you own the pool you registered with.
               </p>
               <p>
-                We will do so using CIP-0022. Please review the information at
-                the{" "}
+                We will do so using{" "}
                 <a href="https://cips.cardano.org/cips/cip22/" target="_blank">
-                  here.
+                  CIP-0022
                 </a>
+                . Please add the following details below:
               </p>
               <p>
                 <label
@@ -268,12 +268,12 @@ export const VerifyForm = (): JSX.Element => {
                   </span>
                 </HtmlTooltip>
               </h3>
-              <p>Run `cncli sign` using the following command:</p>
+              <p>Run cncli sign using the following command:</p>
               <div className="mb-4">
                 <div className="relative" style={{ paddingRight: "64px" }}>
                   <div className="overflow-hidden overflow-x-auto p-4 rounded-none rounded-tl-lg shadow-inner shadow-lg bg-dark-300 overflow-hidden pr-24 border-2 border-b-0 border-primary-100">
-                    $ cncli sign --domain {domain} --nonce {nonce}{" "}
-                    --pool-vrf-skey /path/to/my/pool.vrf.skey
+                    cncli sign --domain {domain} --nonce {nonce} --pool-vrf-skey
+                    /path/to/my/pool.vrf.skey
                   </div>
                   <button
                     onClick={handleCopy}

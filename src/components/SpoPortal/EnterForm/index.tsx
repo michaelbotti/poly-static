@@ -93,21 +93,21 @@ export const EnterForm = (): JSX.Element => {
             How it Works
           </h3>
           <p className="text-lg text-center text-dark-350">
-            Purchasing a Handle during for SPOs is a 3-step process, starting
-            with:
+            Purchasing a Handle for SPOs is a 5-step process, starting with:
           </p>
           <ol className="mb-4">
             <li>
               Follow the steps detailed in{" "}
               <a href="https://cips.cardano.org/cips/cip22/" target="_blank">
-                CIP-22
+                CIP-0022
               </a>{" "}
-              to verify you are the rightful manager of the stakepool and ticker
+              to verify you are the rightful manager of the stakepool and
+              ticker.
             </li>
-            <li>Agree to the terms of use below</li>
+            <li>Agree to the terms of use below.</li>
             <li>
               Add your pool information including, Pool ID, VFR Key, and VKey
-              Hash
+              Hash.
             </li>
             <li>
               Once added, you will receive a custom nonce. Use this nonce and
@@ -115,7 +115,7 @@ export const EnterForm = (): JSX.Element => {
             </li>
             <li>
               If successful, you will be taken to the Handle payment page, which
-              includes an address that you will use to purchase your handle
+              includes an address that you will use to purchase your handle.
             </li>
           </ol>
           <p>
@@ -128,12 +128,12 @@ export const EnterForm = (): JSX.Element => {
             </Link>
             .
           </p>
-          <p>Pricing for each Handle is 250 ADA.</p>
           <p>
-            All pools that reserved their tickers via the Google Form in
-            September 2021 will get their corresponding Handles via paying only
-            the minting and transaction costs. You will receive a 2 ADA payment
-            request (instead of 250 ADA).
+            Pricing for each Handle is 250 ADA, however, all pools that reserved
+            their tickers via the Google Form in September 2021 will get their
+            corresponding Handles via paying only the minting and transaction
+            costs. You will receive a 2 ADA payment request (instead of 250
+            ADA).
           </p>
         </div>
         <form onSubmit={(e) => e.preventDefault()} ref={form}>
