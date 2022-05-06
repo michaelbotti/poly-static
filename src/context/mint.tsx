@@ -162,7 +162,6 @@ export const HandleMintContextProvider = ({ children, ...rest }) => {
         })
         .catch((e) => {
           setStateData(null);
-          console.log(e);
         })
         .finally(() => {
           setStateLoading(false);

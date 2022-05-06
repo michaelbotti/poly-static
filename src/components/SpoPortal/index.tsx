@@ -14,7 +14,6 @@ import { Loader } from "../Loader";
 import NFTPreview from "../NFTPreview";
 import { Closed } from "./Closed";
 import { EnterForm } from "./EnterForm";
-import { HandleSearch } from "./HandleSearch";
 import { TabNavigation } from "./TabNavigation";
 import {
   SPO_COOKIE_ACCESS_KEY,
@@ -26,14 +25,10 @@ export const SpoPortalPage = (): JSX.Element => {
   const {
     stateData,
     stateLoading,
-    handle,
-    handleCost,
     currentIndex,
     setCurrentIndex,
     currentSPOAccess,
     setCurrentSPOAccess,
-    poolVerified,
-    poolChallenged,
   } = useContext(HandleMintContext);
   const [currentSession, setCurrentSession] = useState<
     false | SessionResponseBody
@@ -51,22 +46,22 @@ export const SpoPortalPage = (): JSX.Element => {
     Cookies.remove(SPO_COOKIE_ACCESS_KEY);
   };
 
-  // TODO: Fix current index. If you refresh, it will always be 0.
+  const setSessions = () => {
+    setPaymentSessions(getAllCurrentSPOSessionData());
+    setCurrentSession(getSPOSessionTokenFromCookie(1));
+  };
 
   useEffect(() => {
-    setPaymentSessions(getAllCurrentSPOSessionData());
+    setSessions();
+  }, []);
 
-    if (currentIndex > 0) {
-      setCurrentSession(getSPOSessionTokenFromCookie(currentIndex));
-    }
+  useEffect(() => {
+    setSessions();
   }, [currentIndex]);
 
   const refreshPaymentSessions = useCallback(() => {
     setPaymentSessions(getAllCurrentSPOSessionData());
   }, [setPaymentSessions, getAllCurrentSPOSessionData]);
-
-  console.log("currentIndex", currentIndex);
-  console.log("currentSession", currentSession);
 
   const renderContent = () => {
     if (!currentSPOAccess) {

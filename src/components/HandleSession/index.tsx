@@ -131,7 +131,6 @@ export const HandleSession = ({
         isSPO
       )
         .then((res) => {
-          console.log("res", res);
           setFetchingPayment(false);
 
           if (res.error) {
@@ -177,9 +176,6 @@ export const HandleSession = ({
       Cookies.remove(`${COOKIE_SESSION_PREFIX}_${currentIndex}`);
     }
   };
-
-  console.log("paymentStatus", paymentStatus);
-  console.log("accessToken", accessToken);
 
   const waitingForPayment = paymentStatus === ConfirmPaymentStatusCode.PENDING;
   const validPayment = paymentStatus === ConfirmPaymentStatusCode.CONFIRMED;
@@ -243,27 +239,10 @@ export const HandleSession = ({
         will be refunded, but can take up to {REFUND_POLICY_DATE}!
       </p>
       <ul>
-        {isSPO ? (
-          <>
-            <li>
-              <b>
-                <u>
-                  Invalid payments will be refunded, minus a 50 ADA processing
-                  fee
-                </u>
-              </b>
-            </li>
-            <li>
-              Do NOT send from an exchange. Only use a STAKE POOL wallet you own
-              the keys to (like Nami, Yoroi, Daedalus, etc).
-            </li>
-          </>
-        ) : (
-          <li>
-            Do NOT send from an exchange. Only use wallets you own the keys to
-            (like Nami, Yoroi, Daedalus, etc).
-          </li>
-        )}
+        <li>
+          Do NOT send from an exchange. Only use wallets you own the keys to
+          (like Nami, Yoroi, Daedalus, etc).
+        </li>
         <li>Byron wallets and bundled transactions will be refunded.</li>
         <li>Do NOT send more than one payment.</li>
         <li>

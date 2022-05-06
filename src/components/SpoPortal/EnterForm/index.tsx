@@ -97,30 +97,38 @@ export const EnterForm = (): JSX.Element => {
             with:
           </p>
           <ol className="mb-4">
-            <li>Search and select an available Handle to purchase.</li>
             <li>
-              Once you have started your session, you <b>must</b> use your STAKE
-              POOL operators wallet for the purchase
+              Follow the steps detailed in{" "}
+              <a href="https://cips.cardano.org/cips/cip22/" target="_blank">
+                CIP-22
+              </a>{" "}
+              to verify you are the rightful manager of the stakepool and ticker
+            </li>
+            <li>Agree to the terms of use below</li>
+            <li>
+              Add your pool information including, Pool ID, VFR Key, and VKey
+              Hash
             </li>
             <li>
-              If you make a payment using a wallet other than the wallet
-              attached to your stake pool, your payment will be refunded minus a
-              50 ADA processing fee
+              Once added, you will receive a custom nonce. Use this nonce and
+              the cncli utility to "sign" the request.
+            </li>
+            <li>
+              If successful, you will be taken to the Handle payment page, which
+              includes an address that you will use to purchase your handle
             </li>
           </ol>
           <p>
-            Pricing for each Handle is 250 ADA. You can see full details on{" "}
-            <Link to="/faq" className="text-primary-100">
-              our FAQ page
+            For security reasons, we have taken a snapshot of all existing
+            pools. If you are not part of this list or created your pool
+            recently, you will need to purchase a handle using the standard
+            method{" "}
+            <Link to="/mint" className="text-primary-100">
+              here
             </Link>
-            !
+            .
           </p>
-          <p>
-            For security reasons, we have taken a snapshot of all existing pools
-            on 1/20/2022 and for this initial phase will only allow minting of
-            those tickers. All pools created after this date will need to await
-            public sale.
-          </p>
+          <p>Pricing for each Handle is 250 ADA.</p>
           <p>
             All pools that reserved their tickers via the Google Form in
             September 2021 will get their corresponding Handles via paying only

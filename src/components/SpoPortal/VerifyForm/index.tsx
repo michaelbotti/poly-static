@@ -1,27 +1,24 @@
-import { Box } from "@mui/material";
 import React, { useContext, useRef, useState } from "react";
 import { SpoVerifyResponseBody } from "../../../../netlify/functions/spoVerify";
 import { getAccessTokenCookieName } from "../../../../netlify/helpers/util";
 import { HandleMintContext } from "../../../context/mint";
+import HelpOutlinedIcon from "@mui/icons-material/HelpOutlined";
 
-import { HEADER_RECAPTCHA } from "../../../lib/constants";
 import {
   getAccessTokenFromCookie,
-  setSessionTokenCookie,
   setSPOSessionTokenCookie,
 } from "../../../lib/helpers/session";
 import Button from "../../button";
-
-interface SpoChallengeResponseBody {
-  error: boolean;
-  message: string;
-  domain?: string;
-  nonce?: string;
-}
+import { Alert, styled, Tooltip, tooltipClasses } from "@mui/material";
+import { SpoChallengeResponseBody } from "../../../../netlify/functions/spoChallenge";
+import { Link } from "gatsby";
 
 export const VerifyForm = (): JSX.Element => {
-  const { setCurrentIndex } = useContext(HandleMintContext);
-  const [responseMessage, setResponseMessage] = useState<string>(null);
+  const { setCurrentIndex, setHandle, handle } = useContext(HandleMintContext);
+  const [verifyResponseMessage, setVerifyResponseMessage] =
+    useState<string>(null);
+  const [challengeResponseMessage, setChallengeResponseMessage] =
+    useState<string>(null);
   const [error, setError] = useState(false);
   const [nonce, setNonce] = useState<string | null>(null);
   const [domain, setDomain] = useState<string | null>(null);
@@ -33,13 +30,6 @@ export const VerifyForm = (): JSX.Element => {
   const [copying, setCopying] = useState(false);
 
   const form = useRef(null);
-
-  const setTimeoutResponseMessage = (message: string) => {
-    setResponseMessage(message);
-    setTimeout(() => {
-      setResponseMessage("");
-    }, 4000);
-  };
 
   const performChallenge = async (): Promise<void> => {
     setLoading(true);
@@ -54,27 +44,36 @@ export const VerifyForm = (): JSX.Element => {
       const res: SpoChallengeResponseBody = await fetch(
         "/.netlify/functions/spoChallenge",
         {
+          method: "POST",
           headers,
+          body: JSON.stringify({
+            bech32PoolId: poolId,
+            cborHexEncodedVRFKey: vrfKey,
+            hexEncodedVKeyHash: vKHash,
+          }),
         }
       ).then((res) => res.json());
 
-      const { error, message, nonce, domain } = res;
+      const { error, message, nonce, domain, handle: handleName } = res;
       if (!error && nonce) {
+        setHandle(handleName);
         setNonce(nonce);
         setDomain(domain);
       }
 
       setError(true);
-      setResponseMessage(message);
+      setChallengeResponseMessage(message);
     } catch (e) {
-      setTimeoutResponseMessage("Hmm, try that again. Something went wrong.");
+      setChallengeResponseMessage("Hmm, try that again. Something went wrong.");
+      setTimeout(() => {
+        setChallengeResponseMessage(null);
+      }, 4000);
     } finally {
       setLoading(false);
     }
   };
 
   const performVerify = async (): Promise<void> => {
-    debugger;
     setLoading(true);
     const headers = new Headers();
     const accessToken = getAccessTokenFromCookie(true);
@@ -89,7 +88,7 @@ export const VerifyForm = (): JSX.Element => {
         {
           method: "POST",
           headers,
-          body: JSON.stringify({ signature }),
+          body: JSON.stringify({ signature, poolId }),
         }
       ).then((res) => res.json());
 
@@ -104,10 +103,12 @@ export const VerifyForm = (): JSX.Element => {
       }
 
       setError(true);
-      setResponseMessage(message);
+      setVerifyResponseMessage(message);
     } catch (e) {
-      console.log("ERROR", e);
-      setTimeoutResponseMessage("Hmm, try that again. Something went wrong.");
+      setVerifyResponseMessage("Hmm, try that again. Something went wrong.");
+      setTimeout(() => {
+        setVerifyResponseMessage(null);
+      }, 4000);
     } finally {
       setLoading(false);
     }
@@ -132,6 +133,29 @@ export const VerifyForm = (): JSX.Element => {
     }, 1000);
   };
 
+  const restartProcess = () => {
+    setNonce(null);
+    setDomain(null);
+    setChallengeResponseMessage(null);
+    setVerifyResponseMessage(null);
+  };
+
+  const HtmlTooltip = styled(
+    ({
+      className,
+      ...props
+    }: {
+      className: string;
+      title: any;
+      children: any;
+    }) => <Tooltip {...props} classes={{ popper: className }} />
+  )(({ theme }) => ({
+    [`& .${tooltipClasses.tooltip}`]: {
+      backgroundColor: "#0B132B",
+      border: "1px solid #999",
+    },
+  }));
+
   return (
     <>
       <div className="col-span-12">
@@ -139,15 +163,18 @@ export const VerifyForm = (): JSX.Element => {
           <h3 className="text-white text-3xl font-bold text-center mb-4">
             Verify SPO Pool
           </h3>
-          <p>
-            We need you to prove that you own the pools you registered with.
-          </p>
-          <p>
-            We will do so using CIP-0022. Please review the information at the
-            referenced link. We also suggest that you watch this video.
-          </p>
           {!nonce || !domain ? (
             <form onSubmit={(e) => e.preventDefault()} ref={form}>
+              <p>
+                We need you to prove that you own the pool you registered with.
+              </p>
+              <p>
+                We will do so using CIP-0022. Please review the information at
+                the{" "}
+                <a href="https://cips.cardano.org/cips/cip22/" target="_blank">
+                  here.
+                </a>
+              </p>
               <p>
                 <label
                   htmlFor="poolId"
@@ -197,22 +224,52 @@ export const VerifyForm = (): JSX.Element => {
                 className={`w-full`}
                 buttonStyle={"primary"}
                 type="submit"
-                disabled={poolId === "" || vrfKey === "" || vKHash === ""}
+                disabled={
+                  poolId === "" || vrfKey === "" || vKHash === "" || loading
+                }
                 onClick={handleSubmitChallengeForm}
               >
                 {loading && "Waiting..."}
                 {!loading && "Start Challenge"}
               </Button>
 
-              {responseMessage && (
-                <p className="my-2 text-center">{responseMessage}</p>
+              {challengeResponseMessage && error && (
+                <p className="my-2 text-center">
+                  <Alert severity="error">{challengeResponseMessage}</Alert>
+                </p>
               )}
             </form>
           ) : null}
           {nonce && domain ? (
             <form onSubmit={(e) => e.preventDefault()} ref={form}>
+              <h3 className="text-white text-2xl font-bold text-center mb-4">
+                Ticker: {handle}
+                <HtmlTooltip
+                  arrow
+                  placement="top"
+                  title={
+                    <>
+                      <p className="text-sm">
+                        Ticker name is based on Pool ID. If this is the
+                        incorrect ticker, please contact support via discord:{" "}
+                        <a
+                          href="https://discord.gg/SKBhBx7qtg"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          https://discord.gg/SKBhBx7qtg
+                        </a>
+                      </p>
+                    </>
+                  }
+                >
+                  <span>
+                    <HelpOutlinedIcon sx={{ fontSize: 15, marginLeft: 1 }} />
+                  </span>
+                </HtmlTooltip>
+              </h3>
               <p>Run `cncli sign` using the following command:</p>
-              <p>
+              <div className="mb-4">
                 <div className="relative" style={{ paddingRight: "64px" }}>
                   <div className="overflow-hidden overflow-x-auto p-4 rounded-none rounded-tl-lg shadow-inner shadow-lg bg-dark-300 overflow-hidden pr-24 border-2 border-b-0 border-primary-100">
                     $ cncli sign --domain {domain} --nonce {nonce}{" "}
@@ -251,7 +308,7 @@ export const VerifyForm = (): JSX.Element => {
                     </svg>
                   </button>
                 </div>
-              </p>
+              </div>
               <p>This will produce a signature. Add signature below.</p>
               <p>
                 <label
@@ -272,15 +329,27 @@ export const VerifyForm = (): JSX.Element => {
                 className={`w-full`}
                 buttonStyle={"primary"}
                 type="submit"
-                disabled={signature === ""}
+                disabled={signature === "" || loading}
                 onClick={handleSubmitVerifyForm}
               >
                 {loading && "Waiting..."}
                 {!loading && "Verify"}
               </Button>
 
-              {responseMessage && (
-                <p className="my-2 text-center">{responseMessage}</p>
+              {verifyResponseMessage && error && (
+                <p className="my-2 text-center">
+                  <Alert severity="error">
+                    {verifyResponseMessage}{" "}
+                    {verifyResponseMessage === "Verification timeout." && (
+                      <span>
+                        Not submitted within 5 minute tme window.
+                        <Link to="" onClick={restartProcess}>
+                          Restart
+                        </Link>
+                      </span>
+                    )}
+                  </Alert>
+                </p>
               )}
             </form>
           ) : null}

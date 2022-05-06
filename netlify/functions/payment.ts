@@ -99,24 +99,12 @@ const handler: Handler = async (
       }
     }
 
-    const res = {
-      error: false,
-      message: '',
-      items: [
-        {
-          address: 'addr123123nskdaj2knk',
-          statusCode: 'PENDING',
-        }
-      ],
-      statusCode: 'PENDING',
-
-    }
-    // await fetchNodeApp(`payment?addresses=${addresses}`, {
-    //   headers: {
-    //     [getAccessTokenCookieName(isSPO)]: accessToken,
-    //     [getSessionTokenCookieName(isSPO)]: sessionToken
-    //   }
-    // }).then(res => res.json())
+    const res = await fetchNodeApp(`payment?addresses=${addresses}`, {
+      headers: {
+        [getAccessTokenCookieName(isSPO)]: accessToken,
+        [getSessionTokenCookieName(isSPO)]: sessionToken
+      }
+    }).then(res => res.json())
 
     if (res.error) {
       return {

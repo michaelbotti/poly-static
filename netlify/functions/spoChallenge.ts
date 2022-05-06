@@ -5,55 +5,80 @@ import {
     HandlerResponse,
 } from "@netlify/functions";
 
-import jwt, { JwtPayload } from "jsonwebtoken";
 
-import { passesRecaptcha } from "../helpers/recaptcha";
-import { botResponse, unauthorizedResponse } from "../helpers/response";
-import { HEADER_RECAPTCHA, HEADER_RECAPTCHA_FALLBACK, MAX_ACCESS_LENGTH, MAX_ACCESS_LENGTH_SPO } from "../../src/lib/constants";
-import { getSecret } from "../helpers";
-import { getAccessTokenCookieName } from "../helpers/util";
+import { unauthorizedResponse } from "../helpers/response";
+import { fetchNodeApp, getAccessTokenCookieName } from "../helpers/util";
+
+interface ChallengeResult {
+    status: string;
+    domain: string;
+    nonce: string;
+}
+
+export interface SpoChallengeResultBody {
+    error: boolean,
+    message: string;
+    handle?: string;
+    challengeResult?: ChallengeResult;
+}
 
 export interface SpoChallengeResponseBody {
     error: boolean,
     message: string;
     domain?: string;
     nonce?: string;
+    handle?: string;
 }
 
 const handler: Handler = async (
     event: HandlerEvent,
     context: HandlerContext
 ): Promise<HandlerResponse> => {
-    const { headers } = event;
+    try {
+        const { headers, body } = event;
 
-    const headerAccess = headers[getAccessTokenCookieName(true)];
-    if (!headerAccess) {
-        return unauthorizedResponse;
-    }
-
-    await new Promise(resolve => setTimeout(resolve, 3000));
-
-    const mockedResult = {
-        error: false,
-        message: `Challenge successful`,
-        challengeResult: {
-            status: 'ok',
-            domain: 'adahandle.com',
-            nonce: '119141b4ee1b65ea330b2e1f12c5611bdbd6810eb02e257f8bf549c2e2c149ce8f80648bbd3cb3e91619f5197fb50b90a29018e7b59aedfe21a9ed383619f81b'
+        if (!body) {
+            return {
+                statusCode: 400,
+                body: JSON.stringify({
+                    error: true,
+                    message: 'Invalid request'
+                })
+            }
         }
-    }
 
-    const result = {
-        error: mockedResult.error,
-        message: mockedResult.message,
-        domain: mockedResult.challengeResult.domain,
-        nonce: mockedResult.challengeResult.nonce,
-    }
+        const headerAccess = headers[getAccessTokenCookieName(true)];
+        if (!headerAccess) {
+            return unauthorizedResponse;
+        }
 
-    return {
-        statusCode: 200,
-        body: JSON.stringify(result),
-    };
+        const res: SpoChallengeResultBody = await fetchNodeApp('spo/challenge', {
+            headers: {
+                [getAccessTokenCookieName(true)]: headerAccess,
+                'Content-Type': 'application/json'
+            },
+            method: 'POST',
+            body
+        }).then(res => res.json());
+
+        const { error, message, handle, challengeResult } = res;
+
+        const result: SpoChallengeResponseBody = { error, message, handle, domain: challengeResult?.domain, nonce: challengeResult?.nonce };
+
+        return {
+            statusCode: 200,
+            body: JSON.stringify(result),
+        };
+    } catch (error) {
+        console.log(error);
+        return {
+            statusCode: 500,
+            body: JSON.stringify({
+                error: true,
+                message: 'Unexpected error.',
+            }),
+        };
+    }
 };
 
 export { handler };
