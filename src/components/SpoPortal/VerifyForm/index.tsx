@@ -184,7 +184,7 @@ export const VerifyForm = (): JSX.Element => {
                 </label>
                 <input
                   type="text"
-                  className={`focus:ring-0 focus:ring-opacity-0 border-2 focus:border-white outline-none form-input bg-dark-100 border-dark-300 rounded-lg pr-6 pl-16 py-2 text-2xl w-full`}
+                  className={`focus:ring-0 focus:ring-opacity-0 border-2 focus:border-white outline-none form-input bg-dark-100 border-dark-300 rounded-lg pr-6 pl-6 py-2 text-2xl w-full`}
                   id="poolId"
                   value={poolId}
                   onChange={(e) => setPoolId(e.target.value)}
@@ -199,7 +199,7 @@ export const VerifyForm = (): JSX.Element => {
                 </label>
                 <input
                   type="text"
-                  className={`focus:ring-0 focus:ring-opacity-0 border-2 focus:border-white outline-none form-input bg-dark-100 border-dark-300 rounded-lg pr-6 pl-16 py-2 text-2xl w-full`}
+                  className={`focus:ring-0 focus:ring-opacity-0 border-2 focus:border-white outline-none form-input bg-dark-100 border-dark-300 rounded-lg pr-6 pl-6 py-2 text-2xl w-full`}
                   id="vrfKey"
                   value={vrfKey}
                   onChange={(e) => setVrfKey(e.target.value)}
@@ -214,7 +214,7 @@ export const VerifyForm = (): JSX.Element => {
                 </label>
                 <input
                   type="text"
-                  className={`focus:ring-0 focus:ring-opacity-0 border-2 focus:border-white outline-none form-input bg-dark-100 border-dark-300 rounded-lg pr-6 pl-16 py-2 text-2xl w-full`}
+                  className={`focus:ring-0 focus:ring-opacity-0 border-2 focus:border-white outline-none form-input bg-dark-100 border-dark-300 rounded-lg pr-6 pl-6 py-2 text-2xl w-full`}
                   id="vKHash"
                   value={vKHash}
                   onChange={(e) => setVKHash(e.target.value)}
@@ -319,7 +319,7 @@ export const VerifyForm = (): JSX.Element => {
                 </label>
                 <input
                   type="text"
-                  className={`focus:ring-0 focus:ring-opacity-0 border-2 focus:border-white outline-none form-input bg-dark-100 border-dark-300 rounded-lg pr-6 pl-16 py-2 text-2xl w-full`}
+                  className={`focus:ring-0 focus:ring-opacity-0 border-2 focus:border-white outline-none form-input bg-dark-100 border-dark-300 rounded-lg pr-6 pl-6 py-2 text-2xl w-full`}
                   id="signature"
                   value={signature}
                   onChange={(e) => setSignature(e.target.value)}

@@ -5,7 +5,6 @@ import {
   COOKIE_SESSION_PREFIX,
   HEADER_IS_SPO,
   REFUND_POLICY_DATE,
-  SPO_ADA_HANDLE_COST,
   SPO_COOKIE_ACCESS_KEY,
   SPO_COOKIE_SESSION_PREFIX,
 } from "../../lib/constants";
@@ -275,7 +274,7 @@ export const HandleSession = ({
                   className="text-4xl mt-4 inline-block font-bold"
                   style={{ color: getRarityHex(handle) }}
                 >
-                  {isSPO ? SPO_ADA_HANDLE_COST : cost} {isTestnet ? "t₳" : "₳"}
+                  {cost} {isTestnet ? "t₳" : "₳"}
                 </strong>
               </h4>
               <div className="relative" style={{ paddingRight: "64px" }}>
