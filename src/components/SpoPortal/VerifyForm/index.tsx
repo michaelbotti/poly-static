@@ -180,7 +180,23 @@ export const VerifyForm = (): JSX.Element => {
                   htmlFor="poolId"
                   className="block text-gray-700 text-med font-bold mb-2"
                 >
-                  Bech32 Pool ID
+                  Bech32 Pool ID{" "}
+                  <HtmlTooltip
+                    arrow
+                    placement="top"
+                    title={
+                      <>
+                        <p className="text-sm">
+                          Bech32 Pool ID can be found on Cardanoscan. It is the
+                          ID that begins with "poolxxxxx".
+                        </p>
+                      </>
+                    }
+                  >
+                    <span>
+                      <HelpOutlinedIcon sx={{ fontSize: 15 }} />
+                    </span>
+                  </HtmlTooltip>
                 </label>
                 <input
                   type="text"
@@ -195,7 +211,23 @@ export const VerifyForm = (): JSX.Element => {
                   htmlFor="vrfKey"
                   className="block text-gray-700 text-med font-bold mb-2"
                 >
-                  cborHex-encoded VRF Key
+                  cborHex-encoded VRF Key{" "}
+                  <HtmlTooltip
+                    arrow
+                    placement="top"
+                    title={
+                      <>
+                        <p className="text-sm">
+                          cborHex-encoded VRF Key can be found in your public
+                          vrf.vkey file.
+                        </p>
+                      </>
+                    }
+                  >
+                    <span>
+                      <HelpOutlinedIcon sx={{ fontSize: 15 }} />
+                    </span>
+                  </HtmlTooltip>
                 </label>
                 <input
                   type="text"
@@ -210,7 +242,26 @@ export const VerifyForm = (): JSX.Element => {
                   htmlFor="vKHash"
                   className="block text-gray-700 text-med font-bold mb-2"
                 >
-                  Hex-encoded VKey Hash
+                  Hex-encoded VKey Hash{" "}
+                  <HtmlTooltip
+                    arrow
+                    placement="top"
+                    title={
+                      <>
+                        <p className="text-sm">
+                          Hex-encoded VKey Hash can be found buy running the
+                          following command in your terminal window:
+                          <br />$ cardano-cli shelley node key-hash-VRF
+                          --verification-key-file vrf.vkey --out-file
+                          vkeyhash.out
+                        </p>
+                      </>
+                    }
+                  >
+                    <span>
+                      <HelpOutlinedIcon sx={{ fontSize: 15 }} />
+                    </span>
+                  </HtmlTooltip>
                 </label>
                 <input
                   type="text"
