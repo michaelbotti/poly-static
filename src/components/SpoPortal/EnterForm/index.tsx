@@ -110,8 +110,10 @@ export const EnterForm = (): JSX.Element => {
               Hash.
             </li>
             <li>
-              Once added, you will receive a custom nonce. Use this nonce and
-              the cncli utility to "sign" the request.
+              Once added, you will receive a custom nonce. You will have 5
+              minutes to use this nonce and the cncli utility to "sign" the
+              request. If you take longer than 5 minutes, you will need to
+              restart the process.
             </li>
             <li>
               If successful, you will be taken to the Handle payment page, which
